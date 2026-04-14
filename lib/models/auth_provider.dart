@@ -1,50 +1,50 @@
 import 'package:flutter/foundation.dart';
-import '../models/user_model.dart';
+import 'user_model.dart';
+import '../mock/mock_data.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserModel? _currentUser;
+  String? _linkedBarberId; // for barber role
   bool _isLoading = false;
 
   UserModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _currentUser != null;
+  String? get linkedBarberId => _linkedBarberId;
 
-  // Mock users database
-  final List<Map<String, String>> _mockUsers = [
-    {
-      'id': '1',
-      'name': 'Carlos Oliveira',
-      'email': 'carlos@barberhub.com',
-      'password': '123456',
-    },
-  ];
+  bool get isClient => _currentUser?.role == UserRole.client;
+  bool get isBarber => _currentUser?.role == UserRole.barber;
+  bool get isAdmin => _currentUser?.role == UserRole.admin;
 
   Future<String?> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
+    await Future.delayed(const Duration(milliseconds: 900));
 
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 1200));
-
-    final user = _mockUsers.where(
-      (u) => u['email'] == email.trim().toLowerCase() && u['password'] == password,
+    final matches = MockData.users.where(
+      (u) =>
+          u['email'] == email.trim().toLowerCase() &&
+          u['password'] == password,
     ).toList();
 
     _isLoading = false;
 
-    if (user.isEmpty) {
+    if (matches.isEmpty) {
       notifyListeners();
       return 'E-mail ou senha incorretos.';
     }
 
+    final u = matches.first;
     _currentUser = UserModel(
-      id: user.first['id']!,
-      name: user.first['name']!,
-      email: user.first['email']!,
+      id: u['id'],
+      name: u['name'],
+      email: u['email'],
+      role: u['role'],
     );
+    _linkedBarberId = u['barberId'] as String?;
 
     notifyListeners();
-    return null; // null = success
+    return null;
   }
 
   Future<String?> register({
@@ -54,10 +54,9 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     _isLoading = true;
     notifyListeners();
+    await Future.delayed(const Duration(milliseconds: 900));
 
-    await Future.delayed(const Duration(milliseconds: 1200));
-
-    final exists = _mockUsers.any(
+    final exists = MockData.users.any(
       (u) => u['email'] == email.trim().toLowerCase(),
     );
 
@@ -67,19 +66,20 @@ class AuthProvider extends ChangeNotifier {
       return 'Este e-mail já está cadastrado.';
     }
 
-    final newUser = {
+    final newU = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'name': name.trim(),
       'email': email.trim().toLowerCase(),
       'password': password,
+      'role': UserRole.client,
     };
-
-    _mockUsers.add(newUser);
+    MockData.users.add(newU);
 
     _currentUser = UserModel(
-      id: newUser['id']!,
-      name: newUser['name']!,
-      email: newUser['email']!,
+      id: newU['id'] as String,
+      name: newU['name'] as String,
+      email: newU['email'] as String,
+      role: UserRole.client,
     );
 
     _isLoading = false;
@@ -90,18 +90,15 @@ class AuthProvider extends ChangeNotifier {
   Future<String?> sendPasswordReset(String email) async {
     _isLoading = true;
     notifyListeners();
-
-    await Future.delayed(const Duration(milliseconds: 1000));
-
+    await Future.delayed(const Duration(milliseconds: 800));
     _isLoading = false;
     notifyListeners();
-
-    // Always succeed (simulated)
     return null;
   }
 
   void logout() {
     _currentUser = null;
+    _linkedBarberId = null;
     notifyListeners();
   }
 }

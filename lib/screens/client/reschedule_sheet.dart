@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
+import '../../mock/mock_data.dart';
 import '../../models/barber_model.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
@@ -176,7 +177,7 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                                   surface: AppTheme.surfaceElevated,
                                   onSurface: AppTheme.textPrimary,
                                 ),
-                                dialogTheme: DialogThemeData(
+                                dialogTheme: const DialogThemeData(
                                     backgroundColor: AppTheme.surface),
                               ),
                               child: child!,
@@ -240,7 +241,7 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: AppDataProvider.timeSlots.map((slot) {
+                          children: MockData.timeSlots.map((slot) {
                             final sel = _selectedTime == slot;
                             return GestureDetector(
                               onTap: () => setState(() => _selectedTime = slot),

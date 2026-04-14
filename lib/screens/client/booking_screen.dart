@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
+import '../../mock/mock_data.dart';
+import '../../models/auth_provider.dart';
 import '../../models/barber_model.dart';
 import '../../models/service_model.dart';
 import '../../theme/app_theme.dart';
@@ -134,7 +136,10 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> _confirm(ServiceModel service, AppDataProvider data) async {
+    final auth = context.read<AuthProvider>();
     await data.bookAppointment(
+      clientId: auth.currentUser?.id ?? 'guest',
+      clientName: auth.currentUser?.name ?? 'Visitante',
       service: service,
       barber: _selectedBarber!,
       date: _selectedDate!,
@@ -493,7 +498,7 @@ class _DateTimeStep extends StatelessWidget {
                             surface: AppTheme.surfaceElevated,
                             onSurface: AppTheme.textPrimary,
                           ),
-                          dialogTheme: DialogThemeData(
+                          dialogTheme: const DialogThemeData(
                               backgroundColor: AppTheme.surface),
                         ),
                         child: child!,
@@ -550,7 +555,7 @@ class _DateTimeStep extends StatelessWidget {
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
-                    children: AppDataProvider.timeSlots.map((slot) {
+                    children: MockData.timeSlots.map((slot) {
                       final isSelected = selectedTime == slot;
                       return GestureDetector(
                         onTap: () => onTimeSelected(slot),

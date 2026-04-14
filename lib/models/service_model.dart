@@ -1,18 +1,20 @@
 class ServiceModel {
   final String id;
-  final String name;
-  final String description;
-  final double price;
-  final int durationMinutes;
-  final String iconName; // used for UI icon selection
+  String name;
+  String description;
+  double price;
+  int durationMinutes;
+  String iconName;
+  bool isActive;
 
-  const ServiceModel({
+  ServiceModel({
     required this.id,
     required this.name,
     required this.description,
     required this.price,
     required this.durationMinutes,
     required this.iconName,
+    this.isActive = true,
   });
 
   String get formattedPrice =>
@@ -23,5 +25,24 @@ class ServiceModel {
     final h = durationMinutes ~/ 60;
     final m = durationMinutes % 60;
     return m == 0 ? '${h}h' : '${h}h ${m}min';
+  }
+
+  ServiceModel copyWith({
+    String? name,
+    String? description,
+    double? price,
+    int? durationMinutes,
+    String? iconName,
+    bool? isActive,
+  }) {
+    return ServiceModel(
+      id: id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      iconName: iconName ?? this.iconName,
+      isActive: isActive ?? this.isActive,
+    );
   }
 }

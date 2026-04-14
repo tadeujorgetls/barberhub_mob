@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
+import '../../models/auth_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
@@ -33,6 +34,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final data = context.watch<AppDataProvider>();
 
     return Scaffold(
@@ -98,9 +100,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text('Ativos'),
-                          if (data.activeAppointments.isNotEmpty) ...[
+                          if (data.activeForClient(auth.currentUser?.id ?? '').isNotEmpty) ...[
                             const SizedBox(width: 6),
-                            _CountBadge(data.activeAppointments.length),
+                            _CountBadge(data.activeForClient(auth.currentUser?.id ?? '').length),
                           ],
                         ],
                       ),
@@ -119,7 +121,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                 controller: _tab,
                 children: [
                   _AppointmentList(
-                    appointments: data.activeAppointments,
+                    appointments: data.activeForClient(auth.currentUser?.id ?? ''),
                     emptyTitle: 'Nenhum agendamento',
                     emptySubtitle:
                         'Você não tem horários marcados.\nQue tal agendar agora?',
@@ -132,7 +134,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                     onReschedule: (a) => _showReschedule(context, a, data),
                   ),
                   _AppointmentList(
-                    appointments: data.pastAppointments,
+                    appointments: data.pastForClient(auth.currentUser?.id ?? ''),
                     emptyTitle: 'Histórico vazio',
                     emptySubtitle:
                         'Seus agendamentos concluídos\naparecerão aqui.',

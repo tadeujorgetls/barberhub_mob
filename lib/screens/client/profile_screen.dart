@@ -112,17 +112,20 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     _StatCard(
-                      value: '${data.appointments.length}',
+                      value:
+                          '${data.appointmentsForClient(auth.currentUser?.id ?? '').length}',
                       label: 'Total',
                     ),
                     const SizedBox(width: 12),
                     _StatCard(
-                      value: '${data.activeAppointments.length}',
+                      value:
+                          '${data.activeForClient(auth.currentUser?.id ?? '').length}',
                       label: 'Ativos',
                     ),
                     const SizedBox(width: 12),
                     _StatCard(
-                      value: '${data.pastAppointments.length}',
+                      value:
+                          '${data.pastForClient(auth.currentUser?.id ?? '').length}',
                       label: 'Histórico',
                     ),
                   ],

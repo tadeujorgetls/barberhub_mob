@@ -86,7 +86,12 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
       );
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      final route = auth.isAdmin
+          ? AppRoutes.adminHome
+          : auth.isBarber
+              ? AppRoutes.barberHome
+              : AppRoutes.home;
+      Navigator.pushReplacementNamed(context, route);
     }
   }
 

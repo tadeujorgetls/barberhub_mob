@@ -9,26 +9,23 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/main_shell.dart';
+import 'screens/barber/barber_shell.dart';
+import 'screens/admin/admin_shell.dart';
 import 'screens/client/service_detail_screen.dart';
 import 'screens/client/booking_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-    ),
-  );
-
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+  ));
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
   runApp(const BarberHubApp());
 }
 
@@ -49,42 +46,24 @@ class BarberHubApp extends StatelessWidget {
         initialRoute: AppRoutes.login,
         onGenerateRoute: (settings) {
           Widget? page;
-
           switch (settings.name) {
-            case AppRoutes.login:
-              page = const LoginScreen();
-              break;
-            case AppRoutes.register:
-              page = const RegisterScreen();
-              break;
-            case AppRoutes.forgotPassword:
-              page = const ForgotPasswordScreen();
-              break;
-            case AppRoutes.home:
-              page = const MainShell();
-              break;
-            case AppRoutes.serviceDetail:
-              page = const ServiceDetailScreen();
-              break;
-            case AppRoutes.booking:
-              page = const BookingScreen();
-              break;
+            case AppRoutes.login:          page = const LoginScreen(); break;
+            case AppRoutes.register:       page = const RegisterScreen(); break;
+            case AppRoutes.forgotPassword: page = const ForgotPasswordScreen(); break;
+            case AppRoutes.home:           page = const MainShell(); break;
+            case AppRoutes.barberHome:     page = const BarberShell(); break;
+            case AppRoutes.adminHome:      page = const AdminShell(); break;
+            case AppRoutes.serviceDetail:  page = const ServiceDetailScreen(); break;
+            case AppRoutes.booking:        page = const BookingScreen(); break;
           }
-
           if (page == null) return null;
-
           return PageRouteBuilder(
             settings: settings,
             pageBuilder: (_, animation, __) => page!,
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOut,
-                ),
-                child: child,
-              );
-            },
+            transitionsBuilder: (_, animation, __, child) => FadeTransition(
+              opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+              child: child,
+            ),
             transitionDuration: const Duration(milliseconds: 280),
           );
         },
