@@ -45,6 +45,9 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
 
+    // Encontra a barbearia do barbeiro (via agendamentos ou lookup)
+    final barbershopName = all.isNotEmpty ? all.first.barbershop.name : null;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -63,18 +66,50 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
           ),
           SafeArea(
             child: Column(children: [
-              // Header
+              // ── Header ─────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
                 child: Row(children: [
-                  const Expanded(
-                      child: ScreenHeader(
-                          eyebrow: 'BARBEIRO', title: 'Minha Agenda')),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('BARBEIRO',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                    color: AppTheme.gold,
+                                    fontSize: 11,
+                                    letterSpacing: 4)),
+                        Text('Minha Agenda',
+                            style:
+                                Theme.of(context).textTheme.displayMedium),
+                        if (barbershopName != null) ...[
+                          const SizedBox(height: 4),
+                          Row(children: [
+                            const Icon(Icons.storefront_outlined,
+                                size: 12, color: AppTheme.textHint),
+                            const SizedBox(width: 5),
+                            Text(
+                              barbershopName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary),
+                            ),
+                          ]),
+                        ],
+                      ],
+                    ),
+                  ),
                   _TodayBadge(count: today.length),
                 ]),
               ),
 
-              // Today summary
+              // ── Today summary ────────────────────────────────────────
               if (today.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -83,7 +118,7 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
 
               const SizedBox(height: 16),
 
-              // Tab bar
+              // ── Tabs ─────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Container(
@@ -175,8 +210,8 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
           context: context,
           builder: (_) => AlertDialog(
             backgroundColor: AppTheme.surfaceElevated,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
             title: Text('Cancelar atendimento',
                 style: Theme.of(context).textTheme.titleLarge),
             content: Text('Confirmar cancelamento deste atendimento?',
@@ -190,7 +225,8 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
                   child: const Text('Não')),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: AppTheme.error),
+                style:
+                    TextButton.styleFrom(foregroundColor: AppTheme.error),
                 child: const Text('Cancelar'),
               ),
             ],
@@ -203,7 +239,6 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
 class _TodayBadge extends StatelessWidget {
   final int count;
   const _TodayBadge({required this.count});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -227,7 +262,6 @@ class _TodayBadge extends StatelessWidget {
 class _TodaySummary extends StatelessWidget {
   final List<AppointmentModel> appointments;
   const _TodaySummary({required this.appointments});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -247,6 +281,12 @@ class _TodaySummary extends StatelessWidget {
           Text('HOJE',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppTheme.gold, fontSize: 10, letterSpacing: 3)),
+          const Spacer(),
+          Text(
+            '${appointments.length} atendimento${appointments.length > 1 ? 's' : ''}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 11, color: AppTheme.textSecondary),
+          ),
         ]),
         const SizedBox(height: 12),
         SingleChildScrollView(
@@ -257,11 +297,12 @@ class _TodaySummary extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 10),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                            horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
                             color: AppTheme.surfaceElevated,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: AppTheme.inputBorder)),
+                            borderRadius: BorderRadius.circular(8),
+                            border:
+                                Border.all(color: AppTheme.inputBorder)),
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -270,20 +311,30 @@ class _TodaySummary extends StatelessWidget {
                                       .textTheme
                                       .titleLarge
                                       ?.copyWith(
-                                          color: AppTheme.gold, fontSize: 15)),
-                              const SizedBox(height: 2),
+                                          color: AppTheme.gold,
+                                          fontSize: 15)),
+                              const SizedBox(height: 3),
                               Text(a.clientName,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
                                       ?.copyWith(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: AppTheme.textPrimary)),
                               Text(a.service.name,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
                                       ?.copyWith(fontSize: 11)),
+                              const SizedBox(height: 2),
+                              Text(
+                                a.service.formattedPrice,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                        fontSize: 12, color: AppTheme.gold),
+                              ),
                             ]),
                       ),
                     ))
@@ -315,7 +366,6 @@ class _ScheduleList extends StatelessWidget {
           title: emptyTitle,
           subtitle: emptySubtitle);
     }
-
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       itemCount: appointments.length,
@@ -326,6 +376,7 @@ class _ScheduleList extends StatelessWidget {
           appointment: a,
           showClient: true,
           showBarber: false,
+          showBarbershop: true,
           onStatusChange: onStatusChange != null
               ? (status) => onStatusChange!(a.id, status)
               : null,
@@ -341,7 +392,6 @@ class _ScheduleList extends StatelessWidget {
 class _CountDot extends StatelessWidget {
   final int count;
   const _CountDot(this.count);
-
   @override
   Widget build(BuildContext context) => Container(
         width: 18,

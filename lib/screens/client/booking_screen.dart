@@ -5,10 +5,15 @@ import '../../models/app_data_provider.dart';
 import '../../mock/mock_data.dart';
 import '../../models/auth_provider.dart';
 import '../../models/barber_model.dart';
+import '../../models/barbershop_model.dart';
 import '../../models/service_model.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BookingScreen
+// Recebe via arguments: Map{'service': ServiceModel, 'barbershop': BarbershopModel}
+// ─────────────────────────────────────────────────────────────────────────────
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
 
@@ -20,20 +25,52 @@ class _BookingScreenState extends State<BookingScreen> {
   BarberModel? _selectedBarber;
   DateTime? _selectedDate;
   String? _selectedTime;
+  int _step = 0; // 0=barbeiro, 1=data/hora, 2=confirmar
 
-  // Steps: 0 = barber, 1 = date/time, 2 = confirm
-  int _step = 0;
+  /// Parse seguro dos arguments. Garante que barbershop sempre vem
+  /// de uma barbearia real (args ou provider).
+  (ServiceModel service, BarbershopModel barbershop) _parseArgs(
+      Object? args, AppDataProvider data) {
+    ServiceModel? service;
+    BarbershopModel? barbershop;
+
+    if (args is Map) {
+      service = args['service'] as ServiceModel?;
+      barbershop = args['barbershop'] as BarbershopModel?;
+    } else if (args is ServiceModel) {
+      service = args;
+    }
+
+    // Fallback para provider se não vier via args
+    barbershop ??= data.selectedBarbershop ?? data.barbershops.first;
+
+    if (service == null) {
+      throw StateError('BookingScreen requer um ServiceModel nos arguments.');
+    }
+
+    return (service, barbershop);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final service = ModalRoute.of(context)!.settings.arguments as ServiceModel;
     final data = context.watch<AppDataProvider>();
+    final args = ModalRoute.of(context)!.settings.arguments;
+    final (service, barbershop) = _parseArgs(args, data);
+
+    // Barbeiros APENAS da barbearia em questão
+    final barbers =
+        barbershop.barbers.where((b) => b.isActive).toList();
+
+    // Horários já ocupados para o barbeiro/data selecionados
+    final bookedSlots = (_selectedBarber != null && _selectedDate != null)
+        ? data.bookedSlotsFor(_selectedBarber!.id, _selectedDate!)
+        : <String>{};
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top bar ──────────────────────────────────────────────────
+            // ── Top bar ────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
               child: Row(
@@ -62,16 +99,19 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
             ),
 
-            // ── Progress indicator ────────────────────────────────────────
+            // ── Step indicator ─────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: _StepIndicator(currentStep: _step),
             ),
 
-            // ── Service summary ───────────────────────────────────────────
+            // ── Service + Barbershop summary ───────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-              child: _ServiceSummaryBar(service: service),
+              child: _BookingSummaryBar(
+                service: service,
+                barbershopName: barbershop.name,
+              ),
             ),
 
             const SizedBox(height: 4),
@@ -90,7 +130,13 @@ class _BookingScreenState extends State<BookingScreen> {
                     child: child,
                   ),
                 ),
-                child: _stepWidget(service, data),
+                child: _buildStep(
+                  service: service,
+                  barbershop: barbershop,
+                  barbers: barbers,
+                  bookedSlots: bookedSlots,
+                  data: data,
+                ),
               ),
             ),
           ],
@@ -99,16 +145,20 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  Widget _stepWidget(ServiceModel service, AppDataProvider data) {
+  Widget _buildStep({
+    required ServiceModel service,
+    required BarbershopModel barbershop,
+    required List<BarberModel> barbers,
+    required Set<String> bookedSlots,
+    required AppDataProvider data,
+  }) {
     switch (_step) {
       case 0:
         return _BarberStep(
           key: const ValueKey('step0'),
-          barbers: data.barbers,
+          barbers: barbers,
           selected: _selectedBarber,
-          onSelect: (b) => setState(() {
-            _selectedBarber = b;
-          }),
+          onSelect: (b) => setState(() => _selectedBarber = b),
           onNext: () => setState(() => _step = 1),
         );
       case 1:
@@ -116,7 +166,12 @@ class _BookingScreenState extends State<BookingScreen> {
           key: const ValueKey('step1'),
           selectedDate: _selectedDate,
           selectedTime: _selectedTime,
-          onDateSelected: (d) => setState(() => _selectedDate = d),
+          bookedSlots: bookedSlots,
+          onDateSelected: (d) =>
+              setState(() {
+                _selectedDate = d;
+                _selectedTime = null; // reset horário ao trocar data
+              }),
           onTimeSelected: (t) => setState(() => _selectedTime = t),
           onNext: () => setState(() => _step = 2),
         );
@@ -125,9 +180,10 @@ class _BookingScreenState extends State<BookingScreen> {
           key: const ValueKey('step2'),
           service: service,
           barber: _selectedBarber!,
+          barbershop: barbershop,
           date: _selectedDate!,
           timeSlot: _selectedTime!,
-          onConfirm: () => _confirm(service, data),
+          onConfirm: () => _confirm(service, barbershop, data),
           isLoading: data.isLoading,
         );
       default:
@@ -135,29 +191,43 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  Future<void> _confirm(ServiceModel service, AppDataProvider data) async {
+  Future<void> _confirm(
+    ServiceModel service,
+    BarbershopModel barbershop,
+    AppDataProvider data,
+  ) async {
     final auth = context.read<AuthProvider>();
-    await data.bookAppointment(
-      clientId: auth.currentUser?.id ?? 'guest',
-      clientName: auth.currentUser?.name ?? 'Visitante',
-      service: service,
-      barber: _selectedBarber!,
-      date: _selectedDate!,
-      timeSlot: _selectedTime!,
-    );
-
-    if (!mounted) return;
-
-    _showSuccessDialog();
+    try {
+      await data.bookAppointment(
+        clientId: auth.currentUser?.id ?? 'guest',
+        clientName: auth.currentUser?.name ?? 'Visitante',
+        service: service,
+        barber: _selectedBarber!,
+        barbershop: barbershop,
+        date: _selectedDate!,
+        timeSlot: _selectedTime!,
+      );
+      if (!mounted) return;
+      _showSuccessDialog(barbershop.name);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppTheme.error,
+          content: Text('Erro: ${e.toString()}'),
+        ),
+      );
+    }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog(String barbershopName) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => Dialog(
         backgroundColor: AppTheme.surfaceElevated,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -176,16 +246,13 @@ class _BookingScreenState extends State<BookingScreen> {
                     color: AppTheme.gold, size: 36),
               ),
               const SizedBox(height: 20),
-              Text(
-                'Agendado!',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+              Text('Agendado!',
+                  style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
               Text(
-                'Seu horário foi confirmado.\nAté lá!',
+                'Seu horário em\n$barbershopName\nfoi confirmado!',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.6,
-                    ),
+                      height: 1.6, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
@@ -193,9 +260,9 @@ class _BookingScreenState extends State<BookingScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // dialog
-                    Navigator.of(context).pop(); // booking
-                    Navigator.of(context).pop(); // detail
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
                   },
                   child: const Text('VER AGENDAMENTOS'),
                 ),
@@ -217,7 +284,7 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 }
 
-// ── Step Indicator ─────────────────────────────────────────────────────────────
+// ── Step Indicator ────────────────────────────────────────────────────────────
 class _StepIndicator extends StatelessWidget {
   final int currentStep;
   const _StepIndicator({required this.currentStep});
@@ -229,7 +296,6 @@ class _StepIndicator extends StatelessWidget {
     return Row(
       children: List.generate(_labels.length * 2 - 1, (i) {
         if (i.isOdd) {
-          // connector
           final stepIndex = i ~/ 2;
           final active = currentStep > stepIndex;
           return Expanded(
@@ -273,7 +339,8 @@ class _StepIndicator extends StatelessWidget {
               style: GoogleFonts.jost(
                 fontSize: 10,
                 color: active ? AppTheme.gold : AppTheme.textHint,
-                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                fontWeight:
+                    active ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],
@@ -283,10 +350,12 @@ class _StepIndicator extends StatelessWidget {
   }
 }
 
-// ── Service Summary ────────────────────────────────────────────────────────────
-class _ServiceSummaryBar extends StatelessWidget {
+// ── Booking summary bar ───────────────────────────────────────────────────────
+class _BookingSummaryBar extends StatelessWidget {
   final ServiceModel service;
-  const _ServiceSummaryBar({required this.service});
+  final String barbershopName;
+  const _BookingSummaryBar(
+      {required this.service, required this.barbershopName});
 
   @override
   Widget build(BuildContext context) {
@@ -297,30 +366,51 @@ class _ServiceSummaryBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: AppTheme.inputBorder),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            service.name,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 14,
-                ),
+          Row(
+            children: [
+              const Icon(Icons.storefront_outlined,
+                  size: 11, color: AppTheme.gold),
+              const SizedBox(width: 5),
+              Text(
+                barbershopName,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 11,
+                      color: AppTheme.gold.withOpacity(0.85),
+                    ),
+              ),
+            ],
           ),
-          const Spacer(),
-          Text(
-            service.formattedPrice,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.gold,
-                  fontSize: 15,
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  service.name,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontSize: 14),
                 ),
-          ),
-          const SizedBox(width: 12),
-          Container(height: 14, width: 1, color: AppTheme.divider),
-          const SizedBox(width: 12),
-          Text(
-            service.formattedDuration,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 12,
-                ),
+              ),
+              Text(
+                service.formattedPrice,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppTheme.gold, fontSize: 15),
+              ),
+              const SizedBox(width: 12),
+              Container(height: 14, width: 1, color: AppTheme.divider),
+              const SizedBox(width: 12),
+              Text(
+                service.formattedDuration,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontSize: 12),
+              ),
+            ],
           ),
         ],
       ),
@@ -328,7 +418,7 @@ class _ServiceSummaryBar extends StatelessWidget {
   }
 }
 
-// ── Step 0: Barber ─────────────────────────────────────────────────────────────
+// ── Step 0: Barber ────────────────────────────────────────────────────────────
 class _BarberStep extends StatelessWidget {
   final List<BarberModel> barbers;
   final BarberModel? selected;
@@ -350,17 +440,13 @@ class _BarberStep extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 4),
-          child: Text(
-            'Escolha o barbeiro',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          child: Text('Escolha o barbeiro',
+              style: Theme.of(context).textTheme.headlineMedium),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-          child: Text(
-            'Quem vai te atender hoje?',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: Text('Quem vai te atender hoje?',
+              style: Theme.of(context).textTheme.bodyMedium),
         ),
         Expanded(
           child: ListView.separated(
@@ -369,47 +455,42 @@ class _BarberStep extends StatelessWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, i) {
               final barber = barbers[i];
-              final isSelected = selected?.id == barber.id;
+              final isSel = selected?.id == barber.id;
               return GestureDetector(
                 onTap: () => onSelect(barber),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSelected
+                    color: isSel
                         ? AppTheme.gold.withOpacity(0.06)
                         : AppTheme.surfaceElevated,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected ? AppTheme.gold : AppTheme.inputBorder,
-                      width: isSelected ? 1.5 : 1,
+                      color: isSel ? AppTheme.gold : AppTheme.inputBorder,
+                      width: isSel ? 1.5 : 1,
                     ),
                   ),
                   child: Row(
                     children: [
                       BarberAvatar(
-                          initials: barber.avatarInitials,
-                          selected: isSelected),
+                          initials: barber.avatarInitials, selected: isSel),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              barber.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontSize: 15),
-                            ),
+                            Text(barber.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(fontSize: 15)),
                             const SizedBox(height: 3),
-                            Text(
-                              barber.specialty,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontSize: 12),
-                            ),
+                            Text(barber.specialty,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(fontSize: 12)),
                             const SizedBox(height: 6),
                             StarRating(
                                 rating: barber.rating,
@@ -417,7 +498,7 @@ class _BarberStep extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (isSelected)
+                      if (isSel)
                         const Icon(Icons.check_circle_rounded,
                             color: AppTheme.gold, size: 20),
                     ],
@@ -439,10 +520,11 @@ class _BarberStep extends StatelessWidget {
   }
 }
 
-// ── Step 1: Date & Time ────────────────────────────────────────────────────────
+// ── Step 1: Data & Hora ───────────────────────────────────────────────────────
 class _DateTimeStep extends StatelessWidget {
   final DateTime? selectedDate;
   final String? selectedTime;
+  final Set<String> bookedSlots;
   final ValueChanged<DateTime> onDateSelected;
   final ValueChanged<String> onTimeSelected;
   final VoidCallback onNext;
@@ -451,6 +533,7 @@ class _DateTimeStep extends StatelessWidget {
     super.key,
     required this.selectedDate,
     required this.selectedTime,
+    required this.bookedSlots,
     required this.onDateSelected,
     required this.onTimeSelected,
     required this.onNext,
@@ -463,17 +546,13 @@ class _DateTimeStep extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 4),
-          child: Text(
-            'Data e horário',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          child: Text('Data e horário',
+              style: Theme.of(context).textTheme.headlineMedium),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-          child: Text(
-            'Quando você quer ser atendido?',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: Text('Quando você quer ser atendido?',
+              style: Theme.of(context).textTheme.bodyMedium),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -481,17 +560,19 @@ class _DateTimeStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date picker button
+                // Date picker
                 GestureDetector(
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: context,
                       initialDate: selectedDate ??
                           DateTime.now().add(const Duration(days: 1)),
-                      firstDate: DateTime.now().add(const Duration(days: 1)),
-                      lastDate: DateTime.now().add(const Duration(days: 60)),
-                      builder: (context, child) => Theme(
-                        data: Theme.of(context).copyWith(
+                      firstDate:
+                          DateTime.now().add(const Duration(days: 1)),
+                      lastDate:
+                          DateTime.now().add(const Duration(days: 60)),
+                      builder: (ctx, child) => Theme(
+                        data: Theme.of(ctx).copyWith(
                           colorScheme: const ColorScheme.dark(
                             primary: AppTheme.gold,
                             onPrimary: AppTheme.background,
@@ -520,25 +601,25 @@ class _DateTimeStep extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          color: selectedDate != null
-                              ? AppTheme.gold
-                              : AppTheme.textHint,
-                          size: 20,
-                        ),
+                        Icon(Icons.calendar_today_outlined,
+                            color: selectedDate != null
+                                ? AppTheme.gold
+                                : AppTheme.textHint,
+                            size: 20),
                         const SizedBox(width: 14),
                         Text(
                           selectedDate != null
-                              ? _formatDate(selectedDate!)
+                              ? _fmt(selectedDate!)
                               : 'Selecionar data',
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: selectedDate != null
-                                        ? AppTheme.textPrimary
-                                        : AppTheme.textHint,
-                                    fontSize: 15,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                color: selectedDate != null
+                                    ? AppTheme.textPrimary
+                                    : AppTheme.textHint,
+                                fontSize: 15,
+                              ),
                         ),
                         const Spacer(),
                         const Icon(Icons.chevron_right_rounded,
@@ -551,40 +632,73 @@ class _DateTimeStep extends StatelessWidget {
                 if (selectedDate != null) ...[
                   const SizedBox(height: 24),
                   const SectionHeader(title: 'Horários disponíveis'),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 6),
+                  if (bookedSlots.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline,
+                              size: 12, color: AppTheme.textHint),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Horários indisponíveis estão acinzentados.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                    fontSize: 11,
+                                    color: AppTheme.textHint),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
                     children: MockData.timeSlots.map((slot) {
-                      final isSelected = selectedTime == slot;
+                      final isSel = selectedTime == slot;
+                      final isBooked = bookedSlots.contains(slot);
                       return GestureDetector(
-                        onTap: () => onTimeSelected(slot),
+                        onTap: isBooked
+                            ? null
+                            : () => onTimeSelected(slot),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppTheme.gold.withOpacity(0.12)
-                                : AppTheme.surfaceElevated,
+                            color: isBooked
+                                ? AppTheme.surface
+                                : isSel
+                                    ? AppTheme.gold.withOpacity(0.12)
+                                    : AppTheme.surfaceElevated,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: isSelected
-                                  ? AppTheme.gold
-                                  : AppTheme.inputBorder,
-                              width: isSelected ? 1.5 : 1,
+                              color: isBooked
+                                  ? AppTheme.divider
+                                  : isSel
+                                      ? AppTheme.gold
+                                      : AppTheme.inputBorder,
+                              width: isSel ? 1.5 : 1,
                             ),
                           ),
                           child: Text(
                             slot,
                             style: GoogleFonts.jost(
                               fontSize: 14,
-                              fontWeight: isSelected
+                              fontWeight: isSel
                                   ? FontWeight.w600
                                   : FontWeight.w400,
-                              color: isSelected
-                                  ? AppTheme.gold
-                                  : AppTheme.textSecondary,
+                              color: isBooked
+                                  ? AppTheme.textHint
+                                  : isSel
+                                      ? AppTheme.gold
+                                      : AppTheme.textSecondary,
+                              decoration: isBooked
+                                  ? TextDecoration.lineThrough
+                                  : null,
                             ),
                           ),
                         ),
@@ -609,40 +723,23 @@ class _DateTimeStep extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
+  String _fmt(DateTime d) {
     const months = [
-      '',
-      'jan',
-      'fev',
-      'mar',
-      'abr',
-      'mai',
-      'jun',
-      'jul',
-      'ago',
-      'set',
-      'out',
-      'nov',
-      'dez'
+      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+      'jul', 'ago', 'set', 'out', 'nov', 'dez'
     ];
     const weekdays = [
-      '',
-      'segunda',
-      'terça',
-      'quarta',
-      'quinta',
-      'sexta',
-      'sábado',
-      'domingo'
+      '', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'
     ];
     return '${weekdays[d.weekday]}, ${d.day} de ${months[d.month]} de ${d.year}';
   }
 }
 
-// ── Step 2: Confirm ────────────────────────────────────────────────────────────
+// ── Step 2: Confirmar ─────────────────────────────────────────────────────────
 class _ConfirmStep extends StatelessWidget {
   final ServiceModel service;
   final BarberModel barber;
+  final BarbershopModel barbershop;
   final DateTime date;
   final String timeSlot;
   final VoidCallback onConfirm;
@@ -652,6 +749,7 @@ class _ConfirmStep extends StatelessWidget {
     super.key,
     required this.service,
     required this.barber,
+    required this.barbershop,
     required this.date,
     required this.timeSlot,
     required this.onConfirm,
@@ -665,23 +763,26 @@ class _ConfirmStep extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 4),
-          child: Text(
-            'Confirmar',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          child: Text('Confirmar',
+              style: Theme.of(context).textTheme.headlineMedium),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: Text(
-            'Revise os detalhes do agendamento.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: Text('Revise os detalhes do agendamento.',
+              style: Theme.of(context).textTheme.bodyMedium),
         ),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
+                _ConfirmRow(
+                  icon: Icons.storefront_outlined,
+                  label: 'Barbearia',
+                  value: barbershop.name,
+                  subValue: barbershop.address,
+                ),
+                const SizedBox(height: 12),
                 _ConfirmRow(
                   icon: Icons.content_cut_rounded,
                   label: 'Serviço',
@@ -699,7 +800,7 @@ class _ConfirmStep extends StatelessWidget {
                 _ConfirmRow(
                   icon: Icons.calendar_today_outlined,
                   label: 'Data',
-                  value: _formatDate(date),
+                  value: _fmtDate(date),
                   subValue: null,
                 ),
                 const SizedBox(height: 12),
@@ -715,7 +816,8 @@ class _ConfirmStep extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    border:
+                        Border.all(color: AppTheme.gold.withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [
@@ -750,21 +852,10 @@ class _ConfirmStep extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
+  String _fmtDate(DateTime d) {
     const months = [
-      '',
-      'jan',
-      'fev',
-      'mar',
-      'abr',
-      'mai',
-      'jun',
-      'jul',
-      'ago',
-      'set',
-      'out',
-      'nov',
-      'dez'
+      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+      'jul', 'ago', 'set', 'out', 'nov', 'dez'
     ];
     return '${d.day} de ${months[d.month]} de ${d.year}';
   }
@@ -796,32 +887,31 @@ class _ConfirmRow extends StatelessWidget {
         children: [
           Icon(icon, color: AppTheme.gold, size: 18),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: 11,
-                      letterSpacing: 0.5,
-                    ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 15,
-                    ),
-              ),
-              if (subValue != null)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  subValue!,
+                  label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                        color: AppTheme.gold,
-                      ),
+                        fontSize: 11, letterSpacing: 0.5),
                 ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontSize: 15),
+                ),
+                if (subValue != null)
+                  Text(
+                    subValue!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12, color: AppTheme.gold),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

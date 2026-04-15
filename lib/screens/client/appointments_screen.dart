@@ -36,13 +36,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final data = context.watch<AppDataProvider>();
+    final clientId = auth.currentUser?.id ?? '';
+
+    final active = data.activeForClient(clientId);
+    final past = data.pastForClient(clientId);
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ────────────────────────────────────────────────────
+            // ── Header ──────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: Column(
@@ -66,7 +70,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
 
             const SizedBox(height: 20),
 
-            // ── Tab bar ───────────────────────────────────────────────────
+            // ── Tab bar ──────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
@@ -82,16 +86,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                     color: AppTheme.gold,
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  indicatorPadding: const EdgeInsets.all(3),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
                   labelStyle: GoogleFonts.jost(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
+                      fontSize: 12, fontWeight: FontWeight.w600),
                   unselectedLabelStyle: GoogleFonts.jost(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                  ),
+                      fontSize: 12, fontWeight: FontWeight.w400),
                   labelColor: AppTheme.background,
                   unselectedLabelColor: AppTheme.textSecondary,
                   tabs: [
@@ -100,9 +100,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text('Ativos'),
-                          if (data.activeForClient(auth.currentUser?.id ?? '').isNotEmpty) ...[
+                          if (active.isNotEmpty) ...[
                             const SizedBox(width: 6),
-                            _CountBadge(data.activeForClient(auth.currentUser?.id ?? '').length),
+                            _CountBadge(active.length),
                           ],
                         ],
                       ),
@@ -115,26 +115,25 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
 
             const SizedBox(height: 4),
 
-            // ── Tab views ─────────────────────────────────────────────────
             Expanded(
               child: TabBarView(
                 controller: _tab,
                 children: [
                   _AppointmentList(
-                    appointments: data.activeForClient(auth.currentUser?.id ?? ''),
+                    appointments: active,
                     emptyTitle: 'Nenhum agendamento',
                     emptySubtitle:
                         'Você não tem horários marcados.\nQue tal agendar agora?',
-                    emptyAction: 'Ver serviços',
+                    emptyAction: 'Ver barbearias',
                     onEmptyAction: () {
-                      // Switch to home tab via MainShell
-                      Navigator.pushReplacementNamed(context, AppRoutes.home);
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.home);
                     },
                     onCancel: (a) => _confirmCancel(context, a, data),
-                    onReschedule: (a) => _showReschedule(context, a, data),
+                    onReschedule: (a) => _showReschedule(context, a),
                   ),
                   _AppointmentList(
-                    appointments: data.pastForClient(auth.currentUser?.id ?? ''),
+                    appointments: past,
                     emptyTitle: 'Histórico vazio',
                     emptySubtitle:
                         'Seus agendamentos concluídos\naparecerão aqui.',
@@ -159,16 +158,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceElevated,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        title: Text(
-          'Cancelar agendamento',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        title: Text('Cancelar agendamento',
+            style: Theme.of(context).textTheme.titleLarge),
         content: Text(
-          'Tem certeza que deseja cancelar o serviço "${a.service.name}" com ${a.barber.name} em ${a.timeSlot}?',
-          style:
-              Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
+          'Cancelar "${a.service.name}" com ${a.barber.name} na ${a.barbershop.name}?',
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(height: 1.5),
         ),
         actions: [
           TextButton(
@@ -202,20 +200,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
     );
   }
 
-  void _showReschedule(
-    BuildContext context,
-    AppointmentModel a,
-    AppDataProvider data,
-  ) {
+  void _showReschedule(BuildContext context, AppointmentModel a) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RescheduleSheet(appointment: a, data: data),
+      builder: (_) => RescheduleSheet(appointment: a),
     );
   }
 }
 
+// ── Count badge ───────────────────────────────────────────────────────────────
 class _CountBadge extends StatelessWidget {
   final int count;
   const _CountBadge(this.count);
@@ -226,24 +221,21 @@ class _CountBadge extends StatelessWidget {
       width: 18,
       height: 18,
       decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppTheme.goldDark,
-      ),
+          shape: BoxShape.circle, color: AppTheme.goldDark),
       child: Center(
         child: Text(
           '$count',
           style: GoogleFonts.jost(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-          ),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary),
         ),
       ),
     );
   }
 }
 
-// ── Appointment list ─────────────────────────────────────────────────────────
+// ── Appointment list ──────────────────────────────────────────────────────────
 class _AppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
   final String emptyTitle;
@@ -274,23 +266,20 @@ class _AppointmentList extends StatelessWidget {
         onAction: onEmptyAction,
       );
     }
-
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       itemCount: appointments.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, i) {
-        return _AppointmentCard(
-          appointment: appointments[i],
-          onCancel: onCancel,
-          onReschedule: onReschedule,
-        );
-      },
+      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      itemBuilder: (context, i) => _AppointmentCard(
+        appointment: appointments[i],
+        onCancel: onCancel,
+        onReschedule: onReschedule,
+      ),
     );
   }
 }
 
-// ── Appointment card ─────────────────────────────────────────────────────────
+// ── Appointment card ──────────────────────────────────────────────────────────
 class _AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
   final void Function(AppointmentModel)? onCancel;
@@ -302,31 +291,66 @@ class _AppointmentCard extends StatelessWidget {
     required this.onReschedule,
   });
 
-  (Color, Color) get _statusColors {
+  Color get _statusColor {
     switch (appointment.status) {
       case AppointmentStatus.scheduled:
-        return (const Color(0xFF4CAF50), const Color(0xFF4CAF50));
+        return const Color(0xFF4CAF50);
       case AppointmentStatus.completed:
-        return (AppTheme.gold, AppTheme.gold);
+        return AppTheme.gold;
       case AppointmentStatus.cancelled:
-        return (AppTheme.error, AppTheme.error);
+        return AppTheme.error;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (statusColor, _) = _statusColors;
     final a = appointment;
 
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceElevated,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.inputBorder),
       ),
       child: Column(
         children: [
-          // Top section
+          // ── Barbershop header ────────────────────────────────────────
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppTheme.gold.withOpacity(0.04),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              border: const Border(
+                  bottom: BorderSide(color: AppTheme.divider)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.storefront_outlined,
+                    size: 13, color: AppTheme.gold),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    a.barbershop.name,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppTheme.gold,
+                          fontSize: 12,
+                          letterSpacing: 0.3,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                StatusBadge(
+                  label: a.statusLabel.toUpperCase(),
+                  color: _statusColor,
+                  bgColor: _statusColor.withOpacity(0.1),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Main content ─────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -334,7 +358,7 @@ class _AppointmentCard extends StatelessWidget {
               children: [
                 // Date block
                 Container(
-                  width: 52,
+                  width: 54,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withOpacity(0.08),
@@ -350,10 +374,9 @@ class _AppointmentCard extends StatelessWidget {
                             .textTheme
                             .headlineLarge
                             ?.copyWith(
-                              color: AppTheme.gold,
-                              fontSize: 24,
-                              height: 1,
-                            ),
+                                color: AppTheme.gold,
+                                fontSize: 26,
+                                height: 1),
                       ),
                       Text(
                         _monthAbbr(a.date.month),
@@ -361,53 +384,48 @@ class _AppointmentCard extends StatelessWidget {
                             .textTheme
                             .labelLarge
                             ?.copyWith(
-                              color: AppTheme.gold,
-                              fontSize: 10,
-                              letterSpacing: 1,
-                            ),
+                                color: AppTheme.gold,
+                                fontSize: 10,
+                                letterSpacing: 1),
                       ),
                     ],
                   ),
                 ),
+
                 const SizedBox(width: 14),
+
+                // Details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              a.service.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontSize: 15),
-                            ),
-                          ),
-                          StatusBadge(
-                            label: a.statusLabel.toUpperCase(),
-                            color: statusColor,
-                            bgColor: statusColor.withOpacity(0.1),
-                          ),
-                        ],
+                      // Service name
+                      Text(
+                        a.service.name,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontSize: 16),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(Icons.person_outline_rounded,
-                              size: 13, color: AppTheme.textHint),
-                          const SizedBox(width: 5),
-                          Text(
-                            a.barber.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(fontSize: 13),
-                          ),
-                        ],
+                      const SizedBox(height: 8),
+
+                      // Barber
+                      _MetaRow(
+                        icon: Icons.person_outline_rounded,
+                        text: a.barber.name,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
+
+                      // Address
+                      _MetaRow(
+                        icon: Icons.location_on_outlined,
+                        text: a.barbershop.address,
+                        textColor: AppTheme.textHint,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 5),
+
+                      // Time + price
                       Row(
                         children: [
                           const Icon(Icons.schedule_outlined,
@@ -420,24 +438,31 @@ class _AppointmentCard extends StatelessWidget {
                                 .bodyMedium
                                 ?.copyWith(fontSize: 13),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
+                          Container(
+                              width: 3,
+                              height: 3,
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppTheme.textHint)),
+                          const SizedBox(width: 8),
                           Text(
-                            '·',
+                            a.service.formattedDuration,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(fontSize: 13),
                           ),
-                          const SizedBox(width: 10),
+                          const Spacer(),
                           Text(
                             a.service.formattedPrice,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  fontSize: 13,
-                                  color: AppTheme.gold,
-                                ),
+                                    fontSize: 14,
+                                    color: AppTheme.gold,
+                                    fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -448,7 +473,7 @@ class _AppointmentCard extends StatelessWidget {
             ),
           ),
 
-          // Actions
+          // ── Actions ──────────────────────────────────────────────────
           if (a.canCancel || a.canReschedule) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(
@@ -465,9 +490,7 @@ class _AppointmentCard extends StatelessWidget {
                         label: const Text('Remarcar'),
                         style: TextButton.styleFrom(
                           textStyle: GoogleFonts.jost(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
+                              fontSize: 12, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -483,9 +506,7 @@ class _AppointmentCard extends StatelessWidget {
                         style: TextButton.styleFrom(
                           foregroundColor: AppTheme.error,
                           textStyle: GoogleFonts.jost(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
+                              fontSize: 12, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -504,5 +525,41 @@ class _AppointmentCard extends StatelessWidget {
       'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
     ];
     return months[m];
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color? textColor;
+  final int maxLines;
+
+  const _MetaRow({
+    required this.icon,
+    required this.text,
+    this.textColor,
+    this.maxLines = 2,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 13, color: AppTheme.textHint),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 13,
+                  color: textColor ?? AppTheme.textSecondary,
+                ),
+            maxLines: maxLines,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 }

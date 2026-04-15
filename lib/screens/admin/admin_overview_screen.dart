@@ -5,8 +5,8 @@ import '../../models/appointment_model.dart';
 import '../../models/auth_provider.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/app_widgets.dart';
 import '../../utils/app_utils.dart';
+import '../../widgets/app_widgets.dart';
 
 class AdminOverviewScreen extends StatelessWidget {
   const AdminOverviewScreen({super.key});
@@ -16,9 +16,6 @@ class AdminOverviewScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final data = context.watch<AppDataProvider>();
     final all = data.allAppointmentsSorted;
-    final scheduled = data.scheduledCount;
-    final completed = data.completedCount;
-    final revenue = data.totalRevenue;
 
     return Scaffold(
       body: Stack(
@@ -41,7 +38,7 @@ class AdminOverviewScreen extends StatelessWidget {
           SafeArea(
             child: CustomScrollView(
               slivers: [
-                // Header
+                // ── Header ───────────────────────────────────────────────
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
@@ -79,35 +76,23 @@ class AdminOverviewScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Title
-                SliverToBoxAdapter(
+                // ── Title ────────────────────────────────────────────────
+                const SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('VISÃO GERAL',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                      color: AppTheme.gold,
-                                      fontSize: 11,
-                                      letterSpacing: 4)),
-                          Text('Dashboard',
-                              style: Theme.of(context).textTheme.displayMedium),
-                        ]),
+                    padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+                    child: ScreenHeader(
+                        eyebrow: 'VISÃO GERAL', title: 'Dashboard'),
                   ),
                 ),
 
-                // Stats row
+                // ── Global stats ─────────────────────────────────────────
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SectionHeader(title: 'Resumo'),
+                          const SectionHeader(title: 'Resumo global'),
                           const SizedBox(height: 14),
                           Row(children: [
                             StatCard(
@@ -116,28 +101,28 @@ class AdminOverviewScreen extends StatelessWidget {
                                 icon: Icons.calendar_month_outlined),
                             const SizedBox(width: 10),
                             StatCard(
-                                value: '$scheduled',
+                                value: '${data.scheduledCount}',
                                 label: 'Pendentes',
                                 icon: Icons.pending_outlined),
                             const SizedBox(width: 10),
                             StatCard(
-                                value: '$completed',
+                                value: '${data.completedCount}',
                                 label: 'Concluídos',
                                 icon: Icons.check_circle_outline),
                           ]),
                           const SizedBox(height: 10),
                           Row(children: [
                             StatCard(
-                              value: 'R\$ $revenue',
+                              value: 'R\$ ${data.totalRevenue}',
                               label: 'Receita total',
                               icon: Icons.attach_money_rounded,
                               valueColor: const Color(0xFF4CAF50),
                             ),
                             const SizedBox(width: 10),
                             StatCard(
-                                value: '${data.barbers.length}',
-                                label: 'Barbeiros',
-                                icon: Icons.content_cut_rounded),
+                                value: '${data.barbershops.length}',
+                                label: 'Barbearias',
+                                icon: Icons.storefront_outlined),
                             const SizedBox(width: 10),
                             StatCard(
                                 value: '${data.services.length}',
@@ -148,7 +133,45 @@ class AdminOverviewScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Status breakdown
+                // ── Por barbearia ─────────────────────────────────────────
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 28, 24, 14),
+                    child: SectionHeader(title: 'Por barbearia'),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 130,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: data.barbershops.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (_, i) {
+                        final shop = data.barbershops[i];
+                        final shopAppts = data.appointmentsForShop(shop.id);
+                        final shopRevenue = shopAppts
+                            .where(
+                                (a) => a.status == AppointmentStatus.completed)
+                            .fold(0.0, (s, a) => s + a.service.price);
+                        final pending = shopAppts
+                            .where(
+                                (a) => a.status == AppointmentStatus.scheduled)
+                            .length;
+                        return _ShopStatCard(
+                          emoji: shop.coverEmoji,
+                          name: shop.name,
+                          total: shopAppts.length,
+                          pending: pending,
+                          revenue: shopRevenue.toInt(),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // ── Distribuição de status ────────────────────────────────
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
@@ -156,7 +179,7 @@ class AdminOverviewScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Appointments list
+                // ── Todos os agendamentos ────────────────────────────────
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(24, 24, 24, 12),
@@ -183,6 +206,7 @@ class AdminOverviewScreen extends StatelessWidget {
                             appointment: all[i],
                             showClient: true,
                             showBarber: true,
+                            showBarbershop: true,
                             onCancel: all[i].canCancel
                                 ? () => _cancelConfirm(context, data, all[i].id)
                                 : null,
@@ -232,20 +256,111 @@ class AdminOverviewScreen extends StatelessWidget {
   }
 }
 
-class _StatusBreakdown extends StatelessWidget {
-  final List<AppointmentModel> appointments;
-  const _StatusBreakdown({required this.appointments});
+// ── Shop stat card ─────────────────────────────────────────────────────────────
+class _ShopStatCard extends StatelessWidget {
+  final String emoji, name;
+  final int total, pending, revenue;
+  const _ShopStatCard({
+    required this.emoji,
+    required this.name,
+    required this.total,
+    required this.pending,
+    required this.revenue,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (appointments.isEmpty) return const SizedBox.shrink();
+    return Container(
+      width: 190,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.inputBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Text(emoji, style: const TextStyle(fontSize: 20)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(name,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontSize: 13),
+                  overflow: TextOverflow.ellipsis),
+            ),
+          ]),
+          const Spacer(),
+          Row(children: [
+            _MiniStat(
+                value: '$total',
+                label: 'agend.',
+                icon: Icons.calendar_today_outlined),
+            const SizedBox(width: 12),
+            _MiniStat(
+                value: '$pending',
+                label: 'pend.',
+                icon: Icons.pending_outlined),
+          ]),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+              border:
+                  Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.attach_money_rounded,
+                  size: 12, color: Color(0xFF4CAF50)),
+              Text('R\$ $revenue',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 12,
+                      color: const Color(0xFF4CAF50),
+                      fontWeight: FontWeight.w600)),
+            ]),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
+class _MiniStat extends StatelessWidget {
+  final String value, label;
+  final IconData icon;
+  const _MiniStat(
+      {required this.value, required this.label, required this.icon});
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, size: 11, color: AppTheme.textHint),
+      const SizedBox(width: 4),
+      Text('$value $label',
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontSize: 11, color: AppTheme.textSecondary)),
+    ]);
+  }
+}
+
+// ── Status breakdown ──────────────────────────────────────────────────────────
+class _StatusBreakdown extends StatelessWidget {
+  final List<AppointmentModel> appointments;
+  const _StatusBreakdown({required this.appointments});
+  @override
+  Widget build(BuildContext context) {
+    if (appointments.isEmpty) return const SizedBox.shrink();
     final total = appointments.length;
     final byStatus = <AppointmentStatus, int>{};
     for (final a in appointments) {
       byStatus[a.status] = (byStatus[a.status] ?? 0) + 1;
     }
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
-import 'client/client_home_screen.dart';
+import 'client/barbershop_list_screen.dart';
 import 'client/appointments_screen.dart';
 import 'client/profile_screen.dart';
 
@@ -16,7 +16,7 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    ClientHomeScreen(),
+    BarbershopListScreen(), // ← antes era ClientHomeScreen
     AppointmentsScreen(),
     ProfileScreen(),
   ];

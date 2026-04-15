@@ -1,5 +1,8 @@
 import 'service_model.dart';
 import 'barber_model.dart';
+import 'barbershop_model.dart';
+
+export 'barbershop_model.dart';
 
 enum AppointmentStatus { scheduled, completed, cancelled }
 
@@ -9,6 +12,7 @@ class AppointmentModel {
   final String clientName;
   final ServiceModel service;
   final BarberModel barber;
+  final BarbershopModel barbershop;
   final DateTime date;
   final String timeSlot;
   AppointmentStatus status;
@@ -19,11 +23,23 @@ class AppointmentModel {
     required this.clientName,
     required this.service,
     required this.barber,
+    required this.barbershop,
     required this.date,
     required this.timeSlot,
     this.status = AppointmentStatus.scheduled,
-  });
+  }) {
+    // Validações de consistência
+    assert(
+      barbershop.services.any((s) => s.id == service.id),
+      'O serviço "${service.name}" não pertence à barbearia "${barbershop.name}".',
+    );
+    assert(
+      barbershop.barbers.any((b) => b.id == barber.id),
+      'O barbeiro "${barber.name}" não pertence à barbearia "${barbershop.name}".',
+    );
+  }
 
+  // ── Status helpers ────────────────────────────────────────────────────────
   String get statusLabel {
     switch (status) {
       case AppointmentStatus.scheduled:
@@ -39,12 +55,24 @@ class AppointmentModel {
   bool get canReschedule => status == AppointmentStatus.scheduled;
   bool get canComplete => status == AppointmentStatus.scheduled;
 
+  bool get isUpcoming =>
+      status == AppointmentStatus.scheduled && date.isAfter(DateTime.now());
+
+  // ── Date formatters ───────────────────────────────────────────────────────
   String get formattedDate {
     const months = [
       '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
       'jul', 'ago', 'set', 'out', 'nov', 'dez'
     ];
     return '${date.day} de ${months[date.month]}';
+  }
+
+  String get formattedDateFull {
+    const months = [
+      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+    ];
+    return '${date.day} de ${months[date.month]} de ${date.year}';
   }
 
   String get monthAbbr {

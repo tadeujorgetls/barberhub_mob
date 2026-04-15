@@ -123,109 +123,108 @@ class DividerWithText extends StatelessWidget {
   const DividerWithText({super.key, required this.text});
   @override
   Widget build(BuildContext context) => Row(children: [
-        const Expanded(child: Divider()),
+        Expanded(child: Container(height: 1, color: AppTheme.divider)),
         Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(text,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 11,
-                    letterSpacing: 1.5,
-                    color: AppTheme.textHint))),
-        const Expanded(child: Divider()),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(text,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontSize: 12)),
+        ),
+        Expanded(child: Container(height: 1, color: AppTheme.divider)),
       ]);
 }
 
 class ScreenHeader extends StatelessWidget {
-  final String eyebrow;
-  final String title;
+  final String eyebrow, title;
   const ScreenHeader({super.key, required this.eyebrow, required this.title});
   @override
-  Widget build(BuildContext context) =>
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(eyebrow,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppTheme.gold, fontSize: 11, letterSpacing: 4)),
-        Text(title, style: Theme.of(context).textTheme.displayMedium),
-      ]);
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(eyebrow,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppTheme.gold, fontSize: 11, letterSpacing: 4)),
+          Text(title, style: Theme.of(context).textTheme.displayMedium),
+        ],
+      );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUTTONS
+// BUTTONS & INPUTS
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CustomButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
-  final bool isOutlined;
+  final bool outlined;
   final bool isDanger;
-  final IconData? icon;
+  final Color? color;
   final double height;
+  final IconData? icon;
 
   const CustomButton({
     super.key,
     required this.label,
     this.onPressed,
     this.isLoading = false,
-    this.isOutlined = false,
+    this.outlined = false,
     this.isDanger = false,
+    this.color,
+    this.height = 52,
     this.icon,
-    this.height = 56,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget child = isLoading
-        ? const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.background)))
-        : Row(mainAxisSize: MainAxisSize.min, children: [
-            if (icon != null) ...[
-              Icon(icon, size: 18),
-              const SizedBox(width: 8)
+    final c = isDanger ? Colors.red : (color ?? AppTheme.gold);
+    Widget buttonChild = isLoading
+        ? SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2, color: c))
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 18),
+                const SizedBox(width: 8),
+              ],
+              Text(label.toUpperCase(),
+                  style: GoogleFonts.jost(
+                      fontSize: 12, fontWeight: FontWeight.w600)),
             ],
-            Text(label.toUpperCase()),
-          ]);
-
-    const shape = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4)));
-    final txtStyle = GoogleFonts.jost(
-        fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 2);
-
-    if (isOutlined || isDanger) {
-      final color = isDanger ? AppTheme.error : AppTheme.textPrimary;
-      final border = isDanger ? AppTheme.error : AppTheme.inputBorder;
+          );
+    if (outlined) {
       return SizedBox(
         width: double.infinity,
         height: height,
         child: OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-              foregroundColor: color,
-              side: BorderSide(color: border),
-              shape: shape,
-              textStyle: txtStyle),
-          child: child,
+            side: BorderSide(color: c),
+            foregroundColor: c,
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(4))),
+          ),
+          child: buttonChild,
         ),
       );
     }
-
     return SizedBox(
       width: double.infinity,
       height: height,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isLoading ? AppTheme.goldDark : AppTheme.gold,
-          foregroundColor: AppTheme.background,
-          elevation: 0,
-          shape: shape,
-          textStyle: txtStyle,
-        ),
-        child: child,
+        style: isDanger
+            ? ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              )
+            : null,
+        child: buttonChild,
       ),
     );
   }
@@ -235,39 +234,45 @@ class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+
   const PrimaryButton(
-      {super.key, required this.label, this.onPressed, this.isLoading = false});
+      {super.key,
+      required this.label,
+      this.onPressed,
+      this.isLoading = false});
+
   @override
-  Widget build(BuildContext context) =>
-      CustomButton(label: label, onPressed: onPressed, isLoading: isLoading);
+  Widget build(BuildContext context) => CustomButton(
+      label: label, onPressed: onPressed, isLoading: isLoading);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FORM
-// ─────────────────────────────────────────────────────────────────────────────
-
 class AppTextField extends StatefulWidget {
-  final String label, hint;
-  final TextEditingController controller;
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final bool obscure;
   final bool isPassword;
-  final TextInputType keyboardType;
-  final String? Function(String?)? validator;
-  final TextInputAction textInputAction;
   final FocusNode? focusNode;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
   final VoidCallback? onEditingComplete;
-  final List<TextInputFormatter>? inputFormatters;
   final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
     required this.label,
-    required this.hint,
-    required this.controller,
+    this.hint,
+    this.controller,
+    this.obscure = false,
     this.isPassword = false,
-    this.keyboardType = TextInputType.text,
-    this.validator,
-    this.textInputAction = TextInputAction.next,
     this.focusNode,
+    this.keyboardType,
+    this.validator,
+    this.textInputAction,
+    this.onFieldSubmitted,
     this.onEditingComplete,
     this.inputFormatters,
     this.maxLines = 1,
@@ -278,43 +283,49 @@ class AppTextField extends StatefulWidget {
 }
 
 class _AppTextFieldState extends State<AppTextField> {
-  bool _obscure = true;
+  bool _show = false;
+
   @override
-  Widget build(BuildContext context) => TextFormField(
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(widget.label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: AppTheme.textSecondary, fontSize: 11, letterSpacing: 1)),
+      const SizedBox(height: 8),
+      TextFormField(
         controller: widget.controller,
         focusNode: widget.focusNode,
-        obscureText: widget.isPassword && _obscure,
+        obscureText: (widget.obscure || widget.isPassword) && !_show,
         keyboardType: widget.keyboardType,
+        validator: widget.validator,
         textInputAction: widget.textInputAction,
+        onFieldSubmitted: widget.onFieldSubmitted,
         onEditingComplete: widget.onEditingComplete,
         inputFormatters: widget.inputFormatters,
-        maxLines: widget.isPassword ? 1 : widget.maxLines,
+        maxLines: (widget.obscure || widget.isPassword) ? 1 : widget.maxLines,
         style: Theme.of(context)
             .textTheme
             .bodyLarge
-            ?.copyWith(color: AppTheme.textPrimary, fontSize: 15),
+            ?.copyWith(fontSize: 15, color: AppTheme.textPrimary),
         decoration: InputDecoration(
-          labelText: widget.label,
           hintText: widget.hint,
-          suffixIcon: widget.isPassword
+          suffixIcon: (widget.obscure || widget.isPassword)
               ? IconButton(
                   icon: Icon(
-                      _obscure
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppTheme.textSecondary,
+                      _show ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: AppTheme.textHint,
                       size: 20),
-                  onPressed: () => setState(() => _obscure = !_obscure),
+                  onPressed: () => setState(() => _show = !_show),
                 )
               : null,
         ),
-        validator: widget.validator,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-      );
+      ),
+    ]);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CARDS
+// SERVICE CARD
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ServiceCard extends StatelessWidget {
@@ -423,10 +434,15 @@ class ServiceCard extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// APPOINTMENT CARD  (atualizado: mostra barbearia)
+// ─────────────────────────────────────────────────────────────────────────────
+
 class AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
   final bool showClient;
   final bool showBarber;
+  final bool showBarbershop; // ← novo
   final VoidCallback? onCancel;
   final VoidCallback? onReschedule;
   final void Function(AppointmentStatus)? onStatusChange;
@@ -436,6 +452,7 @@ class AppointmentCard extends StatelessWidget {
     required this.appointment,
     this.showClient = false,
     this.showBarber = true,
+    this.showBarbershop = true, // ← padrão: mostrar
     this.onCancel,
     this.onReschedule,
     this.onStatusChange,
@@ -451,6 +468,38 @@ class AppointmentCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppTheme.inputBorder)),
       child: Column(children: [
+        // ── Barbershop header ────────────────────────────────────────────
+        if (showBarbershop)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.gold.withOpacity(0.04),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(10)),
+              border: const Border(
+                  bottom: BorderSide(color: AppTheme.divider, width: 0.5)),
+            ),
+            child: Row(children: [
+              const Icon(Icons.storefront_outlined,
+                  size: 12, color: AppTheme.gold),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  a.barbershop.name,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppTheme.gold, fontSize: 11, letterSpacing: 0.3),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              StatusBadge(
+                label: a.statusLabel.toUpperCase(),
+                color: statusColor,
+                bgColor: statusColor.withOpacity(.1),
+              ),
+            ]),
+          ),
+
+        // ── Main content ─────────────────────────────────────────────────
         Padding(
             padding: const EdgeInsets.all(14),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -460,18 +509,26 @@ class AppointmentCard extends StatelessWidget {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Row(children: [
-                      Expanded(
-                          child: Text(a.service.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontSize: 15))),
-                      StatusBadge(
-                          label: a.statusLabel.toUpperCase(),
-                          color: statusColor,
-                          bgColor: statusColor.withOpacity(.1)),
-                    ]),
+                    // Se não há header de barbearia, mostra status inline
+                    if (!showBarbershop)
+                      Row(children: [
+                        Expanded(
+                            child: Text(a.service.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(fontSize: 15))),
+                        StatusBadge(
+                            label: a.statusLabel.toUpperCase(),
+                            color: statusColor,
+                            bgColor: statusColor.withOpacity(.1)),
+                      ])
+                    else
+                      Text(a.service.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontSize: 15)),
                     const SizedBox(height: 4),
                     if (showClient)
                       _Meta(
@@ -479,7 +536,8 @@ class AppointmentCard extends StatelessWidget {
                           text: a.clientName),
                     if (showBarber)
                       _Meta(
-                          icon: Icons.content_cut_rounded, text: a.barber.name),
+                          icon: Icons.content_cut_rounded,
+                          text: a.barber.name),
                     _Meta(
                         icon: Icons.schedule_outlined,
                         text:
@@ -490,6 +548,8 @@ class AppointmentCard extends StatelessWidget {
                         gold: true),
                   ])),
             ])),
+
+        // ── Actions ───────────────────────────────────────────────────────
         if (onCancel != null ||
             onReschedule != null ||
             onStatusChange != null) ...[
@@ -561,10 +621,13 @@ class _Meta extends StatelessWidget {
         child: Row(children: [
           Icon(icon, size: 13, color: AppTheme.textHint),
           const SizedBox(width: 5),
-          Text(text,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 13,
-                  color: gold ? AppTheme.gold : AppTheme.textSecondary)),
+          Expanded(
+            child: Text(text,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    color: gold ? AppTheme.gold : AppTheme.textSecondary)),
+          ),
         ]),
       );
 }
@@ -606,16 +669,15 @@ class StatusBadge extends StatelessWidget {
       required this.bgColor});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(.3))),
+            color: bgColor, borderRadius: BorderRadius.circular(4)),
         child: Text(label,
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
-                ?.copyWith(color: color, fontSize: 10, letterSpacing: 1)),
+            style: GoogleFonts.jost(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: color,
+                letterSpacing: .5)),
       );
 }
 
@@ -624,19 +686,19 @@ class RoleBadge extends StatelessWidget {
   const RoleBadge({super.key, required this.label});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-            color: AppTheme.gold.withOpacity(.12),
-            borderRadius: BorderRadius.circular(4),
+            color: AppTheme.gold.withOpacity(.1),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppTheme.gold.withOpacity(.3))),
         child: Text(label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppTheme.gold, fontSize: 10, letterSpacing: 1.5)),
+                color: AppTheme.gold, fontSize: 10, letterSpacing: 1)),
       );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PEOPLE
+// BARBER COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
 
 class BarberAvatar extends StatelessWidget {
@@ -779,7 +841,8 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) => Center(
       child: Padding(
           padding: const EdgeInsets.all(40),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          child:
+              Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(
                 width: 80,
                 height: 80,

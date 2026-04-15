@@ -6,6 +6,7 @@ class AppRoutes {
 
   // Client
   static const String home = '/home';
+  static const String barbershopDetail = '/barbershop-detail'; // ← novo
   static const String serviceDetail = '/service-detail';
   static const String booking = '/booking';
 

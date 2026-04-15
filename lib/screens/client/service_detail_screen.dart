@@ -1,38 +1,35 @@
 import 'package:flutter/material.dart';
+import '../../models/barbershop_model.dart';
 import '../../models/service_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
+/// Aceita dois formatos de arguments:
+///   1) Map{'service': ServiceModel, 'barbershop': BarbershopModel}  ← novo
+///   2) ServiceModel direto                                           ← legado
 class ServiceDetailScreen extends StatelessWidget {
   const ServiceDetailScreen({super.key});
 
-  IconData _iconFor(String name) {
-    switch (name) {
-      case 'face':
-        return Icons.face_retouching_natural_outlined;
-      case 'combo':
-        return Icons.auto_awesome_outlined;
-      case 'color':
-        return Icons.palette_outlined;
-      case 'spa':
-        return Icons.spa_outlined;
-      case 'brow':
-        return Icons.visibility_outlined;
-      default:
-        return Icons.content_cut_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final service = ModalRoute.of(context)!.settings.arguments as ServiceModel;
+    final args = ModalRoute.of(context)!.settings.arguments;
+    final ServiceModel service;
+    final BarbershopModel? barbershop;
+
+    if (args is Map) {
+      service = args['service'] as ServiceModel;
+      barbershop = args['barbershop'] as BarbershopModel?;
+    } else {
+      service = args as ServiceModel;
+      barbershop = null;
+    }
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top bar ─────────────────────────────────────────────────
+            // ── Top bar ───────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
               child: Row(
@@ -61,7 +58,7 @@ class ServiceDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Hero icon ────────────────────────────────────────
+                    // ── Hero icon ───────────────────────────────────
                     Center(
                       child: Container(
                         width: 100,
@@ -73,7 +70,7 @@ class ServiceDetailScreen extends StatelessWidget {
                               color: AppTheme.gold.withOpacity(0.25)),
                         ),
                         child: Icon(
-                          _iconFor(service.iconName),
+                          ServiceCard.iconFor(service.iconName),
                           color: AppTheme.gold,
                           size: 44,
                         ),
@@ -81,32 +78,67 @@ class ServiceDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
 
-                    // ── Service name ──────────────────────────────────────
-                    Text(
-                      service.name,
-                      style: Theme.of(context).textTheme.displayMedium,
-                    ),
+                    // ── Barbershop badge ──────────────────────────────
+                    if (barbershop != null) ...[
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.gold.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: AppTheme.gold.withOpacity(0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.storefront_outlined,
+                                  size: 13, color: AppTheme.gold),
+                              const SizedBox(width: 6),
+                              Text(
+                                barbershop.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: AppTheme.gold,
+                                      fontSize: 11,
+                                    ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.chevron_left_rounded,
+                                  size: 13, color: AppTheme.gold),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // ── Service name ──────────────────────────────────
+                    Text(service.name,
+                        style: Theme.of(context).textTheme.displayMedium),
                     const SizedBox(height: 8),
                     const GoldAccent(),
                     const SizedBox(height: 20),
 
-                    // ── Info pills ────────────────────────────────────────
+                    // ── Pills ─────────────────────────────────────────
                     Row(
                       children: [
                         _InfoPill(
-                          icon: Icons.attach_money_rounded,
-                          label: service.formattedPrice,
-                        ),
+                            icon: Icons.attach_money_rounded,
+                            label: service.formattedPrice),
                         const SizedBox(width: 12),
                         _InfoPill(
-                          icon: Icons.schedule_outlined,
-                          label: service.formattedDuration,
-                        ),
+                            icon: Icons.schedule_outlined,
+                            label: service.formattedDuration),
                       ],
                     ),
                     const SizedBox(height: 28),
 
-                    // ── Description ───────────────────────────────────────
+                    // ── Description ───────────────────────────────────
                     const SectionHeader(title: 'Sobre o serviço'),
                     const SizedBox(height: 16),
                     Text(
@@ -119,7 +151,7 @@ class ServiceDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // ── What's included ───────────────────────────────────
+                    // ── Includes ──────────────────────────────────────
                     const SectionHeader(title: 'Inclui'),
                     const SizedBox(height: 16),
                     ..._includedItems(service).map(
@@ -152,13 +184,16 @@ class ServiceDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 40),
 
-                    // ── CTA ───────────────────────────────────────────────
+                    // ── CTA ───────────────────────────────────────────
                     PrimaryButton(
                       label: 'Agendar agora',
                       onPressed: () => Navigator.pushNamed(
                         context,
                         AppRoutes.booking,
-                        arguments: service,
+                        arguments: {
+                          'service': service,
+                          'barbershop': barbershop,
+                        },
                       ),
                     ),
                   ],
@@ -221,7 +256,6 @@ class ServiceDetailScreen extends StatelessWidget {
 class _InfoPill extends StatelessWidget {
   final IconData icon;
   final String label;
-
   const _InfoPill({required this.icon, required this.label});
 
   @override
@@ -241,9 +275,7 @@ class _InfoPill extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 14,
-                  color: AppTheme.textPrimary,
-                ),
+                  fontSize: 14, color: AppTheme.textPrimary),
           ),
         ],
       ),

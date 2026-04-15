@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/auth_provider.dart';
 import '../../models/app_data_provider.dart';
+import '../../models/appointment_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
@@ -14,27 +15,43 @@ class ProfileScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final data = context.watch<AppDataProvider>();
     final user = auth.currentUser;
+    final clientId = user?.id ?? '';
     final initials =
         user?.name.split(' ').take(2).map((e) => e[0].toUpperCase()).join() ??
             'U';
+
+    final allAppts = data.appointmentsForClient(clientId);
+    final active = data.activeForClient(clientId);
+    final past = data.pastForClient(clientId);
+
+    // Barbearias visitadas (únicas, ordenadas pela mais recente)
+    final visitedShops = <String, String>{};
+    for (final a in allAppts) {
+      visitedShops[a.barbershop.id] = a.barbershop.name;
+    }
+
+    // Receita total gasta
+    final totalSpent = past
+        .where((a) => a.status == AppointmentStatus.completed)
+        .fold(0.0, (s, a) => s + a.service.price);
 
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // ── Header ────────────────────────────────────────────────
+              // ── Hero ──────────────────────────────────────────────────
               Stack(
                 children: [
                   Container(
-                    height: 160,
+                    height: 170,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
                           AppTheme.gold.withOpacity(0.12),
-                          AppTheme.gold.withOpacity(0.03),
+                          AppTheme.gold.withOpacity(0.02),
                         ],
                       ),
                     ),
@@ -53,7 +70,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                    padding: const EdgeInsets.fromLTRB(24, 36, 24, 0),
                     child: Row(
                       children: [
                         Container(
@@ -62,7 +79,8 @@ class ProfileScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: AppTheme.gold.withOpacity(0.15),
-                            border: Border.all(color: AppTheme.gold, width: 2),
+                            border:
+                                Border.all(color: AppTheme.gold, width: 2),
                           ),
                           child: Center(
                             child: Text(
@@ -70,9 +88,7 @@ class ProfileScreen extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineMedium
-                                  ?.copyWith(
-                                    color: AppTheme.gold,
-                                  ),
+                                  ?.copyWith(color: AppTheme.gold),
                             ),
                           ),
                         ),
@@ -97,6 +113,8 @@ class ProfileScreen extends StatelessWidget {
                                     ?.copyWith(fontSize: 13),
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(height: 8),
+                              RoleBadge(label: user?.roleLabel ?? 'Cliente'),
                             ],
                           ),
                         ),
@@ -106,35 +124,87 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
 
-              // ── Stats row ─────────────────────────────────────────────
+              // ── Stats ─────────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: Row(
                   children: [
-                    _StatCard(
-                      value:
-                          '${data.appointmentsForClient(auth.currentUser?.id ?? '').length}',
-                      label: 'Total',
-                    ),
-                    const SizedBox(width: 12),
-                    _StatCard(
-                      value:
-                          '${data.activeForClient(auth.currentUser?.id ?? '').length}',
-                      label: 'Ativos',
-                    ),
-                    const SizedBox(width: 12),
-                    _StatCard(
-                      value:
-                          '${data.pastForClient(auth.currentUser?.id ?? '').length}',
-                      label: 'Histórico',
-                    ),
+                    _StatTile(
+                        value: '${allAppts.length}', label: 'Total'),
+                    const SizedBox(width: 10),
+                    _StatTile(
+                        value: '${active.length}', label: 'Ativos'),
+                    const SizedBox(width: 10),
+                    _StatTile(
+                        value: 'R\$ ${totalSpent.toInt()}',
+                        label: 'Investido',
+                        gold: true),
                   ],
                 ),
               ),
 
+              // ── Barbearias visitadas ───────────────────────────────────
+              if (visitedShops.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(24, 28, 24, 14),
+                  child: SectionHeader(title: 'Barbearias visitadas'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: visitedShops.values.map((name) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceElevated,
+                          borderRadius: BorderRadius.circular(20),
+                          border:
+                              Border.all(color: AppTheme.inputBorder),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.storefront_outlined,
+                                size: 12, color: AppTheme.gold),
+                            const SizedBox(width: 6),
+                            Text(
+                              name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+
+              // ── Próximo agendamento ────────────────────────────────────
+              if (active.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(24, 28, 24, 14),
+                  child: SectionHeader(title: 'Próximo agendamento'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: AppointmentCard(
+                    appointment: active.first,
+                    showBarbershop: true,
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 28),
 
-              // ── Menu items ────────────────────────────────────────────
+              // ── Menu ──────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
@@ -176,11 +246,12 @@ class ProfileScreen extends StatelessWidget {
                               context, AppRoutes.login);
                         },
                         style: OutlinedButton.styleFrom(
-                          side:
-                              const BorderSide(color: AppTheme.error, width: 1),
+                          side: const BorderSide(
+                              color: AppTheme.error, width: 1),
                           foregroundColor: AppTheme.error,
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(4)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(4)),
                           ),
                         ),
                         icon: const Icon(Icons.logout_rounded, size: 18),
@@ -190,7 +261,7 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 32),
                     Center(
                       child: Text(
-                        'Barber Hub v1.0.0',
+                        'Barber Hub v2.0.0',
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
@@ -209,16 +280,18 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _StatTile extends StatelessWidget {
   final String value;
   final String label;
-  const _StatCard({required this.value, required this.label});
+  final bool gold;
+  const _StatTile(
+      {required this.value, required this.label, this.gold = false});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: AppTheme.surfaceElevated,
           borderRadius: BorderRadius.circular(8),
@@ -229,16 +302,17 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.gold,
-                    fontSize: 26,
+                    color: gold ? AppTheme.gold : AppTheme.textPrimary,
+                    fontSize: gold ? 18 : 24,
                   ),
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 11,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontSize: 11),
             ),
           ],
         ),
@@ -251,12 +325,8 @@ class _MenuItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String tag;
-
-  const _MenuItem({
-    required this.icon,
-    required this.label,
-    required this.tag,
-  });
+  const _MenuItem(
+      {required this.icon, required this.label, required this.tag});
 
   @override
   Widget build(BuildContext context) {
@@ -273,26 +343,22 @@ class _MenuItem extends StatelessWidget {
           Icon(icon, color: AppTheme.textSecondary, size: 20),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontSize: 14,
-                  ),
-            ),
+            child: Text(label,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(fontSize: 14)),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: AppTheme.textHint.withOpacity(0.15),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Text(
-              tag,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 10,
-                    color: AppTheme.textHint,
-                  ),
-            ),
+            child: Text(tag,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 10, color: AppTheme.textHint)),
           ),
           const SizedBox(width: 8),
           const Icon(Icons.chevron_right_rounded,
