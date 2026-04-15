@@ -28,8 +28,10 @@ class AdminOverviewScreen extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                    colors: [AppTheme.gold.withOpacity(.05), Colors.transparent]),
+                gradient: RadialGradient(colors: [
+                  AppTheme.gold.withOpacity(.05),
+                  Colors.transparent
+                ]),
               ),
             ),
           ),
@@ -75,10 +77,10 @@ class AdminOverviewScreen extends StatelessWidget {
                 ),
 
                 // ── Title ────────────────────────────────────────────────
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                    child: const ScreenHeader(
+                    padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+                    child: ScreenHeader(
                         eyebrow: 'VISÃO GERAL', title: 'Dashboard'),
                   ),
                 ),
@@ -132,10 +134,10 @@ class AdminOverviewScreen extends StatelessWidget {
                 ),
 
                 // ── Por barbearia ─────────────────────────────────────────
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 14),
-                    child: const SectionHeader(title: 'Por barbearia'),
+                    padding: EdgeInsets.fromLTRB(24, 28, 24, 14),
+                    child: SectionHeader(title: 'Por barbearia'),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -145,19 +147,17 @@ class AdminOverviewScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       scrollDirection: Axis.horizontal,
                       itemCount: data.barbershops.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(width: 12),
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
                       itemBuilder: (_, i) {
                         final shop = data.barbershops[i];
-                        final shopAppts =
-                            data.appointmentsForShop(shop.id);
+                        final shopAppts = data.appointmentsForShop(shop.id);
                         final shopRevenue = shopAppts
-                            .where((a) =>
-                                a.status == AppointmentStatus.completed)
+                            .where(
+                                (a) => a.status == AppointmentStatus.completed)
                             .fold(0.0, (s, a) => s + a.service.price);
                         final pending = shopAppts
-                            .where((a) =>
-                                a.status == AppointmentStatus.scheduled)
+                            .where(
+                                (a) => a.status == AppointmentStatus.scheduled)
                             .length;
                         return _ShopStatCard(
                           emoji: shop.coverEmoji,
@@ -192,14 +192,12 @@ class AdminOverviewScreen extends StatelessWidget {
                     child: EmptyState(
                       icon: Icons.calendar_today_outlined,
                       title: 'Sem agendamentos',
-                      subtitle:
-                          'Os agendamentos realizados aparecerão aqui.',
+                      subtitle: 'Os agendamentos realizados aparecerão aqui.',
                     ),
                   )
                 else
                   SliverPadding(
-                    padding:
-                        const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (_, i) => Padding(
@@ -210,8 +208,7 @@ class AdminOverviewScreen extends StatelessWidget {
                             showBarber: true,
                             showBarbershop: true,
                             onCancel: all[i].canCancel
-                                ? () => _cancelConfirm(
-                                    context, data, all[i].id)
+                                ? () => _cancelConfirm(context, data, all[i].id)
                                 : null,
                           ),
                         ),
@@ -233,8 +230,7 @@ class AdminOverviewScreen extends StatelessWidget {
       context: ctx,
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceElevated,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         title: Text('Cancelar agendamento',
             style: Theme.of(ctx).textTheme.titleLarge),
         content: Text('Confirmar cancelamento?',
@@ -245,8 +241,7 @@ class AdminOverviewScreen extends StatelessWidget {
               child: const Text('Não')),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppTheme.error),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
             child: const Text('Cancelar'),
           ),
         ],
@@ -301,7 +296,9 @@ class _ShopStatCard extends StatelessWidget {
           const Spacer(),
           Row(children: [
             _MiniStat(
-                value: '$total', label: 'agend.', icon: Icons.calendar_today_outlined),
+                value: '$total',
+                label: 'agend.',
+                icon: Icons.calendar_today_outlined),
             const SizedBox(width: 12),
             _MiniStat(
                 value: '$pending',
@@ -314,8 +311,8 @@ class _ShopStatCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF4CAF50).withOpacity(0.1),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                  color: const Color(0xFF4CAF50).withOpacity(0.3)),
+              border:
+                  Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.attach_money_rounded,

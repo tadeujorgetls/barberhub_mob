@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'service_model.dart';
 import 'barber_model.dart';
 import 'appointment_model.dart';
-import 'barbershop_model.dart';
-import 'product_model.dart';
 import '../mock/mock_data.dart';
 
 class AppDataProvider extends ChangeNotifier {
@@ -121,9 +119,7 @@ class AppDataProvider extends ChangeNotifier {
 
   // ── Queries de barbeiro ───────────────────────────────────────────────────
   List<AppointmentModel> appointmentsForBarber(String barberId) =>
-      _appointments
-          .where((a) => a.barber.id == barberId)
-          .toList()
+      _appointments.where((a) => a.barber.id == barberId).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
 
   List<AppointmentModel> todayForBarber(String barberId) {
@@ -143,11 +139,13 @@ class AppDataProvider extends ChangeNotifier {
       .where((a) => a.status == AppointmentStatus.completed)
       .fold(0, (sum, a) => sum + a.service.price.toInt());
 
-  int get scheduledCount =>
-      _appointments.where((a) => a.status == AppointmentStatus.scheduled).length;
+  int get scheduledCount => _appointments
+      .where((a) => a.status == AppointmentStatus.scheduled)
+      .length;
 
-  int get completedCount =>
-      _appointments.where((a) => a.status == AppointmentStatus.completed).length;
+  int get completedCount => _appointments
+      .where((a) => a.status == AppointmentStatus.completed)
+      .length;
 
   // ── Validações ────────────────────────────────────────────────────────────
   bool isServiceFromShop(ServiceModel service, BarbershopModel shop) =>

@@ -58,7 +58,7 @@ class MockData {
           BarberModel(id: 'b2', name: 'Diego Costa', specialty: 'Barba & Navalha', rating: 4.8, reviewCount: 175, avatarInitials: 'DC', phone: '(11) 99999-2222'),
         ],
         products: [
-          ProductModel(
+          const ProductModel(
             id: 'bs1_p1',
             barbershopId: 'bs1',
             name: 'Pomada Modeladora Classic',
@@ -71,7 +71,7 @@ class MockData {
             isFeatured: true,
             stockQty: 15,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs1_p2',
             barbershopId: 'bs1',
             name: 'Óleo para Barba Premium',
@@ -83,7 +83,7 @@ class MockData {
             isFeatured: true,
             stockQty: 22,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs1_p3',
             barbershopId: 'bs1',
             name: 'Shampoo Antiqueda',
@@ -94,7 +94,7 @@ class MockData {
             brand: 'HairCare',
             stockQty: 30,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs1_p4',
             barbershopId: 'bs1',
             name: 'Kit Barba Completo',
@@ -107,7 +107,7 @@ class MockData {
             isFeatured: true,
             stockQty: 8,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs1_p5',
             barbershopId: 'bs1',
             name: 'Balm Pós-Barba',
@@ -142,7 +142,7 @@ class MockData {
           BarberModel(id: 'b4', name: 'Lucas Ferreira', specialty: 'Cortes Modernos', rating: 4.6, reviewCount: 89, avatarInitials: 'LF', phone: '(11) 99999-4444'),
         ],
         products: [
-          ProductModel(
+          const ProductModel(
             id: 'bs2_p1',
             barbershopId: 'bs2',
             name: 'Tônico Capilar Urbano',
@@ -154,7 +154,7 @@ class MockData {
             isFeatured: true,
             stockQty: 12,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs2_p2',
             barbershopId: 'bs2',
             name: 'Pomada Matte Efeito Opaco',
@@ -167,7 +167,7 @@ class MockData {
             isFeatured: true,
             stockQty: 20,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs2_p3',
             barbershopId: 'bs2',
             name: 'Máscara de Hidratação Capilar',
@@ -178,7 +178,7 @@ class MockData {
             brand: 'HydraLab',
             stockQty: 10,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs2_p4',
             barbershopId: 'bs2',
             name: 'Leave-in Protetor Térmico',
@@ -189,7 +189,7 @@ class MockData {
             brand: 'UrbanStyle',
             stockQty: 25,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs2_p5',
             barbershopId: 'bs2',
             name: 'Kit Coloração em Casa',
@@ -225,7 +225,7 @@ class MockData {
           BarberModel(id: 'b6', name: 'Fábio Reis', specialty: 'Cortes Premium', rating: 4.7, reviewCount: 145, avatarInitials: 'FR', phone: '(11) 99888-6666'),
         ],
         products: [
-          ProductModel(
+          const ProductModel(
             id: 'bs3_p1',
             barbershopId: 'bs3',
             name: 'Navalha Artesanal Dom',
@@ -237,7 +237,7 @@ class MockData {
             isFeatured: true,
             stockQty: 5,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs3_p2',
             barbershopId: 'bs3',
             name: 'Óleo de Barba Importado',
@@ -250,7 +250,7 @@ class MockData {
             isFeatured: true,
             stockQty: 14,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs3_p3',
             barbershopId: 'bs3',
             name: 'Creme de Barbear Premium',
@@ -261,7 +261,7 @@ class MockData {
             brand: 'Dom Signature',
             stockQty: 20,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs3_p4',
             barbershopId: 'bs3',
             name: 'Pedra de Alúmen Natural',
@@ -272,7 +272,7 @@ class MockData {
             brand: 'NaturalCare',
             stockQty: 40,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs3_p5',
             barbershopId: 'bs3',
             name: 'Kit Dom VIP',
@@ -285,7 +285,7 @@ class MockData {
             isFeatured: true,
             stockQty: 4,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs3_p6',
             barbershopId: 'bs3',
             name: 'Hidratante Facial Masculino',
@@ -320,7 +320,7 @@ class MockData {
           BarberModel(id: 'b8', name: 'Natã Lima', specialty: 'Tratamentos Capilares', rating: 4.5, reviewCount: 73, avatarInitials: 'NL', phone: '(11) 97777-8888'),
         ],
         products: [
-          ProductModel(
+          const ProductModel(
             id: 'bs4_p1',
             barbershopId: 'bs4',
             name: 'Shampoo Matizador Silver',
@@ -332,7 +332,7 @@ class MockData {
             isFeatured: true,
             stockQty: 18,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs4_p2',
             barbershopId: 'bs4',
             name: 'Ampola de Reconstrução',
@@ -344,7 +344,7 @@ class MockData {
             isFeatured: true,
             stockQty: 35,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs4_p3',
             barbershopId: 'bs4',
             name: 'Pó Descolorante Profissional',
@@ -356,7 +356,7 @@ class MockData {
             brand: 'LabColor',
             stockQty: 9,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs4_p4',
             barbershopId: 'bs4',
             name: 'Sérum Anti-Frizz',
@@ -367,7 +367,7 @@ class MockData {
             brand: 'LabTech',
             stockQty: 22,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs4_p5',
             barbershopId: 'bs4',
             name: 'Kit Manutenção Loiro',
@@ -404,7 +404,7 @@ class MockData {
           BarberModel(id: 'b10', name: 'Rodrigo Melo', specialty: 'Barba & Acabamento', rating: 4.4, reviewCount: 81, avatarInitials: 'RM', phone: '(11) 96666-0000'),
         ],
         products: [
-          ProductModel(
+          const ProductModel(
             id: 'bs5_p1',
             barbershopId: 'bs5',
             name: 'Pomada Kids Sem Química',
@@ -416,7 +416,7 @@ class MockData {
             isFeatured: true,
             stockQty: 28,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs5_p2',
             barbershopId: 'bs5',
             name: 'Shampoo Familiar 3 em 1',
@@ -429,7 +429,7 @@ class MockData {
             isFeatured: true,
             stockQty: 45,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs5_p3',
             barbershopId: 'bs5',
             name: 'Pente de Madeira Artesanal',
@@ -440,7 +440,7 @@ class MockData {
             brand: 'NaturalArt',
             stockQty: 30,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs5_p4',
             barbershopId: 'bs5',
             name: 'Gel Fixador Extra Forte',
@@ -451,7 +451,7 @@ class MockData {
             brand: 'StyleFix',
             stockQty: 50,
           ),
-          ProductModel(
+          const ProductModel(
             id: 'bs5_p5',
             barbershopId: 'bs5',
             name: 'Kit Pai & Filho',

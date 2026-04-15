@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/cart_provider.dart';
 import '../../models/product_model.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/app_widgets.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});

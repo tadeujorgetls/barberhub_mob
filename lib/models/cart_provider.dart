@@ -37,11 +37,9 @@ class CartProvider extends ChangeNotifier {
   bool get isEmpty => _items.isEmpty;
   bool get isNotEmpty => _items.isNotEmpty;
 
-  int get itemCount =>
-      _items.fold(0, (sum, item) => sum + item.quantity);
+  int get itemCount => _items.fold(0, (sum, item) => sum + item.quantity);
 
-  double get total =>
-      _items.fold(0.0, (sum, item) => sum + item.subtotal);
+  double get total => _items.fold(0.0, (sum, item) => sum + item.subtotal);
 
   String get formattedTotal =>
       'R\$ ${total.toStringAsFixed(2).replaceAll('.', ',')}';
