@@ -180,23 +180,28 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = isDanger ? Colors.red : (color ?? AppTheme.gold);
-    Widget buttonChild = isLoading
-        ? SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2, color: c))
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18),
-                const SizedBox(width: 8),
-              ],
-              Text(label.toUpperCase(),
-                  style: GoogleFonts.jost(
-                      fontSize: 12, fontWeight: FontWeight.w600)),
-            ],
-          );
+    Widget child;
+    if (isLoading) {
+      child = SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+              strokeWidth: 2, color: outlined ? c : AppTheme.background));
+    } else if (icon != null) {
+      child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text(label.toUpperCase(),
+              style: GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      );
+    } else {
+      child = Text(label.toUpperCase(),
+          style: GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w600));
+    }
+
     if (outlined) {
       return SizedBox(
         width: double.infinity,
@@ -209,7 +214,7 @@ class CustomButton extends StatelessWidget {
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(4))),
           ),
-          child: buttonChild,
+          child: child,
         ),
       );
     }
@@ -218,13 +223,11 @@ class CustomButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: isDanger
-            ? ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              )
-            : null,
-        child: buttonChild,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isDanger ? Colors.red : null,
+          foregroundColor: isDanger ? Colors.white : null,
+        ),
+        child: child,
       ),
     );
   }
@@ -252,12 +255,12 @@ class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
   final bool obscure;
   final bool isPassword;
-  final FocusNode? focusNode;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
   final void Function(String)? onFieldSubmitted;
   final VoidCallback? onEditingComplete;
+  final FocusNode? focusNode;
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
 
@@ -268,12 +271,12 @@ class AppTextField extends StatefulWidget {
     this.controller,
     this.obscure = false,
     this.isPassword = false,
-    this.focusNode,
     this.keyboardType,
     this.validator,
     this.textInputAction,
     this.onFieldSubmitted,
     this.onEditingComplete,
+    this.focusNode,
     this.inputFormatters,
     this.maxLines = 1,
   });

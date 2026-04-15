@@ -78,7 +78,8 @@ class _LoginScreenState extends State<LoginScreen>
         const SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle_outline, color: AppTheme.gold, size: 18),
+              Icon(Icons.check_circle_outline,
+                  color: AppTheme.gold, size: 18),
               SizedBox(width: 10),
               Text('Bem-vindo de volta!'),
             ],
@@ -143,8 +144,8 @@ class _LoginScreenState extends State<LoginScreen>
               child: SlideTransition(
                 position: _slideAnim,
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 28, vertical: 40),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -183,11 +184,10 @@ class _LoginScreenState extends State<LoginScreen>
                           focusNode: _emailFocus,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          onEditingComplete: () => FocusScope.of(context)
-                              .requestFocus(_passwordFocus),
+                          onEditingComplete: () =>
+                              FocusScope.of(context).requestFocus(_passwordFocus),
                           validator: (v) {
-                            if (v == null || v.isEmpty)
-                              return 'Informe o e-mail';
+                            if (v == null || v.isEmpty) return 'Informe o e-mail';
                             if (!v.contains('@')) return 'E-mail inválido';
                             return null;
                           },
@@ -203,8 +203,7 @@ class _LoginScreenState extends State<LoginScreen>
                           textInputAction: TextInputAction.done,
                           onEditingComplete: _handleLogin,
                           validator: (v) {
-                            if (v == null || v.isEmpty)
-                              return 'Informe a senha';
+                            if (v == null || v.isEmpty) return 'Informe a senha';
                             if (v.length < 6) return 'Mínimo 6 caracteres';
                             return null;
                           },
@@ -279,8 +278,7 @@ class _LoginScreenState extends State<LoginScreen>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            border: Border.all(
-                                color: AppTheme.gold.withOpacity(0.2)),
+                            border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
                             borderRadius: BorderRadius.circular(4),
                             color: AppTheme.gold.withOpacity(0.04),
                           ),

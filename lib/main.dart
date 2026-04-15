@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'models/auth_provider.dart';
 import 'models/app_data_provider.dart';
+import 'models/cart_provider.dart';
 import 'routes/app_routes.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -14,6 +15,8 @@ import 'screens/admin/admin_shell.dart';
 import 'screens/client/barbershop_detail_screen.dart';
 import 'screens/client/service_detail_screen.dart';
 import 'screens/client/booking_screen.dart';
+import 'screens/client/product_detail_screen.dart';
+import 'screens/client/cart_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -39,6 +42,7 @@ class BarberHubApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AppDataProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()), // ← novo
       ],
       child: MaterialApp(
         title: 'Barber Hub',
@@ -66,7 +70,6 @@ class BarberHubApp extends StatelessWidget {
             case AppRoutes.adminHome:
               page = const AdminShell();
               break;
-            // ── Novo: detalhe da barbearia ──────────────────────────────
             case AppRoutes.barbershopDetail:
               page = const BarbershopDetailScreen();
               break;
@@ -76,13 +79,21 @@ class BarberHubApp extends StatelessWidget {
             case AppRoutes.booking:
               page = const BookingScreen();
               break;
+            case AppRoutes.productDetail:
+              page = const ProductDetailScreen();
+              break;
+            case AppRoutes.cart:               // ← novo
+              page = const CartScreen();
+              break;
           }
           if (page == null) return null;
           return PageRouteBuilder(
             settings: settings,
             pageBuilder: (_, animation, __) => page!,
-            transitionsBuilder: (_, animation, __, child) => FadeTransition(
-              opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            transitionsBuilder: (_, animation, __, child) =>
+                FadeTransition(
+              opacity: CurvedAnimation(
+                  parent: animation, curve: Curves.easeOut),
               child: child,
             ),
             transitionDuration: const Duration(milliseconds: 280),

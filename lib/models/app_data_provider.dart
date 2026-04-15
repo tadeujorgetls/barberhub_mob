@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'service_model.dart';
 import 'barber_model.dart';
 import 'appointment_model.dart';
+import 'barbershop_model.dart';
+import 'product_model.dart';
 import '../mock/mock_data.dart';
 
 class AppDataProvider extends ChangeNotifier {
@@ -21,12 +23,10 @@ class AppDataProvider extends ChangeNotifier {
 
   // ── Getters gerais ────────────────────────────────────────────────────────
   List<BarbershopModel> get barbershops => List.unmodifiable(_barbershops);
-
   BarbershopModel? get selectedBarbershop => _selectedBarbershop;
-
   bool get isBarbershopSelected => _selectedBarbershop != null;
+  bool get isLoading => _isLoading;
 
-  /// Serviços ativos da barbearia selecionada, ou da 1ª por compatibilidade.
   List<ServiceModel> get services {
     final src = _selectedBarbershop?.services ?? _services;
     return List.unmodifiable(src.where((s) => s.isActive));
@@ -37,7 +37,6 @@ class AppDataProvider extends ChangeNotifier {
     return List.unmodifiable(src);
   }
 
-  /// Barbeiros ativos da barbearia selecionada, ou da 1ª por compatibilidade.
   List<BarberModel> get barbers {
     final src = _selectedBarbershop?.barbers ?? _barbers;
     return List.unmodifiable(src.where((b) => b.isActive));
@@ -50,7 +49,38 @@ class AppDataProvider extends ChangeNotifier {
 
   List<AppointmentModel> get appointments => List.unmodifiable(_appointments);
 
-  bool get isLoading => _isLoading;
+  // ── Produtos ──────────────────────────────────────────────────────────────
+
+  /// Produtos disponíveis da barbearia selecionada.
+  List<ProductModel> get products {
+    final src = _selectedBarbershop?.availableProducts ?? [];
+    return List.unmodifiable(src);
+  }
+
+  /// Produtos em destaque da barbearia selecionada.
+  List<ProductModel> get featuredProducts {
+    final src = _selectedBarbershop?.featuredProducts ?? [];
+    return List.unmodifiable(src);
+  }
+
+  /// Todos os produtos de uma barbearia específica.
+  List<ProductModel> productsFor(BarbershopModel shop) =>
+      List.unmodifiable(shop.availableProducts);
+
+  /// Produtos em destaque de uma barbearia específica.
+  List<ProductModel> featuredProductsFor(BarbershopModel shop) =>
+      List.unmodifiable(shop.featuredProducts);
+
+  /// Produtos filtrados por categoria.
+  List<ProductModel> productsByCategory(
+          BarbershopModel shop, ProductCategory cat) =>
+      List.unmodifiable(shop.productsByCategory(cat));
+
+  /// Categorias que têm produtos disponíveis nessa barbearia.
+  List<ProductCategory> availableCategoriesFor(BarbershopModel shop) {
+    final cats = shop.availableProducts.map((p) => p.category).toSet();
+    return ProductCategory.values.where((c) => cats.contains(c)).toList();
+  }
 
   // ── Seleção de barbearia ──────────────────────────────────────────────────
   void selectBarbershop(BarbershopModel shop) {
@@ -114,26 +144,18 @@ class AppDataProvider extends ChangeNotifier {
       .fold(0, (sum, a) => sum + a.service.price.toInt());
 
   int get scheduledCount =>
-      _appointments
-          .where((a) => a.status == AppointmentStatus.scheduled)
-          .length;
+      _appointments.where((a) => a.status == AppointmentStatus.scheduled).length;
 
   int get completedCount =>
-      _appointments
-          .where((a) => a.status == AppointmentStatus.completed)
-          .length;
+      _appointments.where((a) => a.status == AppointmentStatus.completed).length;
 
-  // ── Validações de agendamento ─────────────────────────────────────────────
-
-  /// Valida se o serviço pertence à barbearia.
+  // ── Validações ────────────────────────────────────────────────────────────
   bool isServiceFromShop(ServiceModel service, BarbershopModel shop) =>
       shop.services.any((s) => s.id == service.id);
 
-  /// Valida se o barbeiro pertence à barbearia.
   bool isBarberFromShop(BarberModel barber, BarbershopModel shop) =>
       shop.barbers.any((b) => b.id == barber.id);
 
-  /// Retorna horários já ocupados para um barbeiro em uma data.
   Set<String> bookedSlotsFor(String barberId, DateTime date) {
     return _appointments
         .where((a) =>
@@ -147,7 +169,6 @@ class AppDataProvider extends ChangeNotifier {
   }
 
   // ── Client: Agendar ───────────────────────────────────────────────────────
-  /// Requer barbearia selecionada. Lança exceção se dados inconsistentes.
   Future<AppointmentModel> bookAppointment({
     required String clientId,
     required String clientName,
@@ -157,7 +178,6 @@ class AppDataProvider extends ChangeNotifier {
     required DateTime date,
     required String timeSlot,
   }) async {
-    // Validação de consistência
     if (!isServiceFromShop(service, barbershop)) {
       throw ArgumentError(
           'O serviço "${service.name}" não pertence à barbearia "${barbershop.name}".');
@@ -188,7 +208,6 @@ class AppDataProvider extends ChangeNotifier {
     return appt;
   }
 
-  // ── Client: Cancelar ──────────────────────────────────────────────────────
   Future<void> cancelAppointment(String id) async {
     _isLoading = true;
     notifyListeners();
@@ -199,7 +218,6 @@ class AppDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Client: Remarcar ──────────────────────────────────────────────────────
   Future<AppointmentModel?> rescheduleAppointment({
     required String id,
     required DateTime newDate,
@@ -218,8 +236,6 @@ class AppDataProvider extends ChangeNotifier {
     }
 
     final old = _appointments[idx];
-
-    // Valida que o novo barbeiro pertence à mesma barbearia
     if (!isBarberFromShop(newBarber, old.barbershop)) {
       _isLoading = false;
       notifyListeners();
@@ -246,7 +262,6 @@ class AppDataProvider extends ChangeNotifier {
     return newAppt;
   }
 
-  // ── Barber: Atualizar status ──────────────────────────────────────────────
   Future<void> updateAppointmentStatus(
       String id, AppointmentStatus status) async {
     _isLoading = true;

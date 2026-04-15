@@ -1,5 +1,8 @@
 import 'service_model.dart';
 import 'barber_model.dart';
+import 'product_model.dart';
+
+export 'product_model.dart';
 
 class BarbershopModel {
   final String id;
@@ -7,10 +10,11 @@ class BarbershopModel {
   final String address;
   final double rating;
   final int reviewCount;
-  final String imageUrl; // usado como placeholder / network image
-  final String coverEmoji; // fallback visual quando não há imagem real
+  final String imageUrl;
+  final String coverEmoji;
   final List<ServiceModel> services;
   final List<BarberModel> barbers;
+  final List<ProductModel> products; // ← novo
   final String? phone;
   final String? description;
   bool isOpen;
@@ -25,10 +29,21 @@ class BarbershopModel {
     this.coverEmoji = '✂️',
     required this.services,
     required this.barbers,
+    this.products = const [],  // ← novo, padrão vazio
     this.phone,
     this.description,
     this.isOpen = true,
   });
 
   String get formattedRating => rating.toStringAsFixed(1);
+
+  // ── Helpers de produtos ────────────────────────────────────────────────────
+  List<ProductModel> get availableProducts =>
+      products.where((p) => p.isAvailable).toList();
+
+  List<ProductModel> get featuredProducts =>
+      products.where((p) => p.isFeatured && p.isAvailable).toList();
+
+  List<ProductModel> productsByCategory(ProductCategory cat) =>
+      products.where((p) => p.category == cat && p.isAvailable).toList();
 }

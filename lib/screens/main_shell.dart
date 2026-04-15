@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../models/cart_provider.dart';
+import '../routes/app_routes.dart';
 import '../theme/app_theme.dart';
 import 'client/barbershop_list_screen.dart';
 import 'client/appointments_screen.dart';
@@ -16,7 +19,7 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    BarbershopListScreen(), // ← antes era ClientHomeScreen
+    BarbershopListScreen(),
     AppointmentsScreen(),
     ProfileScreen(),
   ];
@@ -47,6 +50,8 @@ class _BarberBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+
     return Container(
       decoration: const BoxDecoration(
         color: AppTheme.surface,
@@ -72,6 +77,8 @@ class _BarberBottomNav extends StatelessWidget {
                 selected: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
+              // ── Carrinho (botão central com badge) ──────────────────
+              _CartNavItem(itemCount: cart.itemCount),
               _NavItem(
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
@@ -81,6 +88,77 @@ class _BarberBottomNav extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Carrinho como item de navegação especial ──────────────────────────────────
+class _CartNavItem extends StatelessWidget {
+  final int itemCount;
+  const _CartNavItem({required this.itemCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.cart),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  itemCount > 0
+                      ? Icons.shopping_bag_rounded
+                      : Icons.shopping_bag_outlined,
+                  color: itemCount > 0
+                      ? AppTheme.gold
+                      : AppTheme.textHint,
+                  size: 22,
+                ),
+                if (itemCount > 0)
+                  Positioned(
+                    top: -6,
+                    right: -8,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppTheme.gold,
+                      ),
+                      child: Center(
+                        child: Text(
+                          itemCount > 9 ? '9+' : '$itemCount',
+                          style: const TextStyle(
+                            color: AppTheme.background,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Carrinho',
+              style: GoogleFonts.jost(
+                fontSize: 10,
+                fontWeight: itemCount > 0
+                    ? FontWeight.w600
+                    : FontWeight.w400,
+                color:
+                    itemCount > 0 ? AppTheme.gold : AppTheme.textHint,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -125,7 +203,8 @@ class _NavItem extends StatelessWidget {
               label,
               style: GoogleFonts.jost(
                 fontSize: 10,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight:
+                    selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected ? AppTheme.gold : AppTheme.textHint,
                 letterSpacing: 0.3,
               ),

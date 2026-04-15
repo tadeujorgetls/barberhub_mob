@@ -1,29 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/barbershop_model.dart';
+import '../../models/cart_provider.dart';
+import '../../models/product_model.dart';
 import '../../models/service_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
-class BarbershopDetailScreen extends StatelessWidget {
+class BarbershopDetailScreen extends StatefulWidget {
   const BarbershopDetailScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final shop = ModalRoute.of(context)!.settings.arguments as BarbershopModel;
+  State<BarbershopDetailScreen> createState() =>
+      _BarbershopDetailScreenState();
+}
 
-    // Garante que a barbearia está selecionada no provider
+class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tab;
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 2, vsync: this);
+    _tab.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shop =
+        ModalRoute.of(context)!.settings.arguments as BarbershopModel;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppDataProvider>().selectBarbershop(shop);
     });
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // ── Top bar ────────────────────────────────────────────────────
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            // ── Top bar ─────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
@@ -42,18 +67,21 @@ class BarbershopDetailScreen extends StatelessWidget {
                     const Spacer(),
                     Text(
                       'BARBEARIA',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: AppTheme.textHint,
-                            fontSize: 11,
-                            letterSpacing: 3,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: AppTheme.textHint,
+                                fontSize: 11,
+                                letterSpacing: 3,
+                              ),
                     ),
+                    const SizedBox(width: 12),
+                    _CartBadgeButton(),
                   ],
                 ),
               ),
             ),
 
-            // ── Cover ──────────────────────────────────────────────────────
+            // ── Cover ────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -61,7 +89,7 @@ class BarbershopDetailScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Info ────────────────────────────────────────────────────────
+            // ── Info ──────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -69,18 +97,18 @@ class BarbershopDetailScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Stats ────────────────────────────────────────────────────────
+            // ── Stats ─────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                padding: const EdgeInsets.fromLTRB(24, 18, 24, 0),
                 child: _StatsRow(shop: shop),
               ),
             ),
 
-            // ── Equipe ──────────────────────────────────────────────────────
+            // ── Equipe ────────────────────────────────────────────────────
             const SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
+                padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
                 child: SectionHeader(title: 'Equipe'),
               ),
             ),
@@ -93,7 +121,8 @@ class BarbershopDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     scrollDirection: Axis.horizontal,
                     itemCount: shop.barbers.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: 12),
                     itemBuilder: (_, i) =>
                         _BarberChip(barber: shop.barbers[i]),
                   ),
@@ -101,31 +130,466 @@ class BarbershopDetailScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Serviços ────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
+            // ── Tab bar Serviços / Produtos ───────────────────────────────
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 28, 24, 14),
-                child: SectionHeader(title: 'Serviços disponíveis'),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                child: _ServicesProductsTabBar(controller: _tab, shop: shop),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final activeServices =
-                        shop.services.where((s) => s.isActive).toList();
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: _ServiceBookingCard(
-                        service: activeServices[index],
-                        shop: shop,
-                      ),
-                    );
-                  },
-                  childCount:
-                      shop.services.where((s) => s.isActive).length,
+          ],
+
+          // ── Tab body ───────────────────────────────────────────────────
+          body: TabBarView(
+            controller: _tab,
+            children: [
+              // Tab 0 — Serviços
+              _ServicesTab(shop: shop),
+              // Tab 1 — Produtos
+              _ProductsTab(shop: shop),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tab bar toggle ─────────────────────────────────────────────────────────────
+class _ServicesProductsTabBar extends StatelessWidget {
+  final TabController controller;
+  final BarbershopModel shop;
+  const _ServicesProductsTabBar(
+      {required this.controller, required this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    final productCount = shop.availableProducts.length;
+    final serviceCount = shop.services.where((s) => s.isActive).length;
+
+    return Container(
+      height: 42,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppTheme.inputBorder),
+      ),
+      child: TabBar(
+        controller: controller,
+        indicator: BoxDecoration(
+          color: AppTheme.gold,
+          borderRadius: BorderRadius.circular(7),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        labelColor: AppTheme.background,
+        unselectedLabelColor: AppTheme.textSecondary,
+        labelStyle:
+            GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w700),
+        unselectedLabelStyle:
+            GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w400),
+        tabs: [
+          Tab(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.content_cut_rounded, size: 14),
+                const SizedBox(width: 6),
+                Text('Serviços'),
+                const SizedBox(width: 5),
+                _TabCount(count: serviceCount,
+                    active: controller.index == 0),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.shopping_bag_outlined, size: 14),
+                const SizedBox(width: 6),
+                Text('Produtos'),
+                if (productCount > 0) ...[
+                  const SizedBox(width: 5),
+                  _TabCount(count: productCount,
+                      active: controller.index == 1),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabCount extends StatelessWidget {
+  final int count;
+  final bool active;
+  const _TabCount({required this.count, required this.active});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: active
+            ? AppTheme.background.withOpacity(0.25)
+            : AppTheme.textHint.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$count',
+        style: GoogleFonts.jost(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: active ? AppTheme.background : AppTheme.textHint,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tab 0: Serviços ───────────────────────────────────────────────────────────
+class _ServicesTab extends StatelessWidget {
+  final BarbershopModel shop;
+  const _ServicesTab({required this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    final active = shop.services.where((s) => s.isActive).toList();
+
+    if (active.isEmpty) {
+      return const EmptyState(
+        icon: Icons.content_cut_outlined,
+        title: 'Sem serviços',
+        subtitle: 'Esta barbearia ainda não tem serviços cadastrados.',
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+      itemCount: active.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      itemBuilder: (context, i) => _ServiceBookingCard(
+        service: active[i],
+        shop: shop,
+      ),
+    );
+  }
+}
+
+// ── Tab 1: Produtos ───────────────────────────────────────────────────────────
+class _ProductsTab extends StatefulWidget {
+  final BarbershopModel shop;
+  const _ProductsTab({required this.shop});
+
+  @override
+  State<_ProductsTab> createState() => _ProductsTabState();
+}
+
+class _ProductsTabState extends State<_ProductsTab> {
+  ProductCategory? _selectedCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = context.watch<AppDataProvider>();
+    final allProducts = data.productsFor(widget.shop);
+    final categories =
+        data.availableCategoriesFor(widget.shop);
+    final featured = data.featuredProductsFor(widget.shop);
+
+    final filtered = _selectedCategory == null
+        ? allProducts
+        : data.productsByCategory(widget.shop, _selectedCategory!);
+
+    if (allProducts.isEmpty) {
+      return const EmptyState(
+        icon: Icons.shopping_bag_outlined,
+        title: 'Sem produtos',
+        subtitle: 'Esta barbearia ainda não tem produtos cadastrados.',
+      );
+    }
+
+    return CustomScrollView(
+      slivers: [
+        // ── Destaques ──────────────────────────────────────────────────
+        if (featured.isNotEmpty && _selectedCategory == null) ...[
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(24, 20, 24, 12),
+              child: SectionHeader(title: 'Destaques'),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 190,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                scrollDirection: Axis.horizontal,
+                itemCount: featured.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 14),
+                itemBuilder: (_, i) => _FeaturedProductCard(
+                  product: featured[i],
+                  shop: widget.shop,
                 ),
+              ),
+            ),
+          ),
+        ],
+
+        // ── Filtro de categorias ────────────────────────────────────────
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 0, 0),
+            child: _CategoryFilter(
+              categories: categories,
+              selected: _selectedCategory,
+              onSelect: (c) =>
+                  setState(() => _selectedCategory = c),
+            ),
+          ),
+        ),
+
+        // ── Lista de produtos ───────────────────────────────────────────
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: SectionHeader(
+              title: _selectedCategory == null
+                  ? 'Todos os produtos'
+                  : _selectedCategory!.label,
+            ),
+          ),
+        ),
+
+        if (filtered.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: Text(
+                  'Nenhum produto nesta categoria.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppTheme.textHint),
+                ),
+              ),
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 14, 24, 40),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: _ProductCard(
+                    product: filtered[i],
+                    shop: widget.shop,
+                  ),
+                ),
+                childCount: filtered.length,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Category filter ───────────────────────────────────────────────────────────
+class _CategoryFilter extends StatelessWidget {
+  final List<ProductCategory> categories;
+  final ProductCategory? selected;
+  final ValueChanged<ProductCategory?> onSelect;
+
+  const _CategoryFilter({
+    required this.categories,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(right: 24),
+      child: Row(
+        children: [
+          // Chip "Todos"
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: _FilterChip(
+              label: 'Todos',
+              emoji: '🛍️',
+              selected: selected == null,
+              onTap: () => onSelect(null),
+            ),
+          ),
+          ...categories.map((cat) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _FilterChip(
+                  label: cat.label,
+                  emoji: cat.emoji,
+                  selected: selected == cat,
+                  onTap: () =>
+                      onSelect(selected == cat ? null : cat),
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label, emoji;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.emoji,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppTheme.gold.withOpacity(0.15)
+              : AppTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? AppTheme.gold : AppTheme.inputBorder,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 13)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                    color:
+                        selected ? AppTheme.gold : AppTheme.textSecondary,
+                    fontWeight: selected
+                        ? FontWeight.w600
+                        : FontWeight.w400,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Featured product card (horizontal scroll) ─────────────────────────────────
+class _FeaturedProductCard extends StatelessWidget {
+  final ProductModel product;
+  final BarbershopModel shop;
+
+  const _FeaturedProductCard(
+      {required this.product, required this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        AppRoutes.productDetail,
+        arguments: {'product': product, 'barbershop': shop},
+      ),
+      child: Container(
+        width: 150,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Imagem
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppTheme.gold.withOpacity(0.07),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12)),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Text(product.imageEmoji,
+                        style: const TextStyle(fontSize: 44)),
+                  ),
+                  if (product.hasDiscount)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.error,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '-${product.discountPercent}%',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontSize: 12),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    product.formattedPrice,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(
+                          color: AppTheme.gold,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -135,7 +599,163 @@ class BarbershopDetailScreen extends StatelessWidget {
   }
 }
 
-// ── Cover card ────────────────────────────────────────────────────────────────
+// ── Product card (list) ───────────────────────────────────────────────────────
+class _ProductCard extends StatelessWidget {
+  final ProductModel product;
+  final BarbershopModel shop;
+
+  const _ProductCard({required this.product, required this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.inputBorder),
+      ),
+      child: Column(
+        children: [
+          // ── Conteúdo ──────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Emoji / imagem
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppTheme.gold.withOpacity(0.07),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color: AppTheme.gold.withOpacity(0.15)),
+                  ),
+                  child: Center(
+                    child: Text(product.imageEmoji,
+                        style: const TextStyle(fontSize: 30)),
+                  ),
+                ),
+                const SizedBox(width: 14),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Nome + destaque
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              product.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(fontSize: 14),
+                            ),
+                          ),
+                          if (product.isFeatured)
+                            const Icon(Icons.star_rounded,
+                                size: 14, color: AppTheme.gold),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+
+                      // Marca + categoria
+                      Text(
+                        '${product.brand} · ${product.category.label}',
+                        style:
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontSize: 11,
+                                  color: AppTheme.textHint,
+                                ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Descrição curta
+                      Text(
+                        product.description,
+                        style:
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                  height: 1.4,
+                                ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Preço
+                      Row(
+                        children: [
+                          Text(
+                            product.formattedPrice,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: AppTheme.gold,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          if (product.hasDiscount) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              product.formattedOriginalPrice!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontSize: 12,
+                                    color: AppTheme.textHint,
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationColor: AppTheme.textHint,
+                                  ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.error.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '-${product.discountPercent}%',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: AppTheme.error,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── CTA (dois botões lado a lado) ──────────────────────────
+          Container(height: 1, color: AppTheme.divider),
+          _ProductCardActions(product: product, shop: shop),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Shared sub-widgets (cover, info, stats, barber chip, service card) ─────────
+
 class _CoverCard extends StatelessWidget {
   final BarbershopModel shop;
   const _CoverCard({required this.shop});
@@ -143,7 +763,7 @@ class _CoverCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 170,
+      height: 160,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
@@ -159,12 +779,11 @@ class _CoverCard extends StatelessWidget {
       child: Stack(
         children: [
           Center(
-            child: Text(shop.coverEmoji,
-                style: const TextStyle(fontSize: 68)),
-          ),
+              child: Text(shop.coverEmoji,
+                  style: const TextStyle(fontSize: 64))),
           Positioned(
-            top: 14,
-            right: 14,
+            top: 12,
+            right: 12,
             child: _OpenBadge(isOpen: shop.isOpen),
           ),
         ],
@@ -181,7 +800,6 @@ class _OpenBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isOpen ? const Color(0xFF2ECC71) : AppTheme.error;
     final bg = isOpen ? const Color(0xFF1A3A1A) : const Color(0xFF3A1A1A);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -189,27 +807,23 @@ class _OpenBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.5)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(
             width: 6,
             height: 6,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            isOpen ? 'Aberto' : 'Fechado',
+            decoration:
+                BoxDecoration(shape: BoxShape.circle, color: color)),
+        const SizedBox(width: 5),
+        Text(isOpen ? 'Aberto' : 'Fechado',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color, fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w600)),
+      ]),
     );
   }
 }
 
-// ── Shop info ─────────────────────────────────────────────────────────────────
 class _ShopInfo extends StatelessWidget {
   final BarbershopModel shop;
   const _ShopInfo({required this.shop});
@@ -223,36 +837,29 @@ class _ShopInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Text(
-                shop.name,
-                style: Theme.of(context)
-                    .textTheme
-                    .displayMedium
-                    ?.copyWith(fontSize: 30, height: 1.1),
-              ),
+              child: Text(shop.name,
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayMedium
+                      ?.copyWith(fontSize: 28, height: 1.1)),
             ),
             const SizedBox(width: 12),
             _RatingPill(rating: shop.rating, count: shop.reviewCount),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         _IconRow(icon: Icons.location_on_outlined, text: shop.address),
         if (shop.phone != null) ...[
-          const SizedBox(height: 7),
+          const SizedBox(height: 6),
           _IconRow(icon: Icons.phone_outlined, text: shop.phone!),
         ],
         if (shop.description != null) ...[
-          const SizedBox(height: 16),
-          const GoldAccent(),
           const SizedBox(height: 14),
-          Text(
-            shop.description!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondary,
-                  fontSize: 13,
-                  height: 1.65,
-                ),
-          ),
+          const GoldAccent(),
+          const SizedBox(height: 12),
+          Text(shop.description!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textSecondary, fontSize: 13, height: 1.6)),
         ],
       ],
     );
@@ -265,22 +872,18 @@ class _IconRow extends StatelessWidget {
   const _IconRow({required this.icon, required this.text});
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 14, color: AppTheme.textHint),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondary, fontSize: 13),
+  Widget build(BuildContext context) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 14, color: AppTheme.textHint),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(text,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary, fontSize: 13)),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 }
 
 class _RatingPill extends StatelessWidget {
@@ -294,42 +897,32 @@ class _RatingPill extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppTheme.gold.withOpacity(0.10),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppTheme.gold.withOpacity(0.28)),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.star_rounded, size: 14, color: AppTheme.gold),
-              const SizedBox(width: 4),
-              Text(
-                rating.toStringAsFixed(1),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.star_rounded, size: 14, color: AppTheme.gold),
+            const SizedBox(width: 4),
+            Text(rating.toStringAsFixed(1),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppTheme.gold,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-            ],
-          ),
+                    color: AppTheme.gold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700)),
+          ]),
         ),
         const SizedBox(height: 4),
-        Text(
-          '$count avaliações',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(fontSize: 11, color: AppTheme.textHint),
-        ),
+        Text('$count avaliações',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 11, color: AppTheme.textHint)),
       ],
     );
   }
 }
 
-// ── Stats row ─────────────────────────────────────────────────────────────────
 class _StatsRow extends StatelessWidget {
   final BarbershopModel shop;
   const _StatsRow({required this.shop});
@@ -339,22 +932,24 @@ class _StatsRow extends StatelessWidget {
     return Row(
       children: [
         _StatTile(
-          icon: Icons.content_cut_rounded,
-          value: '${shop.services.where((s) => s.isActive).length}',
-          label: 'serviços',
-        ),
+            icon: Icons.content_cut_rounded,
+            value: '${shop.services.where((s) => s.isActive).length}',
+            label: 'serviços'),
         const SizedBox(width: 10),
         _StatTile(
-          icon: Icons.people_outline_rounded,
-          value: '${shop.barbers.where((b) => b.isActive).length}',
-          label: 'barbeiros',
-        ),
+            icon: Icons.people_outline_rounded,
+            value: '${shop.barbers.where((b) => b.isActive).length}',
+            label: 'barbeiros'),
         const SizedBox(width: 10),
         _StatTile(
-          icon: Icons.star_outline_rounded,
-          value: shop.formattedRating,
-          label: 'avaliação',
-        ),
+            icon: Icons.shopping_bag_outlined,
+            value: '${shop.availableProducts.length}',
+            label: 'produtos'),
+        const SizedBox(width: 10),
+        _StatTile(
+            icon: Icons.star_outline_rounded,
+            value: shop.formattedRating,
+            label: 'avaliação'),
       ],
     );
   }
@@ -371,7 +966,7 @@ class _StatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: AppTheme.surfaceElevated,
           borderRadius: BorderRadius.circular(8),
@@ -379,24 +974,17 @@ class _StatTile extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 18, color: AppTheme.gold),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontSize: 18,
+            Icon(icon, size: 16, color: AppTheme.gold),
+            const SizedBox(height: 5),
+            Text(value,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
-                  ),
-            ),
+                    color: AppTheme.textPrimary)),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontSize: 10, color: AppTheme.textHint),
-            ),
+            Text(label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 9, color: AppTheme.textHint)),
           ],
         ),
       ),
@@ -404,7 +992,6 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-// ── Barber chip ───────────────────────────────────────────────────────────────
 class _BarberChip extends StatelessWidget {
   final dynamic barber;
   const _BarberChip({required this.barber});
@@ -431,13 +1018,9 @@ class _BarberChip extends StatelessWidget {
                   color: AppTheme.gold.withOpacity(0.3), width: 1.5),
             ),
             child: Center(
-              child: Text(
-                barber.avatarInitials,
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(color: AppTheme.gold, fontSize: 12),
-              ),
+              child: Text(barber.avatarInitials,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppTheme.gold, fontSize: 12)),
             ),
           ),
           const SizedBox(width: 10),
@@ -446,34 +1029,26 @@ class _BarberChip extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  barber.name.split(' ').first,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontSize: 13),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(barber.name.split(' ').first,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontSize: 13),
+                    overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 3),
-                Text(
-                  barber.specialty,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                Text(barber.specialty,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontSize: 10, color: AppTheme.textHint),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                    overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        size: 11, color: AppTheme.gold),
-                    const SizedBox(width: 3),
-                    Text(
-                      (barber.rating as double).toStringAsFixed(1),
+                Row(children: [
+                  const Icon(Icons.star_rounded,
+                      size: 11, color: AppTheme.gold),
+                  const SizedBox(width: 3),
+                  Text((barber.rating as double).toStringAsFixed(1),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 11, color: AppTheme.textSecondary),
-                    ),
-                  ],
-                ),
+                          fontSize: 11, color: AppTheme.textSecondary)),
+                ]),
               ],
             ),
           ),
@@ -488,7 +1063,8 @@ class _ServiceBookingCard extends StatelessWidget {
   final ServiceModel service;
   final BarbershopModel shop;
 
-  const _ServiceBookingCard({required this.service, required this.shop});
+  const _ServiceBookingCard(
+      {required this.service, required this.shop});
 
   @override
   Widget build(BuildContext context) {
@@ -501,9 +1077,8 @@ class _ServiceBookingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Info ──────────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -513,7 +1088,8 @@ class _ServiceBookingCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    border: Border.all(
+                        color: AppTheme.gold.withOpacity(0.2)),
                   ),
                   child: Icon(ServiceCard.iconFor(service.iconName),
                       color: AppTheme.gold, size: 22),
@@ -523,56 +1099,46 @@ class _ServiceBookingCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        service.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(fontSize: 15),
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          const Icon(Icons.schedule_outlined,
-                              size: 12, color: AppTheme.textHint),
-                          const SizedBox(width: 4),
-                          Text(
-                            service.formattedDuration,
+                      Text(service.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontSize: 15)),
+                      const SizedBox(height: 4),
+                      Row(children: [
+                        const Icon(Icons.schedule_outlined,
+                            size: 12, color: AppTheme.textHint),
+                        const SizedBox(width: 4),
+                        Text(service.formattedDuration,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
-                                ?.copyWith(fontSize: 12),
-                          ),
-                        ],
-                      ),
+                                ?.copyWith(fontSize: 12)),
+                      ]),
                       const SizedBox(height: 4),
-                      Text(
-                        service.description,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: 11,
-                              color: AppTheme.textHint,
-                              height: 1.4,
-                            ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text(service.description,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                fontSize: 11,
+                                color: AppTheme.textHint,
+                                height: 1.4,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  service.formattedPrice,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                Text(service.formattedPrice,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: AppTheme.gold,
                         fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
+                        fontWeight: FontWeight.w700)),
               ],
             ),
           ),
-
-          // ── Agendar CTA ───────────────────────────────────────────────
           Container(height: 1, color: AppTheme.divider),
           Material(
             color: Colors.transparent,
@@ -582,32 +1148,258 @@ class _ServiceBookingCard extends StatelessWidget {
                 AppRoutes.booking,
                 arguments: {'service': service, 'barbershop': shop},
               ),
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(10)),
+              borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(10)),
               splashColor: AppTheme.gold.withOpacity(0.08),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                    horizontal: 16, vertical: 11),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(Icons.calendar_month_outlined,
-                        size: 15, color: AppTheme.gold),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Agendar este serviço',
-                      style:
-                          Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: AppTheme.gold,
-                                fontSize: 13,
-                                letterSpacing: 0.5,
-                              ),
-                    ),
+                        size: 14, color: AppTheme.gold),
+                    const SizedBox(width: 7),
+                    Text('Agendar este serviço',
+                        style:
+                            Theme.of(context).textTheme.labelLarge?.copyWith(
+                                  color: AppTheme.gold,
+                                  fontSize: 12,
+                                  letterSpacing: 0.4,
+                                )),
                   ],
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Product card actions (Ver detalhes + Adicionar ao carrinho) ──────────────
+class _ProductCardActions extends StatelessWidget {
+  final ProductModel product;
+  final BarbershopModel shop;
+  const _ProductCardActions({required this.product, required this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+    final inCart = cart.contains(product.id);
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+      child: Row(
+        children: [
+          // Botão "Ver detalhes"
+          Expanded(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.productDetail,
+                  arguments: {'product': product, 'barbershop': shop},
+                ),
+                splashColor: AppTheme.gold.withOpacity(0.06),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.info_outline_rounded,
+                          size: 14, color: AppTheme.textSecondary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Detalhes',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(
+                                color: AppTheme.textSecondary,
+                                fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          Container(width: 1, height: 36, color: AppTheme.divider),
+
+          // Botão "Adicionar" / "No carrinho"
+          Expanded(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: product.inStock
+                    ? () {
+                        final added = cart.addItem(product, shop);
+                        if (!added && cart.pendingConflict != null) {
+                          _showConflictDialog(context, cart);
+                          return;
+                        }
+                        if (inCart) {
+                          Navigator.pushNamed(context, AppRoutes.cart);
+                        } else {
+                          ScaffoldMessenger.of(context)
+                              .clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              duration:
+                                  const Duration(seconds: 2),
+                              content: Text(
+                                '${product.name} adicionado!',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              action: SnackBarAction(
+                                label: 'Ver',
+                                textColor: AppTheme.gold,
+                                onPressed: () => Navigator
+                                    .pushNamed(context, AppRoutes.cart),
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    : null,
+                splashColor: AppTheme.gold.withOpacity(0.08),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        inCart
+                            ? Icons.shopping_bag_rounded
+                            : Icons.add_shopping_cart_rounded,
+                        size: 14,
+                        color: !product.inStock
+                            ? AppTheme.textHint
+                            : AppTheme.gold,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        !product.inStock
+                            ? 'Indisponível'
+                            : inCart
+                                ? 'No carrinho'
+                                : 'Adicionar',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(
+                              color: !product.inStock
+                                  ? AppTheme.textHint
+                                  : AppTheme.gold,
+                              fontSize: 12,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showConflictDialog(BuildContext context, CartProvider cart) {
+    final conflict = cart.pendingConflict!;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppTheme.surfaceElevated,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12)),
+        title: Text('Carrinho de outra barbearia',
+            style: Theme.of(context).textTheme.titleLarge),
+        content: Text(
+          'Você tem itens de "${cart.barbershop?.name}" no carrinho.\n\nDeseja descartá-los e começar com "${conflict.shop.name}"?',
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              cart.cancelConflict();
+              Navigator.pop(context);
+            },
+            child: const Text('Manter atual'),
+          ),
+          TextButton(
+            onPressed: () {
+              cart.confirmConflictSwitch();
+              Navigator.pop(context);
+            },
+            style:
+                TextButton.styleFrom(foregroundColor: AppTheme.error),
+            child: const Text('Descartar e trocar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Cart badge button (usado no top bar do detalhe) ──────────────────────────
+class _CartBadgeButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.cart),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceElevated,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.inputBorder),
+            ),
+            child: Icon(
+              cart.isNotEmpty
+                  ? Icons.shopping_bag_rounded
+                  : Icons.shopping_bag_outlined,
+              color: cart.isNotEmpty
+                  ? AppTheme.gold
+                  : AppTheme.textSecondary,
+              size: 18,
+            ),
+          ),
+          if (cart.itemCount > 0)
+            Positioned(
+              top: -6,
+              right: -6,
+              child: Container(
+                width: 17,
+                height: 17,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.gold,
+                ),
+                child: Center(
+                  child: Text(
+                    cart.itemCount > 9 ? '9+' : '${cart.itemCount}',
+                    style: const TextStyle(
+                      color: AppTheme.background,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

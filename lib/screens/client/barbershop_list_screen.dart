@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/auth_provider.dart';
 import '../../models/appointment_model.dart';
+import '../../models/barbershop_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
@@ -90,7 +91,8 @@ class _BarbershopListScreenState extends State<BarbershopListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Olá, $firstName.',
-                            style: Theme.of(context).textTheme.displayMedium),
+                            style:
+                                Theme.of(context).textTheme.displayMedium),
                         const SizedBox(height: 6),
                         Text(
                           'Escolha uma barbearia.',
@@ -98,7 +100,8 @@ class _BarbershopListScreenState extends State<BarbershopListScreen> {
                               .textTheme
                               .bodyMedium
                               ?.copyWith(
-                                  color: AppTheme.textSecondary, fontSize: 15),
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 15),
                         ),
                       ],
                     ),
@@ -369,7 +372,8 @@ class _BarbershopCard extends StatelessWidget {
                   ],
                 ),
                 border: Border(
-                    bottom: BorderSide(color: AppTheme.gold.withOpacity(0.12))),
+                    bottom: BorderSide(
+                        color: AppTheme.gold.withOpacity(0.12))),
               ),
               child: Stack(
                 children: [
@@ -415,8 +419,12 @@ class _BarbershopCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         shop.address,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 12, color: AppTheme.textSecondary),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -463,10 +471,8 @@ class _OpenBadge extends StatelessWidget {
       ),
       child: Text(
         isOpen ? 'Aberto' : 'Fechado',
-        style: Theme.of(context)
-            .textTheme
-            .labelSmall
-            ?.copyWith(color: color, fontSize: 10, fontWeight: FontWeight.w600),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: color, fontSize: 10, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -522,10 +528,8 @@ class _InfoChip extends StatelessWidget {
           Icon(icon, size: 11, color: AppTheme.textSecondary),
           const SizedBox(width: 4),
           Text(label,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontSize: 11, color: AppTheme.textSecondary)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 11, color: AppTheme.textSecondary)),
         ],
       ),
     );

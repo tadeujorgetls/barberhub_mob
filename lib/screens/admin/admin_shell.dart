@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
+import '../../models/barbershop_model.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_widgets.dart';
 import 'admin_overview_screen.dart';
 import 'admin_services_screen.dart';
 import 'admin_barbers_screen.dart';
@@ -31,7 +33,8 @@ class _AdminShellState extends State<AdminShell> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // ── Seletor de barbearia (aparece nas abas de Serviços/Barbeiros)
-          if (_index == 1 || _index == 2) _BarbershopSelector(),
+          if (_index == 1 || _index == 2)
+            _BarbershopSelector(),
           _AdminNav(
             currentIndex: _index,
             onTap: (i) => setState(() => _index = i),
@@ -64,10 +67,8 @@ class _BarbershopSelector extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Barbearia:',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontSize: 11, color: AppTheme.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 11, color: AppTheme.textSecondary),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -90,7 +91,9 @@ class _BarbershopSelector extends StatelessWidget {
                               : AppTheme.surfaceElevated,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSel ? AppTheme.gold : AppTheme.inputBorder,
+                            color: isSel
+                                ? AppTheme.gold
+                                : AppTheme.inputBorder,
                             width: isSel ? 1.5 : 1,
                           ),
                         ),
@@ -104,8 +107,9 @@ class _BarbershopSelector extends StatelessWidget {
                                     ? AppTheme.gold
                                     : AppTheme.textSecondary,
                                 fontSize: 11,
-                                fontWeight:
-                                    isSel ? FontWeight.w700 : FontWeight.w400,
+                                fontWeight: isSel
+                                    ? FontWeight.w700
+                                    : FontWeight.w400,
                               ),
                         ),
                       ),
@@ -192,7 +196,8 @@ class _Item extends StatelessWidget {
             Text(label,
                 style: GoogleFonts.jost(
                     fontSize: 10,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight:
+                        selected ? FontWeight.w600 : FontWeight.w400,
                     color: selected ? AppTheme.gold : AppTheme.textHint),
                 overflow: TextOverflow.ellipsis),
           ]),
