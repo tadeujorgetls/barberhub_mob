@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'product_model.dart';
 import 'barbershop_model.dart';
 
 /// Representa um item no carrinho: produto + quantidade.

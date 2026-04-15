@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/cart_provider.dart';
-import '../../models/product_model.dart';
 import '../../models/service_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';

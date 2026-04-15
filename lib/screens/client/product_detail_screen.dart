@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/cart_provider.dart';
-import '../../models/product_model.dart';
 import '../../models/barbershop_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
@@ -119,8 +118,7 @@ class ProductDetailScreen extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .headlineMedium
-                              ?.copyWith(
-                                  color: AppTheme.gold, fontSize: 34),
+                              ?.copyWith(color: AppTheme.gold, fontSize: 34),
                         ),
                         if (product.hasDiscount) ...[
                           const SizedBox(width: 12),
@@ -134,8 +132,7 @@ class ProductDetailScreen extends StatelessWidget {
                                   ?.copyWith(
                                     color: AppTheme.textHint,
                                     fontSize: 16,
-                                    decoration:
-                                        TextDecoration.lineThrough,
+                                    decoration: TextDecoration.lineThrough,
                                     decorationColor: AppTheme.textHint,
                                   ),
                             ),
@@ -168,8 +165,7 @@ class ProductDetailScreen extends StatelessWidget {
 
                     // ── CTA ──────────────────────────────────────────
                     if (product.inStock)
-                      _AddToCartButton(
-                          product: product, barbershop: barbershop)
+                      _AddToCartButton(product: product, barbershop: barbershop)
                     else
                       _OutOfStockBanner(),
                   ],
@@ -249,9 +245,7 @@ class _DiscountBadge extends StatelessWidget {
       child: Text(
         '-$percent%',
         style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w700),
+            color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -261,8 +255,7 @@ class _DiscountBadge extends StatelessWidget {
 class _AddToCartButton extends StatefulWidget {
   final ProductModel product;
   final BarbershopModel barbershop;
-  const _AddToCartButton(
-      {required this.product, required this.barbershop});
+  const _AddToCartButton({required this.product, required this.barbershop});
 
   @override
   State<_AddToCartButton> createState() => _AddToCartButtonState();
@@ -279,8 +272,8 @@ class _AddToCartButtonState extends State<_AddToCartButton>
     super.initState();
     _ctrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 200));
-    _scaleAnim = Tween<double>(begin: 1, end: 0.95).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _scaleAnim = Tween<double>(begin: 1, end: 0.95)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
   }
 
   @override
@@ -297,8 +290,7 @@ class _AddToCartButtonState extends State<_AddToCartButton>
     await _ctrl.forward();
     await _ctrl.reverse();
 
-    final added =
-        cart.addItem(widget.product, widget.barbershop);
+    final added = cart.addItem(widget.product, widget.barbershop);
 
     if (!mounted) return;
 
@@ -328,16 +320,12 @@ class _AddToCartButtonState extends State<_AddToCartButton>
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceElevated,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text('Carrinho de outra barbearia',
             style: Theme.of(context).textTheme.titleLarge),
         content: Text(
           'Você tem itens de "${cart.barbershop?.name}" no carrinho.\n\nDeseja descartá-los e começar um novo carrinho com "${conflict.shop.name}"?',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(height: 1.5),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
         ),
         actions: [
           TextButton(
@@ -354,12 +342,12 @@ class _AddToCartButtonState extends State<_AddToCartButton>
               if (mounted) {
                 setState(() => _added = true);
                 _showAddedSnack(context);
-                Future.delayed(const Duration(seconds: 2),
-                    () { if (mounted) setState(() => _added = false); });
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (mounted) setState(() => _added = false);
+                });
               }
             },
-            style: TextButton.styleFrom(
-                foregroundColor: AppTheme.error),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
             child: const Text('Descartar e trocar'),
           ),
         ],
@@ -388,8 +376,7 @@ class _AddToCartButtonState extends State<_AddToCartButton>
         action: SnackBarAction(
           label: 'Ver carrinho',
           textColor: AppTheme.gold,
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.cart),
+          onPressed: () => Navigator.pushNamed(context, AppRoutes.cart),
         ),
       ),
     );
@@ -408,10 +395,8 @@ class _AddToCartButtonState extends State<_AddToCartButton>
           _QuantityRow(
             product: widget.product,
             quantity: qty,
-            onIncrement: () =>
-                cart.incrementItem(widget.product.id),
-            onDecrement: () =>
-                cart.decrementItem(widget.product.id),
+            onIncrement: () => cart.incrementItem(widget.product.id),
+            onDecrement: () => cart.decrementItem(widget.product.id),
           ),
           const SizedBox(height: 14),
         ],
@@ -431,11 +416,9 @@ class _AddToCartButtonState extends State<_AddToCartButton>
                 size: 18,
               ),
               label: Text(
-                inCart
-                    ? 'IR AO CARRINHO ($qty)'
-                    : 'ADICIONAR AO CARRINHO',
-                style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w700),
+                inCart ? 'IR AO CARRINHO ($qty)' : 'ADICIONAR AO CARRINHO',
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -548,8 +531,10 @@ class _CategoryChip extends StatelessWidget {
           Text(category.emoji, style: const TextStyle(fontSize: 12)),
           const SizedBox(width: 5),
           Text(category.label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 11, color: AppTheme.textSecondary)),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontSize: 11, color: AppTheme.textSecondary)),
         ],
       ),
     );
@@ -605,8 +590,7 @@ class _StockIndicator extends StatelessWidget {
         Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle, color: color)),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color)),
         const SizedBox(width: 8),
         Text(label,
             style: Theme.of(context)
@@ -633,8 +617,7 @@ class _BarbershopInfo extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(barbershop.coverEmoji,
-              style: const TextStyle(fontSize: 28)),
+          Text(barbershop.coverEmoji, style: const TextStyle(fontSize: 28)),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -647,12 +630,8 @@ class _BarbershopInfo extends StatelessWidget {
                         ?.copyWith(fontSize: 15)),
                 const SizedBox(height: 3),
                 Text(barbershop.address,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary)),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 12, color: AppTheme.textSecondary)),
               ],
             ),
           ),
