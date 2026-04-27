@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../models/auth_provider.dart';
+import '../../models/review_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_utils.dart';
@@ -128,6 +129,36 @@ class AdminOverviewScreen extends StatelessWidget {
                                 value: '${data.services.length}',
                                 label: 'Serviços',
                                 icon: Icons.spa_outlined),
+                          ]),
+                          const SizedBox(height: 10),
+                          // ── Linha de avaliações ─────────────────────
+                          Row(children: [
+                            StatCard(
+                              value: '${data.allReviews.length}',
+                              label: 'Avaliações',
+                              icon: Icons.star_rounded,
+                              valueColor: AppTheme.gold,
+                            ),
+                            const SizedBox(width: 10),
+                            StatCard(
+                              value: data.allReviews.isEmpty
+                                  ? '–'
+                                  : (data.allReviews
+                                              .fold(0, (s, r) => s + r.rating) /
+                                          data.allReviews.length)
+                                      .toStringAsFixed(1),
+                              label: 'Nota média',
+                              icon: Icons.star_half_rounded,
+                              valueColor: AppTheme.gold,
+                            ),
+                            const SizedBox(width: 10),
+                            StatCard(
+                              value:
+                                  '${data.allReviews.where((r) => r.rating >= 4).length}',
+                              label: 'Positivas',
+                              icon: Icons.thumb_up_outlined,
+                              valueColor: const Color(0xFF4CAF50),
+                            ),
                           ]),
                         ]),
                   ),

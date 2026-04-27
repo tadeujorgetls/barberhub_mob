@@ -6,6 +6,7 @@ import '../../models/auth_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/app_utils.dart';
 import '../../widgets/app_widgets.dart';
 import 'reschedule_sheet.dart';
 
@@ -139,6 +140,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                         'Seus agendamentos concluídos\naparecerão aqui.',
                     onCancel: null,
                     onReschedule: null,
+                    onReview: (a) => _openReview(context, a),
                   ),
                 ],
               ),
@@ -208,6 +210,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
       builder: (_) => RescheduleSheet(appointment: a),
     );
   }
+
+  Future<void> _openReview(BuildContext context, AppointmentModel a) async {
+    final result = await Navigator.pushNamed(
+      context,
+      AppRoutes.review,
+      arguments: a,
+    );
+    if (result == true && context.mounted) {
+      AppUtils.showSnack(context, 'Avaliação enviada! Obrigado. 🌟',
+          isSuccess: true);
+    }
+  }
 }
 
 // ── Count badge ───────────────────────────────────────────────────────────────
@@ -244,6 +258,7 @@ class _AppointmentList extends StatelessWidget {
   final VoidCallback? onEmptyAction;
   final void Function(AppointmentModel)? onCancel;
   final void Function(AppointmentModel)? onReschedule;
+  final void Function(AppointmentModel)? onReview;
 
   const _AppointmentList({
     required this.appointments,
@@ -253,6 +268,7 @@ class _AppointmentList extends StatelessWidget {
     this.onEmptyAction,
     required this.onCancel,
     required this.onReschedule,
+    this.onReview,
   });
 
   @override
@@ -274,6 +290,7 @@ class _AppointmentList extends StatelessWidget {
         appointment: appointments[i],
         onCancel: onCancel,
         onReschedule: onReschedule,
+        onReview: onReview,
       ),
     );
   }
@@ -284,11 +301,13 @@ class _AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
   final void Function(AppointmentModel)? onCancel;
   final void Function(AppointmentModel)? onReschedule;
+  final void Function(AppointmentModel)? onReview;
 
   const _AppointmentCard({
     required this.appointment,
     required this.onCancel,
     required this.onReschedule,
+    this.onReview,
   });
 
   Color get _statusColor {
@@ -510,6 +529,96 @@ class _AppointmentCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                ],
+              ),
+            ),
+          ],
+
+          // ── Botão Avaliar / Badge avaliado ────────────────────────────
+          if (a.canReview && onReview != null) ...[
+            Container(height: 1, color: AppTheme.divider),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => onReview!(a),
+                borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(10)),
+                splashColor: AppTheme.gold.withOpacity(0.08),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 11),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.star_outline_rounded,
+                          size: 15, color: AppTheme.gold),
+                      const SizedBox(width: 7),
+                      Text(
+                        'Avaliar atendimento',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(
+                              color: AppTheme.gold,
+                              fontSize: 12,
+                              letterSpacing: 0.3,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          if (a.isReviewed) ...[
+            Container(height: 1, color: AppTheme.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(5, (i) => Icon(
+                      i < a.review!.rating
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 14,
+                      color: AppTheme.gold,
+                    )),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      a.review!.comment ?? a.review!.ratingLabel,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppTheme.gold.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Avaliado',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                              color: AppTheme.gold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600),
+                    ),
+                  ),
                 ],
               ),
             ),

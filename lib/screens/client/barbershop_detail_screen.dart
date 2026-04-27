@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/cart_provider.dart';
+import '../../models/review_model.dart';
 import '../../models/service_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
@@ -23,7 +24,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 2, vsync: this);
+    _tab = TabController(length: 3, vsync: this);
     _tab.addListener(() => setState(() {}));
   }
 
@@ -137,10 +138,9 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
           body: TabBarView(
             controller: _tab,
             children: [
-              // Tab 0 — Serviços
               _ServicesTab(shop: shop),
-              // Tab 1 — Produtos
               _ProductsTab(shop: shop),
+              _ReviewsTab(shop: shop),
             ],
           ),
         ),
@@ -157,8 +157,10 @@ class _ServicesProductsTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final data = context.watch<AppDataProvider>();
     final productCount = shop.availableProducts.length;
     final serviceCount = shop.services.where((s) => s.isActive).length;
+    final reviewCount = data.reviewsForShop(shop.id).length;
 
     return Container(
       height: 42,
@@ -177,35 +179,40 @@ class _ServicesProductsTabBar extends StatelessWidget {
         dividerColor: Colors.transparent,
         labelColor: AppTheme.background,
         unselectedLabelColor: AppTheme.textSecondary,
-        labelStyle: GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w700),
+        labelStyle: GoogleFonts.jost(fontSize: 11, fontWeight: FontWeight.w700),
         unselectedLabelStyle:
-            GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w400),
+            GoogleFonts.jost(fontSize: 11, fontWeight: FontWeight.w400),
         tabs: [
           Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.content_cut_rounded, size: 14),
-                const SizedBox(width: 6),
-                const Text('Serviços'),
-                const SizedBox(width: 5),
-                _TabCount(count: serviceCount, active: controller.index == 0),
-              ],
-            ),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Icon(Icons.content_cut_rounded, size: 13),
+              const SizedBox(width: 5),
+              const Text('Serviços'),
+              const SizedBox(width: 4),
+              _TabCount(count: serviceCount, active: controller.index == 0),
+            ]),
           ),
           Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.shopping_bag_outlined, size: 14),
-                const SizedBox(width: 6),
-                const Text('Produtos'),
-                if (productCount > 0) ...[
-                  const SizedBox(width: 5),
-                  _TabCount(count: productCount, active: controller.index == 1),
-                ],
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Icon(Icons.shopping_bag_outlined, size: 13),
+              const SizedBox(width: 5),
+              const Text('Produtos'),
+              if (productCount > 0) ...[
+                const SizedBox(width: 4),
+                _TabCount(count: productCount, active: controller.index == 1),
               ],
-            ),
+            ]),
+          ),
+          Tab(
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Icon(Icons.star_outline_rounded, size: 13),
+              const SizedBox(width: 5),
+              const Text('Reviews'),
+              if (reviewCount > 0) ...[
+                const SizedBox(width: 4),
+                _TabCount(count: reviewCount, active: controller.index == 2),
+              ],
+            ]),
           ),
         ],
       ),
@@ -723,6 +730,311 @@ class _ProductCard extends StatelessWidget {
           // ── CTA (dois botões lado a lado) ──────────────────────────
           Container(height: 1, color: AppTheme.divider),
           _ProductCardActions(product: product, shop: shop),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Tab 2: Reviews ────────────────────────────────────────────────────────────
+class _ReviewsTab extends StatelessWidget {
+  final BarbershopModel shop;
+  const _ReviewsTab({required this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = context.watch<AppDataProvider>();
+    final reviews = data.reviewsForShop(shop.id);
+    final rating = data.ratingForShop(shop.id);
+    final dist = data.ratingDistributionForShop(shop.id);
+
+    if (reviews.isEmpty) {
+      return const EmptyState(
+        icon: Icons.star_outline_rounded,
+        title: 'Sem avaliações',
+        subtitle:
+            'Seja o primeiro a avaliar esta barbearia\napós seu atendimento.',
+      );
+    }
+
+    return CustomScrollView(
+      slivers: [
+        // ── Rating summary ────────────────────────────────────────────
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: _RatingSummary(
+              rating: rating,
+              count: reviews.length,
+              distribution: dist,
+            ),
+          ),
+        ),
+
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 14),
+            child: SectionHeader(title: 'Avaliações'),
+          ),
+        ),
+
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (ctx, i) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ReviewCard(review: reviews[i]),
+              ),
+              childCount: reviews.length,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Rating summary widget ─────────────────────────────────────────────────────
+class _RatingSummary extends StatelessWidget {
+  final double rating;
+  final int count;
+  final Map<int, int> distribution;
+
+  const _RatingSummary({
+    required this.rating,
+    required this.count,
+    required this.distribution,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.inputBorder),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Nota grande
+          Column(
+            children: [
+              Text(
+                rating.toStringAsFixed(1),
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: AppTheme.gold,
+                      fontSize: 48,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < rating.round()
+                        ? Icons.star_rounded
+                        : Icons.star_outline_rounded,
+                    size: 14,
+                    color: AppTheme.gold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$count avaliações',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 11,
+                      color: AppTheme.textHint,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 20),
+          Container(width: 1, height: 80, color: AppTheme.divider),
+          const SizedBox(width: 20),
+          // Barras de distribuição
+          Expanded(
+            child: Column(
+              children: List.generate(5, (i) {
+                final star = 5 - i;
+                final qty = distribution[star] ?? 0;
+                final pct = count > 0 ? qty / count : 0.0;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Row(
+                    children: [
+                      Text(
+                        '$star',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 11,
+                              color: AppTheme.textHint,
+                            ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.star_rounded,
+                          size: 10, color: AppTheme.gold),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: pct,
+                            minHeight: 6,
+                            backgroundColor: AppTheme.inputBorder,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppTheme.gold.withOpacity(0.7),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        width: 16,
+                        child: Text(
+                          '$qty',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontSize: 11,
+                                    color: AppTheme.textHint,
+                                  ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Review card ───────────────────────────────────────────────────────────────
+class _ReviewCard extends StatelessWidget {
+  final ReviewModel review;
+  const _ReviewCard({required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    final r = review;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.inputBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: nome + estrelas + data
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.gold.withOpacity(0.12),
+                  border: Border.all(color: AppTheme.gold.withOpacity(0.25)),
+                ),
+                child: Center(
+                  child: Text(
+                    r.clientName.isNotEmpty
+                        ? r.clientName[0].toUpperCase()
+                        : '?',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(color: AppTheme.gold, fontSize: 14),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r.clientName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontSize: 13)),
+                    const SizedBox(height: 2),
+                    Text(r.barberName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontSize: 11, color: AppTheme.textHint)),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      5,
+                      (i) => Icon(
+                        i < r.rating
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        size: 13,
+                        color: AppTheme.gold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(r.formattedDate,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(fontSize: 10, color: AppTheme.textHint)),
+                ],
+              ),
+            ],
+          ),
+
+          // Serviço
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppTheme.inputBorder),
+            ),
+            child: Text(
+              r.serviceName,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
+            ),
+          ),
+
+          // Comentário
+          if (r.comment != null && r.comment!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              r.comment!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
+                  ),
+            ),
+          ],
         ],
       ),
     );

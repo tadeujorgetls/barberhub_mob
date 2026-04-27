@@ -263,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 focusNode: _confirmFocus,
                                 isPassword: true,
                                 textInputAction: TextInputAction.done,
-                                onEditingComplete: _handleRegister,
+                                onEditingComplete: () => _handleRegister(),
                                 validator: (v) {
                                   if (v == null || v.isEmpty) {
                                     return 'Confirme a senha';

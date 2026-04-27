@@ -161,9 +161,9 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final bool outlined;
   final bool isDanger;
+  final IconData? icon;
   final Color? color;
   final double height;
-  final IconData? icon;
 
   const CustomButton({
     super.key,
@@ -172,36 +172,14 @@ class CustomButton extends StatelessWidget {
     this.isLoading = false,
     this.outlined = false,
     this.isDanger = false,
+    this.icon,
     this.color,
     this.height = 52,
-    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    final c = isDanger ? Colors.red : (color ?? AppTheme.gold);
-    Widget child;
-    if (isLoading) {
-      child = SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(
-              strokeWidth: 2, color: outlined ? c : AppTheme.background));
-    } else if (icon != null) {
-      child = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 8),
-          Text(label.toUpperCase(),
-              style: GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w600)),
-        ],
-      );
-    } else {
-      child = Text(label.toUpperCase(),
-          style: GoogleFonts.jost(fontSize: 12, fontWeight: FontWeight.w600));
-    }
-
+    final c = isDanger ? Colors.redAccent : (color ?? AppTheme.gold);
     if (outlined) {
       return SizedBox(
         width: double.infinity,
@@ -214,7 +192,15 @@ class CustomButton extends StatelessWidget {
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(4))),
           ),
-          child: child,
+          child: isLoading
+              ? SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: c))
+              : Text(label.toUpperCase(),
+                  style: GoogleFonts.jost(
+                      fontSize: 12, fontWeight: FontWeight.w600)),
         ),
       );
     }
@@ -223,11 +209,26 @@ class CustomButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isDanger ? Colors.red : null,
-          foregroundColor: isDanger ? Colors.white : null,
-        ),
-        child: child,
+        child: isLoading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: AppTheme.background))
+            : icon != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 18, color: AppTheme.background),
+                      const SizedBox(width: 8),
+                      Text(label.toUpperCase(),
+                          style: GoogleFonts.jost(
+                              fontSize: 12, fontWeight: FontWeight.w600)),
+                    ],
+                  )
+                : Text(label.toUpperCase(),
+                    style: GoogleFonts.jost(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -253,14 +254,14 @@ class AppTextField extends StatefulWidget {
   final String label;
   final String? hint;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final bool obscure;
   final bool isPassword;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
-  final void Function(String)? onFieldSubmitted;
   final VoidCallback? onEditingComplete;
-  final FocusNode? focusNode;
+  final void Function(String)? onFieldSubmitted;
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
 
@@ -269,14 +270,14 @@ class AppTextField extends StatefulWidget {
     required this.label,
     this.hint,
     this.controller,
+    this.focusNode,
     this.obscure = false,
     this.isPassword = false,
     this.keyboardType,
     this.validator,
     this.textInputAction,
-    this.onFieldSubmitted,
     this.onEditingComplete,
-    this.focusNode,
+    this.onFieldSubmitted,
     this.inputFormatters,
     this.maxLines = 1,
   });
@@ -302,8 +303,8 @@ class _AppTextFieldState extends State<AppTextField> {
         keyboardType: widget.keyboardType,
         validator: widget.validator,
         textInputAction: widget.textInputAction,
-        onFieldSubmitted: widget.onFieldSubmitted,
         onEditingComplete: widget.onEditingComplete,
+        onFieldSubmitted: widget.onFieldSubmitted,
         inputFormatters: widget.inputFormatters,
         maxLines: (widget.obscure || widget.isPassword) ? 1 : widget.maxLines,
         style: Theme.of(context)

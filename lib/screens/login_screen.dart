@@ -201,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen>
                           focusNode: _passwordFocus,
                           isPassword: true,
                           textInputAction: TextInputAction.done,
-                          onEditingComplete: _handleLogin,
+                          onEditingComplete: () => _handleLogin(),
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Informe a senha';
                             if (v.length < 6) return 'Mínimo 6 caracteres';

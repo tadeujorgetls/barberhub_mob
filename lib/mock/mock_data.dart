@@ -1,6 +1,9 @@
 import '../models/service_model.dart';
 import '../models/barber_model.dart';
 import '../models/appointment_model.dart';
+import '../models/barbershop_model.dart';
+import '../models/product_model.dart';
+import '../models/review_model.dart';
 import '../models/user_model.dart';
 
 class MockData {
@@ -804,4 +807,223 @@ class MockData {
     '17:00',
     '17:30',
   ];
+
+  // ── Seed Reviews ──────────────────────────────────────────────────────────
+  // Cria avaliações mockadas para agendamentos já concluídos.
+  // Também vincula cada ReviewModel ao AppointmentModel correspondente,
+  // e recalcula rating/reviewCount das barbearias e barbeiros.
+  static List<ReviewModel> seedReviews(List<AppointmentModel> appointments) {
+    final now = DateTime.now();
+    final reviews = <ReviewModel>[];
+
+    // Helper: cria review e vincula ao appointment
+    ReviewModel make({
+      required String id,
+      required AppointmentModel appt,
+      required int rating,
+      String? comment,
+      int daysAgo = 1,
+    }) {
+      final r = ReviewModel(
+        id: id,
+        appointmentId: appt.id,
+        clientId: appt.clientId,
+        clientName: appt.clientName,
+        barbershopId: appt.barbershop.id,
+        barbershopName: appt.barbershop.name,
+        barberId: appt.barber.id,
+        barberName: appt.barber.name,
+        serviceName: appt.service.name,
+        rating: rating,
+        comment: comment,
+        createdAt: now.subtract(Duration(days: daysAgo)),
+      );
+      appt.review = r; // vincula ao agendamento
+      return r;
+    }
+
+    // Busca agendamentos concluídos pelo id
+    final completed =
+        appointments.where((a) => a.status == AppointmentStatus.completed);
+
+    for (final appt in completed) {
+      switch (appt.id) {
+        case 'a3':
+          reviews.add(make(
+            id: 'r1',
+            appt: appt,
+            rating: 5,
+            comment:
+                'Rafael é incrível! Corte perfeito, ambiente ótimo e atendimento nota 10. Já virei cliente fiel.',
+            daysAgo: 7,
+          ));
+          break;
+        case 'a6':
+          reviews.add(make(
+            id: 'r2',
+            appt: appt,
+            rating: 4,
+            comment:
+                'Bom atendimento e ambiente agradável. Degradê ficou muito bom, voltarei com certeza.',
+            daysAgo: 2,
+          ));
+          break;
+      }
+    }
+
+    // Reviews adicionais de outros clientes (enriquecem o histórico das barbearias)
+    final shops = {for (final a in appointments) a.barbershop.id: a.barbershop};
+
+    // bs1 — Barbearia Clássica
+    if (shops.containsKey('bs1')) {
+      final bs1 = shops['bs1']!;
+      reviews.addAll([
+        ReviewModel(
+          id: 'r3',
+          appointmentId: 'ext_a1',
+          clientId: 'ext_c1',
+          clientName: 'Felipe Rodrigues',
+          barbershopId: 'bs1',
+          barbershopName: bs1.name,
+          barberId: 'b1',
+          barberName: 'Rafael Mendes',
+          serviceName: 'Corte Clássico',
+          rating: 5,
+          comment:
+              'Melhor barbearia da cidade. Rafael sabe exatamente o que você quer.',
+          createdAt: now.subtract(const Duration(days: 3)),
+        ),
+        ReviewModel(
+          id: 'r4',
+          appointmentId: 'ext_a2',
+          clientId: 'ext_c2',
+          clientName: 'Bruno Nascimento',
+          barbershopId: 'bs1',
+          barbershopName: bs1.name,
+          barberId: 'b2',
+          barberName: 'Diego Costa',
+          serviceName: 'Barba Completa',
+          rating: 5,
+          comment: 'Diego é um artista com a navalha. Barba impecável!',
+          createdAt: now.subtract(const Duration(days: 5)),
+        ),
+        ReviewModel(
+          id: 'r5',
+          appointmentId: 'ext_a3',
+          clientId: 'ext_c3',
+          clientName: 'Gustavo Almeida',
+          barbershopId: 'bs1',
+          barbershopName: bs1.name,
+          barberId: 'b1',
+          barberName: 'Rafael Mendes',
+          serviceName: 'Corte + Barba',
+          rating: 4,
+          comment: 'Ótimo combo, preço justo e ambiente muito bacana.',
+          createdAt: now.subtract(const Duration(days: 10)),
+        ),
+        ReviewModel(
+          id: 'r6',
+          appointmentId: 'ext_a4',
+          clientId: 'ext_c4',
+          clientName: 'Lucas Pereira',
+          barbershopId: 'bs1',
+          barbershopName: bs1.name,
+          barberId: 'b2',
+          barberName: 'Diego Costa',
+          serviceName: 'Corte Clássico',
+          rating: 5,
+          comment: null,
+          createdAt: now.subtract(const Duration(days: 14)),
+        ),
+      ]);
+    }
+
+    // bs2 — Studio Urbano
+    if (shops.containsKey('bs2')) {
+      final bs2 = shops['bs2']!;
+      reviews.addAll([
+        ReviewModel(
+          id: 'r7',
+          appointmentId: 'ext_b1',
+          clientId: 'ext_c5',
+          clientName: 'Matheus Lima',
+          barbershopId: 'bs2',
+          barbershopName: bs2.name,
+          barberId: 'b3',
+          barberName: 'Thiago Alves',
+          serviceName: 'Degradê Americano',
+          rating: 5,
+          comment: 'Fade perfeito! Thiago é um especialista em degradê.',
+          createdAt: now.subtract(const Duration(days: 4)),
+        ),
+        ReviewModel(
+          id: 'r8',
+          appointmentId: 'ext_b2',
+          clientId: 'ext_c6',
+          clientName: 'Rafael Costa',
+          barbershopId: 'bs2',
+          barbershopName: bs2.name,
+          barberId: 'b4',
+          barberName: 'Lucas Ferreira',
+          serviceName: 'Corte Navalhado',
+          rating: 4,
+          comment: 'Muito bom! Apenas demorou um pouco mais que o esperado.',
+          createdAt: now.subtract(const Duration(days: 8)),
+        ),
+        ReviewModel(
+          id: 'r9',
+          appointmentId: 'ext_b3',
+          clientId: 'ext_c7',
+          clientName: 'Diego Martins',
+          barbershopId: 'bs2',
+          barbershopName: bs2.name,
+          barberId: 'b3',
+          barberName: 'Thiago Alves',
+          serviceName: 'Platinado / Coloração',
+          rating: 5,
+          comment:
+              'Platinado ficou exatamente como eu queria. Profissional top!',
+          createdAt: now.subtract(const Duration(days: 12)),
+        ),
+      ]);
+    }
+
+    // bs3 — Dom Navalha
+    if (shops.containsKey('bs3')) {
+      final bs3 = shops['bs3']!;
+      reviews.addAll([
+        ReviewModel(
+          id: 'r10',
+          appointmentId: 'ext_c1',
+          clientId: 'ext_c8',
+          clientName: 'André Vieira',
+          barbershopId: 'bs3',
+          barbershopName: bs3.name,
+          barberId: 'b5',
+          barberName: 'Marcelo Viana',
+          serviceName: 'Barba VIP',
+          rating: 5,
+          comment:
+              'Experiência única. A toalha quente e o óleo importado fazem toda a diferença.',
+          createdAt: now.subtract(const Duration(days: 6)),
+        ),
+        ReviewModel(
+          id: 'r11',
+          appointmentId: 'ext_c2',
+          clientId: 'ext_c9',
+          clientName: 'Henrique Souza',
+          barbershopId: 'bs3',
+          barbershopName: bs3.name,
+          barberId: 'b6',
+          barberName: 'Fábio Reis',
+          serviceName: 'Corte Premium',
+          rating: 5,
+          comment: 'Vale cada centavo. Atendimento VIP do começo ao fim.',
+          createdAt: now.subtract(const Duration(days: 9)),
+        ),
+      ]);
+    }
+
+    return reviews;
+  }
 }

@@ -9,6 +9,7 @@ class AppDataProvider extends ChangeNotifier {
   late List<ServiceModel> _services;
   late List<BarberModel> _barbers;
   late List<AppointmentModel> _appointments;
+  late List<ReviewModel> _reviews;
   BarbershopModel? _selectedBarbershop;
   bool _isLoading = false;
 
@@ -17,6 +18,7 @@ class AppDataProvider extends ChangeNotifier {
     _services = MockData.services();
     _barbers = MockData.barbers();
     _appointments = MockData.seedAppointments(_barbershops);
+    _reviews = MockData.seedReviews(_appointments);
   }
 
   // ── Getters gerais ────────────────────────────────────────────────────────
@@ -47,34 +49,148 @@ class AppDataProvider extends ChangeNotifier {
 
   List<AppointmentModel> get appointments => List.unmodifiable(_appointments);
 
-  // ── Produtos ──────────────────────────────────────────────────────────────
+  // ── Reviews ───────────────────────────────────────────────────────────────
 
-  /// Produtos disponíveis da barbearia selecionada.
+  List<ReviewModel> get allReviews => List.unmodifiable(_reviews);
+
+  /// Avaliações de uma barbearia, da mais recente para a mais antiga.
+  List<ReviewModel> reviewsForShop(String shopId) =>
+      _reviews.where((r) => r.barbershopId == shopId).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  /// Avaliações de um barbeiro específico.
+  List<ReviewModel> reviewsForBarber(String barberId) =>
+      _reviews.where((r) => r.barberId == barberId).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  /// Avaliações feitas por um cliente.
+  List<ReviewModel> reviewsByClient(String clientId) =>
+      _reviews.where((r) => r.clientId == clientId).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  /// Média de rating de uma barbearia calculada a partir das avaliações reais.
+  double ratingForShop(String shopId) {
+    final reviews = reviewsForShop(shopId);
+    if (reviews.isEmpty) return 0.0;
+    final sum = reviews.fold(0, (s, r) => s + r.rating);
+    return sum / reviews.length;
+  }
+
+  /// Média de rating de um barbeiro.
+  double ratingForBarber(String barberId) {
+    final reviews = reviewsForBarber(barberId);
+    if (reviews.isEmpty) return 0.0;
+    final sum = reviews.fold(0, (s, r) => s + r.rating);
+    return sum / reviews.length;
+  }
+
+  /// Distribuição de notas (1–5) de uma barbearia.
+  Map<int, int> ratingDistributionForShop(String shopId) {
+    final dist = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+    for (final r in reviewsForShop(shopId)) {
+      dist[r.rating] = (dist[r.rating] ?? 0) + 1;
+    }
+    return dist;
+  }
+
+  /// Distribuição de notas (1–5) de um barbeiro.
+  Map<int, int> ratingDistributionForBarber(String barberId) {
+    final dist = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+    for (final r in reviewsForBarber(barberId)) {
+      dist[r.rating] = (dist[r.rating] ?? 0) + 1;
+    }
+    return dist;
+  }
+
+  /// Submete uma nova avaliação para um agendamento concluído.
+  Future<ReviewModel> submitReview({
+    required AppointmentModel appointment,
+    required int rating,
+    String? comment,
+  }) async {
+    if (!appointment.canReview) {
+      throw StateError(
+          'Este agendamento não pode ser avaliado (já avaliado ou não concluído).');
+    }
+    if (rating < 1 || rating > 5) {
+      throw ArgumentError('A nota deve ser entre 1 e 5.');
+    }
+
+    _isLoading = true;
+    notifyListeners();
+    await Future.delayed(const Duration(milliseconds: 700));
+
+    final review = ReviewModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      appointmentId: appointment.id,
+      clientId: appointment.clientId,
+      clientName: appointment.clientName,
+      barbershopId: appointment.barbershop.id,
+      barbershopName: appointment.barbershop.name,
+      barberId: appointment.barber.id,
+      barberName: appointment.barber.name,
+      serviceName: appointment.service.name,
+      rating: rating,
+      comment: comment?.trim().isEmpty == true ? null : comment?.trim(),
+      createdAt: DateTime.now(),
+    );
+
+    _reviews.add(review);
+
+    // Vincula a avaliação ao agendamento
+    final apptIdx = _appointments.indexWhere((a) => a.id == appointment.id);
+    if (apptIdx != -1) _appointments[apptIdx].review = review;
+
+    // Atualiza rating em memória da barbearia
+    final shopIdx =
+        _barbershops.indexWhere((s) => s.id == appointment.barbershop.id);
+    if (shopIdx != -1) {
+      final newRating = ratingForShop(appointment.barbershop.id);
+      final newCount = reviewsForShop(appointment.barbershop.id).length;
+      _barbershops[shopIdx] = _barbershops[shopIdx].copyWith(
+        rating: double.parse(newRating.toStringAsFixed(1)),
+        reviewCount: newCount,
+      );
+    }
+
+    // Atualiza rating em memória do barbeiro
+    final allBarbers = _barbershops.expand((s) => s.barbers).toList()
+      ..addAll(_barbers);
+    for (final b in allBarbers) {
+      if (b.id == appointment.barber.id) {
+        final newRating = ratingForBarber(b.id);
+        final newCount = reviewsForBarber(b.id).length;
+        b.rating = double.parse(newRating.toStringAsFixed(1));
+        b.reviewCount = newCount;
+      }
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return review;
+  }
+
+  // ── Produtos ──────────────────────────────────────────────────────────────
   List<ProductModel> get products {
     final src = _selectedBarbershop?.availableProducts ?? [];
     return List.unmodifiable(src);
   }
 
-  /// Produtos em destaque da barbearia selecionada.
   List<ProductModel> get featuredProducts {
     final src = _selectedBarbershop?.featuredProducts ?? [];
     return List.unmodifiable(src);
   }
 
-  /// Todos os produtos de uma barbearia específica.
   List<ProductModel> productsFor(BarbershopModel shop) =>
       List.unmodifiable(shop.availableProducts);
 
-  /// Produtos em destaque de uma barbearia específica.
   List<ProductModel> featuredProductsFor(BarbershopModel shop) =>
       List.unmodifiable(shop.featuredProducts);
 
-  /// Produtos filtrados por categoria.
   List<ProductModel> productsByCategory(
           BarbershopModel shop, ProductCategory cat) =>
       List.unmodifiable(shop.productsByCategory(cat));
 
-  /// Categorias que têm produtos disponíveis nessa barbearia.
   List<ProductCategory> availableCategoriesFor(BarbershopModel shop) {
     final cats = shop.availableProducts.map((p) => p.category).toSet();
     return ProductCategory.values.where((c) => cats.contains(c)).toList();

@@ -99,6 +99,15 @@ class BarberProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
+            // ── Reviews do barbeiro ─────────────────────────────────
+            if (barberId.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _BarberReviewsSection(barberId: barberId),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // Info section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -219,4 +228,200 @@ class _MenuItem extends StatelessWidget {
               size: 18, color: AppTheme.textHint),
         ]),
       );
+}
+
+// ── Seção de avaliações do barbeiro ───────────────────────────────────────────
+class _BarberReviewsSection extends StatelessWidget {
+  final String barberId;
+  const _BarberReviewsSection({required this.barberId});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = context.watch<AppDataProvider>();
+    final reviews = data.reviewsForBarber(barberId);
+    final rating = data.ratingForBarber(barberId);
+    final dist = data.ratingDistributionForBarber(barberId);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(title: 'Minhas Avaliações'),
+        const SizedBox(height: 14),
+        if (reviews.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceElevated,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.inputBorder),
+            ),
+            child: Row(children: [
+              const Icon(Icons.star_outline_rounded,
+                  color: AppTheme.textHint, size: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  'Você ainda não recebeu avaliações.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppTheme.textHint, fontSize: 13),
+                ),
+              ),
+            ]),
+          )
+        else ...[
+          // Rating summary compacto
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceElevated,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Column(children: [
+                  Text(
+                    rating.toStringAsFixed(1),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: AppTheme.gold, fontSize: 36, height: 1),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      5,
+                      (i) => Icon(
+                        i < rating.round()
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        size: 12,
+                        color: AppTheme.gold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '${reviews.length} avaliações',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontSize: 10, color: AppTheme.textHint),
+                  ),
+                ]),
+                const SizedBox(width: 16),
+                Container(width: 1, height: 60, color: AppTheme.divider),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    children: List.generate(5, (i) {
+                      final star = 5 - i;
+                      final qty = dist[star] ?? 0;
+                      final pct =
+                          reviews.isNotEmpty ? qty / reviews.length : 0.0;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(children: [
+                          Text('$star',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                      fontSize: 10, color: AppTheme.textHint)),
+                          const SizedBox(width: 3),
+                          const Icon(Icons.star_rounded,
+                              size: 9, color: AppTheme.gold),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: LinearProgressIndicator(
+                                value: pct,
+                                minHeight: 5,
+                                backgroundColor: AppTheme.inputBorder,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppTheme.gold.withOpacity(0.65)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text('$qty',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                      fontSize: 10, color: AppTheme.textHint)),
+                        ]),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Últimas 3 avaliações
+          ...reviews.take(3).map((r) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceElevated,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.inputBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            5,
+                            (i) => Icon(
+                              i < r.rating
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              size: 13,
+                              color: AppTheme.gold,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(r.clientName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary)),
+                        const SizedBox(width: 8),
+                        Text(r.formattedDate,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                    fontSize: 10, color: AppTheme.textHint)),
+                      ]),
+                      if (r.comment != null && r.comment!.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(r.comment!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary,
+                                    height: 1.4)),
+                      ],
+                    ],
+                  ),
+                ),
+              )),
+        ],
+      ],
+    );
+  }
 }

@@ -17,6 +17,7 @@ import 'screens/client/service_detail_screen.dart';
 import 'screens/client/booking_screen.dart';
 import 'screens/client/product_detail_screen.dart';
 import 'screens/client/cart_screen.dart';
+import 'screens/client/review_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -82,8 +83,11 @@ class BarberHubApp extends StatelessWidget {
             case AppRoutes.productDetail:
               page = const ProductDetailScreen();
               break;
-            case AppRoutes.cart:               // ← novo
+            case AppRoutes.cart:               // ← carrinho
               page = const CartScreen();
+              break;
+            case AppRoutes.review:             // ← avaliações
+              page = const ReviewScreen();
               break;
           }
           if (page == null) return null;
