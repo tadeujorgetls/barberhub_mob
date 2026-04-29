@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../models/auth_provider.dart';
-import '../../models/review_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_utils.dart';

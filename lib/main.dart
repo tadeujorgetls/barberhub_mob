@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'models/auth_provider.dart';
 import 'models/app_data_provider.dart';
 import 'models/cart_provider.dart';
+import 'models/onboarding_provider.dart';
 import 'routes/app_routes.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -43,7 +44,8 @@ class BarberHubApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AppDataProvider()),
-        ChangeNotifierProvider(create: (_) => CartProvider()), // ← novo
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => OnboardingProvider()),
       ],
       child: MaterialApp(
         title: 'Barber Hub',
@@ -83,10 +85,10 @@ class BarberHubApp extends StatelessWidget {
             case AppRoutes.productDetail:
               page = const ProductDetailScreen();
               break;
-            case AppRoutes.cart:               // ← carrinho
+            case AppRoutes.cart:
               page = const CartScreen();
               break;
-            case AppRoutes.review:             // ← avaliações
+            case AppRoutes.review:
               page = const ReviewScreen();
               break;
           }

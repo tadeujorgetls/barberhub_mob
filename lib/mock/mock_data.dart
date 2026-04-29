@@ -1,9 +1,6 @@
 import '../models/service_model.dart';
 import '../models/barber_model.dart';
 import '../models/appointment_model.dart';
-import '../models/barbershop_model.dart';
-import '../models/product_model.dart';
-import '../models/review_model.dart';
 import '../models/user_model.dart';
 
 class MockData {
