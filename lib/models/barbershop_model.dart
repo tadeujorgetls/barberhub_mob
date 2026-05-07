@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'service_model.dart';
 import 'barber_model.dart';
 import 'product_model.dart';
@@ -38,6 +40,13 @@ class BarbershopModel {
   final String? description;
   final BarbershopLocation? location;
   bool isOpen;
+
+  /// Ícone Flutter correspondente ao campo coverEmoji.
+  /// Suporta chaves string ('scissors','zap','crown') e emojis legados.
+  IconData get coverIconData {
+    if (coverEmoji.runes.any((r) => r > 127)) return LucideIcons.scissors;
+    return BarbershopIcons.fromKey(coverEmoji);
+  }
 
   BarbershopModel({
     required this.id,

@@ -539,7 +539,7 @@ class _OfflineFallback extends StatelessWidget {
                   painter: _MapGridPainter(),
                 ),
               ),
-              // Pin com emoji
+              // Pin com ícone da barbearia
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -559,8 +559,7 @@ class _OfflineFallback extends StatelessWidget {
                         ],
                       ),
                       child: Center(
-                        child: Text(shop.coverEmoji,
-                            style: const TextStyle(fontSize: 24)),
+                        child: Icon(shop.coverIconData, size: 26, color: AppTheme.background),
                       ),
                     ),
                     Container(

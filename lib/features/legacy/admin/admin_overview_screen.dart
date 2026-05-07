@@ -190,7 +190,7 @@ class AdminOverviewScreen extends StatelessWidget {
                                 (a) => a.status == AppointmentStatus.scheduled)
                             .length;
                         return _ShopStatCard(
-                          emoji: shop.coverEmoji,
+                          shopIcon: shop.coverIconData,
                           name: shop.name,
                           total: shopAppts.length,
                           pending: pending,
@@ -288,10 +288,10 @@ class AdminOverviewScreen extends StatelessWidget {
 
 // ── Shop stat card ─────────────────────────────────────────────────────────────
 class _ShopStatCard extends StatelessWidget {
-  final String emoji, name;
+  final IconData shopIcon; final String name;
   final int total, pending, revenue;
   const _ShopStatCard({
-    required this.emoji,
+    required this.shopIcon,
     required this.name,
     required this.total,
     required this.pending,
@@ -312,7 +312,7 @@ class _ShopStatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Text(emoji, style: const TextStyle(fontSize: 20)),
+            Icon(shopIcon, size: 20, color: AppTheme.gold),
             const SizedBox(width: 8),
             Expanded(
               child: Text(name,

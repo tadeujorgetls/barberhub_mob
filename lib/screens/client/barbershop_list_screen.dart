@@ -374,8 +374,7 @@ class _BarbershopCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Center(
-                    child: Text(shop.coverEmoji,
-                        style: const TextStyle(fontSize: 52)),
+                    child: Icon(shop.coverIconData, size: 52, color: AppTheme.gold),
                   ),
                   Positioned(
                     top: 10,

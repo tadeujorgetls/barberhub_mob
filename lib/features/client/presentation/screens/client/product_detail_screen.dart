@@ -617,7 +617,7 @@ class _BarbershopInfo extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(barbershop.coverEmoji, style: const TextStyle(fontSize: 28)),
+          Icon(barbershop.coverIconData, size: 28, color: AppTheme.gold),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

@@ -229,8 +229,7 @@ class _AppointmentSummary extends StatelessWidget {
               border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
             ),
             child: Center(
-              child: Text(a.barbershop.coverEmoji,
-                  style: const TextStyle(fontSize: 24)),
+              child: Icon(a.barbershop.coverIconData, size: 24, color: AppTheme.gold),
             ),
           ),
           const SizedBox(width: 14),

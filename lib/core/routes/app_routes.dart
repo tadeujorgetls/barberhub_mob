@@ -16,10 +16,15 @@ class AppRoutes {
   static const String cart              = '/cart';
   static const String review            = '/review';
 
-  // ── Barbearia (novo) ───────────────────────────────────────────────────────
-  static const String barberShopHome    = '/barber-shop-home';
+  // ── Membership ────────────────────────────────────────────────────────────
+  /// Planos de uma barbearia específica (requer MembershipPlansArgs).
+  static const String membershipPlans = '/membership/plans';
+
+  // ── Barbearia (proprietário) ───────────────────────────────────────────────
+  static const String barberShopHome        = '/barber-shop-home';
+  static const String membershipManagement  = '/barber-shop/memberships';
 
   // ── Legado ────────────────────────────────────────────────────────────────
-  static const String barberHome        = '/barber-home';
-  static const String adminHome         = '/admin-home';
+  static const String barberHome = '/barber-home';
+  static const String adminHome  = '/admin-home';
 }

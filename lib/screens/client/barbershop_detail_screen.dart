@@ -418,7 +418,7 @@ class _CategoryFilter extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8),
             child: _FilterChip(
               label: 'Todos',
-              emoji: '🛍️',
+              iconData: Icons.shopping_bag_outlined,
               selected: selected == null,
               onTap: () => onSelect(null),
             ),
@@ -427,7 +427,7 @@ class _CategoryFilter extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: _FilterChip(
                   label: cat.label,
-                  emoji: cat.emoji,
+                  iconData: cat.iconData,
                   selected: selected == cat,
                   onTap: () => onSelect(selected == cat ? null : cat),
                 ),
@@ -439,13 +439,13 @@ class _CategoryFilter extends StatelessWidget {
 }
 
 class _FilterChip extends StatelessWidget {
-  final String label, emoji;
+  final String label; final IconData iconData;
   final bool selected;
   final VoidCallback onTap;
 
   const _FilterChip({
     required this.label,
-    required this.emoji,
+    required this.iconData,
     required this.selected,
     required this.onTap,
   });
@@ -470,7 +470,7 @@ class _FilterChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 13)),
+            Icon(iconData, size: 14, color: AppTheme.textSecondary),
             const SizedBox(width: 5),
             Text(
               label,
@@ -1067,7 +1067,7 @@ class _CoverCard extends StatelessWidget {
         children: [
           Center(
               child:
-                  Text(shop.coverEmoji, style: const TextStyle(fontSize: 64))),
+                  Icon(shop.coverIconData, size: 64, color: AppTheme.gold)),
           Positioned(
             top: 12,
             right: 12,

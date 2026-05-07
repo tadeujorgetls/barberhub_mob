@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
+
 /// Categorias de produto disponíveis
 enum ProductCategory {
   pomade,       // Pomadas e finalizadores
@@ -28,6 +31,20 @@ extension ProductCategoryExt on ProductCategory {
       case ProductCategory.skincare:  return '✨';
       case ProductCategory.tool:      return '✂️';
       case ProductCategory.kit:       return '🎁';
+    }
+  }
+
+  /// Ícone Flutter que substitui o emoji em toda a UI.
+  IconData get iconData => ProductCategoryIcons.fromKey(_iconKey);
+
+  String get _iconKey {
+    switch (this) {
+      case ProductCategory.pomade:    return 'pomade';
+      case ProductCategory.shampoo:   return 'shampoo';
+      case ProductCategory.beard:     return 'beard';
+      case ProductCategory.skincare:  return 'skincare';
+      case ProductCategory.tool:      return 'tool';
+      case ProductCategory.kit:       return 'kit';
     }
   }
 }

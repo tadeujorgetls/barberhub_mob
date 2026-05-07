@@ -7,6 +7,7 @@
 /// - AsyncNotifier nativo + watch/listen/ref.invalidate sem boilerplate.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_hub/features/auth/domain/usecases/login_usecase.dart';
 import 'package:barber_hub/features/auth/domain/usecases/register_usecase.dart';
@@ -42,7 +43,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         return user.initialRoute;
       }
-    } catch (_) {}
+    } catch (e, st) {
+      // RISCO #5 CORRIGIDO: o catch original era `catch (_) {}` — engolia
+      // qualquer exceção sem deixar rastro, tornando falhas de SharedPreferences
+      // corrompido ou decode inválido completamente invisíveis em debug.
+      //
+      // Em modo debug, loga o erro completo com stack trace para facilitar
+      // diagnóstico. Em release, o bloco é removido pelo compilador (kDebugMode).
+      // Integre aqui um serviço de crash reporting (ex: Firebase Crashlytics)
+      // quando o backend real for implementado:
+      //   FirebaseCrashlytics.instance.recordError(e, st);
+      if (kDebugMode) {
+        debugPrint('[AuthNotifier.tryAutoLogin] Erro ao restaurar sessão: $e');
+        debugPrint(st.toString());
+      }
+    }
     state = const AuthUnauthenticated();
     return '/login';
   }

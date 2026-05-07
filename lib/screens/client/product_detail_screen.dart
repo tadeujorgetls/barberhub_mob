@@ -528,7 +528,7 @@ class _CategoryChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(category.emoji, style: const TextStyle(fontSize: 12)),
+          Icon(category.iconData, size: 14, color: AppTheme.textSecondary),
           const SizedBox(width: 5),
           Text(category.label,
               style: Theme.of(context)
@@ -617,7 +617,7 @@ class _BarbershopInfo extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(barbershop.coverEmoji, style: const TextStyle(fontSize: 28)),
+          Icon(barbershop.coverIconData, size: 28, color: AppTheme.gold),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

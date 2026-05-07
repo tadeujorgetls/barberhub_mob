@@ -57,7 +57,7 @@ class CartScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                 child: _BarbershopBadge(
                     name: cart.barbershop!.name,
-                    emoji: cart.barbershop!.coverEmoji),
+                    iconData: cart.barbershop!.coverIconData),
               ),
 
             // ── Conteúdo ────────────────────────────────────────────────
@@ -104,8 +104,8 @@ class CartScreen extends StatelessWidget {
 
 // ── Barbershop badge ──────────────────────────────────────────────────────────
 class _BarbershopBadge extends StatelessWidget {
-  final String name, emoji;
-  const _BarbershopBadge({required this.name, required this.emoji});
+  final String name; final IconData iconData;
+  const _BarbershopBadge({required this.name, required this.iconData});
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +118,7 @@ class _BarbershopBadge extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
+          Icon(iconData, size: 22, color: AppTheme.gold),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

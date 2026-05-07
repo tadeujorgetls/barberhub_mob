@@ -9,8 +9,17 @@ class AuthMockDatasource {
   Future<(UserModel?, Failure?)> login(String email, String password) async {
     await Future.delayed(const Duration(milliseconds: 800));
 
+    // RISCO #4 CORRIGIDO: a comparação original era u['email'] == email,
+    // sensível a maiúsculas/minúsculas. O LoginUseCase já normaliza o e-mail
+    // antes de chamar o repositório, mas qualquer chamada direta ao datasource
+    // (testes, outros fluxos) falharia silenciosamente com e-mails em casing
+    // diferente. Normalização aplicada também aqui como defesa em profundidade.
+    final normalizedEmail = email.trim().toLowerCase();
+
     final match = MockData.users.where(
-      (u) => u['email'] == email && u['password'] == password,
+      (u) =>
+          (u['email'] as String).toLowerCase() == normalizedEmail &&
+          u['password'] == password,
     ).firstOrNull;
 
     if (match == null) {
@@ -36,7 +45,13 @@ class AuthMockDatasource {
   }) async {
     await Future.delayed(const Duration(milliseconds: 800));
 
-    final exists = MockData.users.any((u) => u['email'] == email);
+    // RISCO #4 CORRIGIDO: mesma normalização aplicada ao cadastro para garantir
+    // que duplicatas com casing diferente sejam detectadas corretamente.
+    final normalizedEmail = email.trim().toLowerCase();
+
+    final exists = MockData.users.any(
+      (u) => (u['email'] as String).toLowerCase() == normalizedEmail,
+    );
     if (exists) {
       return (null, const AuthFailure('Este e-mail já está cadastrado.'));
     }
@@ -44,7 +59,7 @@ class AuthMockDatasource {
     final newUser = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'name': name,
-      'email': email,
+      'email': normalizedEmail,
       'password': password,
       'role': UserRole.client,
     };

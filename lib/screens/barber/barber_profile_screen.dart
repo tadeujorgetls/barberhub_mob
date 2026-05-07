@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/auth_provider.dart';
+import 'package:barber_hub/features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../routes/app_routes.dart';
@@ -12,9 +12,14 @@ class BarberProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.watch<LegacyAuthAdapter>();
     final data = context.watch<AppDataProvider>();
-    final user = auth.currentUser!;
+    final user = auth.currentUser;
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: Color(0xFFD4A853))),
+      );
+    }
     final barberId = auth.linkedBarberId ?? '';
     final barber = data.allBarbers.where((b) => b.id == barberId).firstOrNull;
     final appts = data.appointmentsForBarber(barberId);
@@ -76,7 +81,7 @@ class BarberProfileScreen extends StatelessWidget {
                       color: AppTheme.textSecondary, size: 20),
                   onPressed: () {
                     auth.logout();
-                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                    if (context.mounted) Navigator.pushReplacementNamed(context, AppRoutes.login);
                   },
                 ),
               ]),
@@ -143,8 +148,7 @@ class BarberProfileScreen extends StatelessWidget {
                       icon: Icons.logout_rounded,
                       onPressed: () {
                         auth.logout();
-                        Navigator.pushReplacementNamed(
-                            context, AppRoutes.login);
+                        if (context.mounted) Navigator.pushReplacementNamed(context, AppRoutes.login);
                       },
                     ),
                     const SizedBox(height: 32),

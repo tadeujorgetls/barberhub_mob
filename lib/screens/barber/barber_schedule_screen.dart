@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
-import '../../models/auth_provider.dart';
+import 'package:barber_hub/features/legacy/providers/legacy_auth_adapter.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_utils.dart';
 import '../../widgets/app_widgets.dart';
@@ -33,7 +33,7 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.watch<LegacyAuthAdapter>();
     final data = context.watch<AppDataProvider>();
     final barberId = auth.linkedBarberId ?? '';
     final today = data.todayForBarber(barberId);

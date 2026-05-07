@@ -9,6 +9,7 @@ import '../widgets/onboarding_overlay.dart';
 import 'client/barbershop_list_screen.dart';
 import 'client/appointments_screen.dart';
 import 'client/profile_screen.dart';
+import 'package:barber_hub/features/membership/presentation/screens/client/my_membership_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -24,13 +25,15 @@ class _MainShellState extends State<MainShell> {
   // calcular a posicao do spotlight em cada etapa.
   final _navKey0 = GlobalKey(); // Inicio
   final _navKey1 = GlobalKey(); // Agendamentos
+  final _navKeyMembership = GlobalKey(); // Assinatura
   final _navKey2 = GlobalKey(); // Carrinho
   final _navKey3 = GlobalKey(); // Perfil
 
   final List<Widget> _pages = const [
-    BarbershopListScreen(),
-    AppointmentsScreen(),
-    ProfileScreen(),
+    BarbershopListScreen(),    // índice 0
+    AppointmentsScreen(),      // índice 1
+    MyMembershipScreen(),      // índice 2 — Assinatura
+    ProfileScreen(),           // índice 3
   ];
 
   @override
@@ -55,6 +58,7 @@ class _MainShellState extends State<MainShell> {
             onTap: (i) => setState(() => _currentIndex = i),
             navKey0: _navKey0,
             navKey1: _navKey1,
+            navKeyMembership: _navKeyMembership,
             navKey2: _navKey2,
             navKey3: _navKey3,
           ),
@@ -79,6 +83,7 @@ class _BarberBottomNav extends StatelessWidget {
   final ValueChanged<int> onTap;
   final GlobalKey navKey0;
   final GlobalKey navKey1;
+  final GlobalKey navKeyMembership;
   final GlobalKey navKey2;
   final GlobalKey navKey3;
 
@@ -87,6 +92,7 @@ class _BarberBottomNav extends StatelessWidget {
     required this.onTap,
     required this.navKey0,
     required this.navKey1,
+    required this.navKeyMembership,
     required this.navKey2,
     required this.navKey3,
   });
@@ -122,14 +128,22 @@ class _BarberBottomNav extends StatelessWidget {
                 selected: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
+              _NavItem(
+                key: navKeyMembership,
+                icon: Icons.workspace_premium_outlined,
+                activeIcon: Icons.workspace_premium_rounded,
+                label: 'Assinatura',
+                selected: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
               _CartNavItem(key: navKey2, itemCount: cart.itemCount),
               _NavItem(
                 key: navKey3,
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
                 label: 'Perfil',
-                selected: currentIndex == 2,
-                onTap: () => onTap(2),
+                selected: currentIndex == 3,
+                onTap: () => onTap(3),
               ),
             ],
           ),

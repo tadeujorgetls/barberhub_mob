@@ -9,6 +9,7 @@ import 'package:barber_hub/features/client/presentation/widgets/onboarding_overl
 import 'package:barber_hub/features/client/presentation/screens/client/barbershop_list_screen.dart';
 import 'package:barber_hub/features/client/presentation/screens/client/appointments_screen.dart';
 import 'package:barber_hub/features/client/presentation/screens/client/profile_screen.dart';
+import 'package:barber_hub/features/membership/presentation/screens/client/my_membership_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -20,17 +21,20 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  // GlobalKeys para cada item da BottomNav — usados pelo onboarding para
-  // calcular a posicao do spotlight em cada etapa.
+  // GlobalKeys para spotlight do onboarding (4 itens originais preservados).
   final _navKey0 = GlobalKey(); // Inicio
   final _navKey1 = GlobalKey(); // Agendamentos
   final _navKey2 = GlobalKey(); // Carrinho
   final _navKey3 = GlobalKey(); // Perfil
+  // Nova key — não incluída no onboarding (não quebra as 4 etapas existentes).
+  final _navKeyMembership = GlobalKey(); // Assinatura
 
+  // MyMembershipScreen adicionada em index 2; ProfileScreen vai para index 3.
   final List<Widget> _pages = const [
-    BarbershopListScreen(),
-    AppointmentsScreen(),
-    ProfileScreen(),
+    BarbershopListScreen(),   // 0
+    AppointmentsScreen(),     // 1
+    MyMembershipScreen(),     // 2 — novo
+    ProfileScreen(),          // 3
   ];
 
   @override
@@ -55,6 +59,7 @@ class _MainShellState extends State<MainShell> {
             onTap: (i) => setState(() => _currentIndex = i),
             navKey0: _navKey0,
             navKey1: _navKey1,
+            navKeyMembership: _navKeyMembership,
             navKey2: _navKey2,
             navKey3: _navKey3,
           ),
@@ -64,6 +69,8 @@ class _MainShellState extends State<MainShell> {
             if (!prov.isReady || !prov.shouldShow) {
               return const SizedBox.shrink();
             }
+            // Onboarding mantém os 4 keys originais — a nova tab Assinatura
+            // não participa do onboarding para não quebrar as etapas existentes.
             return OnboardingOverlay(
               navKeys: [_navKey0, _navKey1, _navKey2, _navKey3],
             );
@@ -79,6 +86,7 @@ class _BarberBottomNav extends StatelessWidget {
   final ValueChanged<int> onTap;
   final GlobalKey navKey0;
   final GlobalKey navKey1;
+  final GlobalKey navKeyMembership;
   final GlobalKey navKey2;
   final GlobalKey navKey3;
 
@@ -87,6 +95,7 @@ class _BarberBottomNav extends StatelessWidget {
     required this.onTap,
     required this.navKey0,
     required this.navKey1,
+    required this.navKeyMembership,
     required this.navKey2,
     required this.navKey3,
   });
@@ -122,14 +131,23 @@ class _BarberBottomNav extends StatelessWidget {
                 selected: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
+              // Nova tab: Assinatura (index 2)
+              _NavItem(
+                key: navKeyMembership,
+                icon: Icons.workspace_premium_outlined,
+                activeIcon: Icons.workspace_premium_rounded,
+                label: 'Assinatura',
+                selected: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
               _CartNavItem(key: navKey2, itemCount: cart.itemCount),
               _NavItem(
                 key: navKey3,
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
                 label: 'Perfil',
-                selected: currentIndex == 2,
-                onTap: () => onTap(2),
+                selected: currentIndex == 3,
+                onTap: () => onTap(3),
               ),
             ],
           ),
@@ -192,7 +210,8 @@ class _CartNavItem extends StatelessWidget {
               'Carrinho',
               style: GoogleFonts.jost(
                 fontSize: 10,
-                fontWeight: itemCount > 0 ? FontWeight.w600 : FontWeight.w400,
+                fontWeight:
+                    itemCount > 0 ? FontWeight.w600 : FontWeight.w400,
                 color: itemCount > 0 ? AppTheme.gold : AppTheme.textHint,
                 letterSpacing: 0.3,
               ),
@@ -243,7 +262,8 @@ class _NavItem extends StatelessWidget {
               label,
               style: GoogleFonts.jost(
                 fontSize: 10,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight:
+                    selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected ? AppTheme.gold : AppTheme.textHint,
                 letterSpacing: 0.3,
               ),

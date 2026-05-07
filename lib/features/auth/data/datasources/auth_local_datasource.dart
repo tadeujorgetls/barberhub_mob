@@ -1,68 +1,58 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:barber_hub/core/constants/app_constants.dart';
+import 'package:flutter/foundation.dart';
+import 'package:barber_hub/core/services/cache_service.dart';
 import 'package:barber_hub/features/auth/data/models/user_model.dart';
 
-/// Datasource local: persiste sessão e usuários registrados via SharedPreferences.
+/// Datasource local: persiste sessão e usuários registrados.
+///
+/// MELHORIA #9: delegação completa para [CacheService].
+///
+/// Antes (ZIP 3): este datasource gerenciava seu próprio acesso ao
+/// SharedPreferences com _cachedPrefs, duplicando a lógica já existente
+/// no CacheService (mesmas chaves, mesmo padrão lazy-init, mesma
+/// serialização JSON). Dois escritores independentes para as mesmas
+/// chaves era uma condição de corrida latente.
+///
+/// Agora: toda a persistência passa pelo CacheService singleton.
+/// Este datasource responsabiliza-se apenas pela camada de domínio:
+/// serializar/deserializar [UserModel] ↔ Map<String, dynamic>.
 class AuthLocalDatasource {
-  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
+  // Alias de conveniência — evita repetir CacheService.instance em cada linha.
+  CacheService get _cache => CacheService.instance;
 
   // ── Sessão ────────────────────────────────────────────────────────────────
 
   Future<void> saveSession(UserModel user) async {
-    final p = await _prefs;
-    await p.setString(AppConstants.sessionKey, jsonEncode(user.toJson()));
+    await _cache.saveSession(user.toJson());
   }
 
   Future<UserModel?> loadSession() async {
-    final p = await _prefs;
-    final raw = p.getString(AppConstants.sessionKey);
-    if (raw == null) return null;
+    final map = await _cache.loadSession();
+    if (map == null) return null;
     try {
-      return UserModel.fromJson(Map<String, dynamic>.from(
-        jsonDecode(raw) as Map,
-      ));
-    } catch (_) {
-      await p.remove(AppConstants.sessionKey);
+      return UserModel.fromJson(map);
+    } catch (e, st) {
+      // CacheService já limpa a chave corrompida no catch interno.
+      // Aqui apenas logamos para facilitar debug.
+      if (kDebugMode) {
+        debugPrint('[AuthLocalDatasource.loadSession] Deserialização falhou: $e');
+        debugPrint(st.toString());
+      }
+      await _cache.clearSession();
       return null;
     }
   }
 
   Future<void> clearSession() async {
-    final p = await _prefs;
-    await p.remove(AppConstants.sessionKey);
+    await _cache.clearSession();
   }
 
   // ── Usuários registrados ──────────────────────────────────────────────────
 
   Future<void> saveRegisteredUser(Map<String, dynamic> userJson) async {
-    final p = await _prefs;
-    final raw = p.getString(AppConstants.usersKey);
-    final list = raw != null
-        ? List<Map<String, dynamic>>.from(
-            (jsonDecode(raw) as List).map((e) => Map<String, dynamic>.from(e as Map)),
-          )
-        : <Map<String, dynamic>>[];
-
-    final idx = list.indexWhere((u) => u['id'] == userJson['id']);
-    if (idx == -1) {
-      list.add(userJson);
-    } else {
-      list[idx] = userJson;
-    }
-    await p.setString(AppConstants.usersKey, jsonEncode(list));
+    await _cache.upsertRegisteredUser(userJson);
   }
 
   Future<List<Map<String, dynamic>>> loadRegisteredUsers() async {
-    final p = await _prefs;
-    final raw = p.getString(AppConstants.usersKey);
-    if (raw == null) return [];
-    try {
-      return List<Map<String, dynamic>>.from(
-        (jsonDecode(raw) as List).map((e) => Map<String, dynamic>.from(e as Map)),
-      );
-    } catch (_) {
-      return [];
-    }
+    return _cache.loadRegisteredUsers();
   }
 }

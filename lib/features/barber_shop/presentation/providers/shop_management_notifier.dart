@@ -66,18 +66,28 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
     }
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final results = await Future.wait([
+      // BUG #3 CORRIGIDO: o código anterior usava Future.wait([...]) retornando
+      // List<dynamic> e fazia casts por índice posicional (results[0] as X,
+      // results[1] as Y...). Qualquer reordenação das chamadas ou tipo
+      // inesperado retornado causava TypeError silencioso em runtime.
+      //
+      // Substituído por awaits individuais com variáveis nomeadas e tipadas:
+      // o compilador Dart garante a consistência de tipos em tempo de compilação,
+      // e a ordem das chamadas fica explícita e segura para refatorações futuras.
+      // O paralelismo é preservado com Future.wait tipado por Record.
+      final (settings, barbers, products, blockedDates) = await (
         _getSettings(shopId),
         _getBarbers(shopId),
         _getProducts(shopId),
         _getBlockedDates(shopId),
-      ]);
+      ).wait;
+
       state = state.copyWith(
         isLoading: false,
-        settings: results[0] as ShopSettingsEntity?,
-        barbers: results[1] as List<BarberModel>,
-        products: results[2] as List<ProductModel>,
-        blockedDates: results[3] as List<BlockedDateEntity>,
+        settings: settings,
+        barbers: barbers,
+        products: products,
+        blockedDates: blockedDates,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
