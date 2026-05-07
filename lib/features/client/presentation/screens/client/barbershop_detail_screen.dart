@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:barber_hub/features/client/presentation/providers/app_data_provider.dart';
@@ -418,7 +419,7 @@ class _CategoryFilter extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8),
             child: _FilterChip(
               label: 'Todos',
-              emoji: '🛍️',
+              icon: LucideIcons.shopping_bag,
               selected: selected == null,
               onTap: () => onSelect(null),
             ),
@@ -427,7 +428,7 @@ class _CategoryFilter extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: _FilterChip(
                   label: cat.label,
-                  emoji: cat.emoji,
+                  icon: cat.iconData,
                   selected: selected == cat,
                   onTap: () => onSelect(selected == cat ? null : cat),
                 ),
@@ -439,13 +440,14 @@ class _CategoryFilter extends StatelessWidget {
 }
 
 class _FilterChip extends StatelessWidget {
-  final String label, emoji;
+  final String label;
+  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
 
   const _FilterChip({
     required this.label,
-    required this.emoji,
+    required this.icon,
     required this.selected,
     required this.onTap,
   });
@@ -470,7 +472,8 @@ class _FilterChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 13)),
+            Icon(icon, size: 13,
+                color: selected ? AppTheme.gold : AppTheme.textSecondary),
             const SizedBox(width: 5),
             Text(
               label,
@@ -523,8 +526,7 @@ class _FeaturedProductCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Center(
-                    child: Text(product.imageEmoji,
-                        style: const TextStyle(fontSize: 44)),
+                    child: Icon(product.iconData, color: AppTheme.gold, size: 26),
                   ),
                   if (product.hasDiscount)
                     Positioned(
@@ -617,8 +619,7 @@ class _ProductCard extends StatelessWidget {
                     border: Border.all(color: AppTheme.gold.withOpacity(0.15)),
                   ),
                   child: Center(
-                    child: Text(product.imageEmoji,
-                        style: const TextStyle(fontSize: 30)),
+                    child: Icon(product.iconData, color: AppTheme.gold, size: 26),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -1067,7 +1068,7 @@ class _CoverCard extends StatelessWidget {
         children: [
           Center(
               child:
-                  Text(shop.coverEmoji, style: const TextStyle(fontSize: 64))),
+                  Icon(shop.coverIconData, color: AppTheme.gold, size: 56)),
           Positioned(
             top: 12,
             right: 12,

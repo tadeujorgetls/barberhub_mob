@@ -12,7 +12,8 @@ class BarbershopListScreen extends ConsumerStatefulWidget {
   const BarbershopListScreen({super.key});
 
   @override
-  ConsumerState<BarbershopListScreen> createState() => _BarbershopListScreenState();
+  ConsumerState<BarbershopListScreen> createState() =>
+      _BarbershopListScreenState();
 }
 
 class _BarbershopListScreenState extends ConsumerState<BarbershopListScreen> {
@@ -376,8 +377,8 @@ class _BarbershopCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Center(
-                    child: Text(shop.coverEmoji,
-                        style: const TextStyle(fontSize: 52)),
+                    child: Icon(shop.coverIconData,
+                        color: AppTheme.gold, size: 28),
                   ),
                   Positioned(
                     top: 10,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -19,7 +20,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))..forward();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 700))
+      ..forward();
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
     _scale = Tween<double>(begin: 0.88, end: 1.0).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
@@ -28,7 +31,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _boot() async {
     final route = await ref.read(authNotifierProvider.notifier).tryAutoLogin();
@@ -50,31 +56,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               scale: _scale,
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Container(
-                  width: 80, height: 80,
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.3), width: 1.5),
+                    border: Border.all(
+                        color: AppTheme.gold.withOpacity(0.3), width: 1.5),
                   ),
-                  child: const Center(child: Text('✂️', style: TextStyle(fontSize: 36))),
+                  child: const Center(
+                    child: Icon(LucideIcons.scissors,
+                        color: AppTheme.gold, size: 36),
+                  ),
                 ),
                 const SizedBox(height: 24),
-                Text('BARBER HUB', style: GoogleFonts.jost(
-                  color: AppTheme.textPrimary, fontSize: 22,
-                  fontWeight: FontWeight.w700, letterSpacing: 5,
-                  decoration: TextDecoration.none,
-                )),
+                Text('BARBER HUB',
+                    style: GoogleFonts.jost(
+                      color: AppTheme.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 5,
+                      decoration: TextDecoration.none,
+                    )),
                 const SizedBox(height: 8),
-                Text('Seu estilo, na palma da mão.', style: GoogleFonts.jost(
-                  color: AppTheme.textSecondary, fontSize: 13,
-                  decoration: TextDecoration.none,
-                )),
+                Text('Seu estilo, na palma da mão.',
+                    style: GoogleFonts.jost(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                      decoration: TextDecoration.none,
+                    )),
                 const SizedBox(height: 64),
                 SizedBox(
-                  width: 24, height: 24,
+                  width: 24,
+                  height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.gold.withOpacity(0.7)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        AppTheme.gold.withOpacity(0.7)),
                   ),
                 ),
               ]),
@@ -86,10 +104,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Widget _circle(double size, double opacity) => Container(
-    width: size, height: size,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      gradient: RadialGradient(colors: [AppTheme.gold.withOpacity(opacity), Colors.transparent]),
-    ),
-  );
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+              colors: [AppTheme.gold.withOpacity(opacity), Colors.transparent]),
+        ),
+      );
 }

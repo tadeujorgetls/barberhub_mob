@@ -87,7 +87,7 @@ class ShopManagementRepositoryImpl implements IShopManagementRepository {
           price: (m['price'] as num).toDouble(),
           originalPrice: m['originalPrice'] != null ? (m['originalPrice'] as num).toDouble() : null,
           category: cat,
-          imageEmoji: m['imageEmoji'] as String? ?? '📦',
+          imageEmoji: m['imageEmoji'] as String? ?? 'package',
           brand: m['brand'] as String? ?? '',
           isFeatured: m['isFeatured'] as bool? ?? false,
           stockQty: m['stockQty'] as int? ?? 0,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:barber_hub/core/routes/app_routes.dart';
 import 'package:barber_hub/shared/widgets/app_widgets.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
@@ -187,24 +188,31 @@ class _DemoHint extends StatelessWidget {
         Row(children: [
           const Icon(Icons.info_outline, color: AppTheme.gold, size: 14),
           const SizedBox(width: 8),
-          Text('DEMO', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppTheme.gold, fontSize: 10, letterSpacing: 2)),
+          Text('DEMO', style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: AppTheme.gold, fontSize: 10, letterSpacing: 2)),
         ]),
         const SizedBox(height: 10),
-        _row(context, '👤 Cliente', 'carlos@barberhub.com'),
-        _row(context, '✂️ Barbearia', 'classica@barberhub.com'),
-        _row(context, '💈 Barbeiro', 'rafael@barberhub.com'),
-        _row(context, '⚙️ Admin', 'admin@barberhub.com'),
+        _row(context, LucideIcons.user,     'Cliente',    'carlos@barberhub.com'),
+        _row(context, LucideIcons.scissors, 'Barbearia',  'classica@barberhub.com'),
+        _row(context, LucideIcons.scissors, 'Barbeiro',   'rafael@barberhub.com'),
+        _row(context, LucideIcons.settings, 'Admin',      'admin@barberhub.com'),
         const SizedBox(height: 4),
-        Text('Senha: 123456 (todos)', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, color: AppTheme.textHint)),
+        Text('Senha: 123456 (todos)', style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(fontSize: 11, color: AppTheme.textHint)),
       ]),
     );
   }
 
-  Widget _row(BuildContext context, String label, String email) => Padding(
-    padding: const EdgeInsets.only(bottom: 3),
+  Widget _row(BuildContext context, IconData icon, String label, String email) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
     child: Row(children: [
-      Text('$label  ', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12)),
-      Expanded(child: Text(email, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, color: AppTheme.textHint), overflow: TextOverflow.ellipsis)),
+      Icon(icon, size: 13, color: AppTheme.gold),
+      const SizedBox(width: 6),
+      Text(label, style: Theme.of(context).textTheme.bodyMedium
+          ?.copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
+      const SizedBox(width: 6),
+      Expanded(child: Text(email, style: Theme.of(context).textTheme.bodyMedium
+          ?.copyWith(fontSize: 11, color: AppTheme.textHint), overflow: TextOverflow.ellipsis)),
     ]),
   );
 }

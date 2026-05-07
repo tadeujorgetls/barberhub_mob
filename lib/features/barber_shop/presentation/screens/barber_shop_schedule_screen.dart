@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
@@ -383,8 +384,8 @@ class _BlocksTab extends StatelessWidget {
                               color: AppTheme.error.withOpacity(0.3)),
                         ),
                         child: Center(
-                            child: Text(b.type.icon,
-                                style: const TextStyle(fontSize: 18))),
+                            child: Icon(b.type.iconData,
+                                color: AppTheme.error, size: 20)),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -509,7 +510,10 @@ class _BlockModalState extends ConsumerState<_BlockModal> {
                       width: _type == t ? 1.5 : 1),
                 ),
                 child: Row(children: [
-                  Text(t.icon, style: const TextStyle(fontSize: 18)),
+                  Icon(t.iconData,
+                      color:
+                          _type == t ? AppTheme.gold : AppTheme.textSecondary,
+                      size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                       child: Text(t.label,

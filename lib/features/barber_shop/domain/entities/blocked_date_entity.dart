@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 /// Tipo de bloqueio de data.
 enum BlockType {
   /// Data específica (feriado, manutenção, etc.)
@@ -16,11 +18,11 @@ extension BlockTypeExt on BlockType {
       case BlockType.allSaturdays: return 'Todos os sábados';
     }
   }
-  String get icon {
+  IconData get iconData {
     switch (this) {
-      case BlockType.specificDate: return '📅';
-      case BlockType.allSundays:   return '🔄';
-      case BlockType.allSaturdays: return '🔄';
+      case BlockType.specificDate: return BlockIcons.specificDate;
+      case BlockType.allSundays:   return BlockIcons.allSundays;
+      case BlockType.allSaturdays: return BlockIcons.allSaturdays;
     }
   }
 }

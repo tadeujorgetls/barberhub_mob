@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 /// Modelo de avaliação de um agendamento concluído.
 /// Uma avaliação está vinculada a um agendamento específico,
 /// e impacta o rating da barbearia e do barbeiro.
@@ -39,16 +41,13 @@ class ReviewModel {
     return '${createdAt.day} de ${months[createdAt.month]} de ${createdAt.year}';
   }
 
-  /// Retorna o emoji correspondente à nota.
-  String get ratingEmoji {
-    switch (rating) {
-      case 5: return '🤩';
-      case 4: return '😊';
-      case 3: return '😐';
-      case 2: return '😕';
-      default: return '😞';
-    }
-  }
+  /// Ícone Lucide correspondente à nota (substitui emoji).
+  IconData get ratingIconData => RatingIcons.forRating(rating);
+
+  /// Cor do ícone por nota.
+  Color get ratingColor => RatingIcons.colorForRating(rating);
+
+
 
   /// Rótulo textual da nota.
   String get ratingLabel {

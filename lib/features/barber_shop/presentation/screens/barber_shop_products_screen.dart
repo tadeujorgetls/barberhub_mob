@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
@@ -54,7 +55,8 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
                       selected: _filter == null,
                       onTap: () => setState(() => _filter = null)),
                   ...ProductCategory.values.map((c) => _FilterChip(
-                        label: '${c.emoji} ${c.label}',
+                        label: c.label,
+                        icon: c.iconData,
                         selected: _filter == c,
                         onTap: () =>
                             setState(() => _filter = _filter == c ? null : c),
@@ -145,10 +147,14 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
 // ── Filter Chip ───────────────────────────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
   final String label;
+  final IconData? icon;
   final bool selected;
   final VoidCallback onTap;
   const _FilterChip(
-      {required this.label, required this.selected, required this.onTap});
+      {required this.label,
+      this.icon,
+      required this.selected,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -194,8 +200,7 @@ class _ProductTile extends StatelessWidget {
               border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
             ),
             child: Center(
-                child: Text(product.imageEmoji,
-                    style: const TextStyle(fontSize: 24))),
+                child: Icon(product.iconData, color: AppTheme.gold, size: 24)),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -323,7 +328,7 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
         description: _descCtrl.text.trim(),
         price: price,
         category: _category,
-        imageEmoji: _category.emoji,
+        imageEmoji: _category.iconKey,
         brand: _brandCtrl.text.trim(),
         stockQty: stock,
         isFeatured: widget.product!.isFeatured,
@@ -336,7 +341,7 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
         description: _descCtrl.text.trim(),
         price: price,
         category: _category,
-        imageEmoji: _category.emoji,
+        imageEmoji: _category.iconKey,
         brand: _brandCtrl.text.trim(),
         stockQty: stock,
       ));
@@ -423,9 +428,14 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
             items: ProductCategory.values
                 .map((c) => DropdownMenuItem(
                       value: c,
-                      child: Text('${c.emoji} ${c.label}',
-                          style: GoogleFonts.jost(
-                              color: AppTheme.textPrimary, fontSize: 14)),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(c.iconData,
+                            size: 14, color: AppTheme.textSecondary),
+                        const SizedBox(width: 8),
+                        Text(c.label,
+                            style: GoogleFonts.jost(
+                                color: AppTheme.textPrimary, fontSize: 14)),
+                      ]),
                     ))
                 .toList(),
             onChanged: (c) => setState(() => _category = c!),

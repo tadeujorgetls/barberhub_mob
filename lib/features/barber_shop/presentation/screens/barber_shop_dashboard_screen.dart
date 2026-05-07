@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
@@ -83,7 +84,7 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                       ]),
                     ])),
                     const SizedBox(width: 12),
-                    Text(shop.coverEmoji, style: const TextStyle(fontSize: 40)),
+                    Icon(BarbershopIcons.fromKey(shop.coverEmoji), color: AppTheme.gold, size: 36),
                   ]),
                 ]),
               )),

@@ -208,8 +208,9 @@ class _BarberModalState extends ConsumerState<_BarberModal> {
 
   String _initials(String name) {
     final parts = name.trim().split(' ');
-    if (parts.length >= 2)
+    if (parts.length >= 2) {
       return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
     return name.isNotEmpty ? name[0].toUpperCase() : 'XX';
   }
 

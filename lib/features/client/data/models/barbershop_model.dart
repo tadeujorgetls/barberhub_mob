@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'service_model.dart';
 import 'barber_model.dart';
 import 'product_model.dart';
@@ -46,7 +48,7 @@ class BarbershopModel {
     required this.rating,
     required this.reviewCount,
     this.imageUrl = '',
-    this.coverEmoji = '✂️',
+    this.coverEmoji = 'scissors',
     required this.services,
     required this.barbers,
     this.products = const [],
@@ -57,6 +59,14 @@ class BarbershopModel {
   });
 
   bool get hasLocation => location != null;
+
+  /// Ícone Lucide correspondente à capa da barbearia.
+  /// Suporta tanto chaves novas ('scissors','zap','crown')
+  /// quanto emojis legados (fallback para scissors).
+  IconData get coverIconData {
+    if (coverEmoji.runes.any((r) => r > 127)) return LucideIcons.scissors;
+    return BarbershopIcons.fromKey(coverEmoji);
+  }
 
   String get formattedRating => rating.toStringAsFixed(1);
 

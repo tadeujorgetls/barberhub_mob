@@ -102,6 +102,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_lucide:
+    dependency: "direct main"
+    description:
+      name: flutter_lucide
+      sha256: d2866c9ba75b2300e73a888489f0d7ef1d225e1c352d7e7f5c7fdff7d04e294c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.11.0"
   flutter_riverpod:
     dependency: "direct main"
     description:
@@ -360,8 +368,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
-<<<<<<< HEAD
-=======
   riverpod:
     dependency: transitive
     description:
@@ -370,7 +376,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.1"
->>>>>>> 5d6312d (feature: outros logins)
   shared_preferences:
     dependency: "direct main"
     description:

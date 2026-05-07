@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:barber_hub/features/client/presentation/providers/app_data_provider.dart';
 import 'package:barber_hub/features/client/data/models/appointment_model.dart';
@@ -97,19 +98,30 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                   .titleLarge
                                   ?.copyWith(fontSize: 18)),
                           const SizedBox(height: 6),
-                          Text(
-                            _rating == 0
-                                ? 'Toque nas estrelas para avaliar'
-                                : _ratingLabel(_rating),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: _rating == 0
-                                      ? AppTheme.textHint
-                                      : AppTheme.gold,
-                                  fontSize: 14,
-                                ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: _rating == 0
+                                ? Text(
+                                    'Toque nas estrelas para avaliar',
+                                    key: const ValueKey('hint'),
+                                    style: Theme.of(context).textTheme.bodyMedium
+                                        ?.copyWith(color: AppTheme.textHint, fontSize: 14),
+                                  )
+                                : Row(
+                                    key: ValueKey(_rating),
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(_ratingIcon(_rating),
+                                          color: _ratingColor(_rating), size: 18),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        _ratingLabel(_rating),
+                                        style: Theme.of(context).textTheme.bodyMedium
+                                            ?.copyWith(color: _ratingColor(_rating), fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
                           ),
                           const SizedBox(height: 20),
                           _StarRatingInput(
@@ -194,13 +206,16 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   String _ratingLabel(int r) {
     switch (r) {
-      case 5: return '🤩  Excelente!';
-      case 4: return '😊  Bom';
-      case 3: return '😐  Regular';
-      case 2: return '😕  Ruim';
-      default: return '😞  Péssimo';
+      case 5: return 'Excelente!';
+      case 4: return 'Bom';
+      case 3: return 'Regular';
+      case 2: return 'Ruim';
+      default: return 'Péssimo';
     }
   }
+
+  IconData _ratingIcon(int r) => RatingIcons.forRating(r);
+  Color _ratingColor(int r) => RatingIcons.colorForRating(r);
 }
 
 // ── Resumo do agendamento ─────────────────────────────────────────────────────
@@ -229,8 +244,7 @@ class _AppointmentSummary extends StatelessWidget {
               border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
             ),
             child: Center(
-              child: Text(a.barbershop.coverEmoji,
-                  style: const TextStyle(fontSize: 24)),
+              child: Icon(a.barbershop.coverIconData, color: AppTheme.gold, size: 26),
             ),
           ),
           const SizedBox(width: 14),

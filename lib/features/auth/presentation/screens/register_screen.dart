@@ -137,10 +137,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             onEditingComplete: () => FocusScope.of(context)
                                 .requestFocus(_emailFocus),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty)
+                              if (v == null || v.trim().isEmpty) {
                                 return 'Informe seu nome';
-                              if (v.trim().length < 3)
+                              }
+                              if (v.trim().length < 3) {
                                 return 'Nome muito curto';
+                              }
                               return null;
                             },
                           ),
@@ -155,10 +157,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             onEditingComplete: () =>
                                 FocusScope.of(context).requestFocus(_passFocus),
                             validator: (v) {
-                              if (v == null || v.isEmpty)
+                              if (v == null || v.isEmpty) {
                                 return 'Informe o e-mail';
-                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v))
+                              }
+                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v)) {
                                 return 'E-mail inválido';
+                              }
                               return null;
                             },
                           ),
@@ -173,8 +177,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             onEditingComplete: () => FocusScope.of(context)
                                 .requestFocus(_confirmFocus),
                             validator: (v) {
-                              if (v == null || v.isEmpty)
+                              if (v == null || v.isEmpty) {
                                 return 'Crie uma senha';
+                              }
                               if (v.length < 6) return 'Mínimo 6 caracteres';
                               return null;
                             },
@@ -189,10 +194,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             textInputAction: TextInputAction.done,
                             onEditingComplete: _handleRegister,
                             validator: (v) {
-                              if (v == null || v.isEmpty)
+                              if (v == null || v.isEmpty) {
                                 return 'Confirme a senha';
-                              if (v != _passCtrl.text)
+                              }
+                              if (v != _passCtrl.text) {
                                 return 'As senhas não coincidem';
+                              }
                               return null;
                             },
                           ),

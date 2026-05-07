@@ -68,8 +68,8 @@ class ProductDetailScreen extends StatelessWidget {
                                   color: AppTheme.gold.withOpacity(0.2)),
                             ),
                             child: Center(
-                              child: Text(product.imageEmoji,
-                                  style: const TextStyle(fontSize: 72)),
+                              child: Icon(product.iconData,
+                                  color: AppTheme.gold, size: 48),
                             ),
                           ),
                           if (product.hasDiscount)
@@ -528,7 +528,7 @@ class _CategoryChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(category.emoji, style: const TextStyle(fontSize: 12)),
+          Icon(category.iconData, size: 12, color: AppTheme.textSecondary),
           const SizedBox(width: 5),
           Text(category.label,
               style: Theme.of(context)

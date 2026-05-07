@@ -220,7 +220,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
       arguments: a,
     );
     if (result == true && context.mounted) {
-      AppUtils.showSnack(context, 'Avaliação enviada! Obrigado. 🌟',
+      AppUtils.showSnack(context, 'Avaliação enviada! Obrigado.',
           isSuccess: true);
     }
   }
