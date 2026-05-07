@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
@@ -7,7 +6,6 @@ import 'package:barber_hub/core/utils/app_utils.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
 import 'package:barber_hub/features/barber_shop/presentation/providers/shop_management_providers.dart';
-import 'package:barber_hub/features/barber_shop/presentation/providers/barber_shop_providers.dart';
 import 'package:barber_hub/features/barber_shop/presentation/widgets/bs_widgets.dart';
 import 'package:barber_hub/features/client/data/models/appointment_model.dart';
 import 'package:barber_hub/shared/mock/mock_data.dart';

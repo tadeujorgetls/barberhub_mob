@@ -28,6 +28,31 @@ class MockData {
       'password': '123456',
       'role': UserRole.admin,
     },
+    // ── Proprietários de Barbearia (novo perfil) — CORRIGIDO: ausente após conflito
+    {
+      'id': 'bs_owner_1',
+      'name': 'Barbearia Clássica',
+      'email': 'classica@barberhub.com',
+      'password': '123456',
+      'role': UserRole.barberShop,
+      'linkedId': 'bs1',
+    },
+    {
+      'id': 'bs_owner_2',
+      'name': 'Studio Urbano',
+      'email': 'studio@barberhub.com',
+      'password': '123456',
+      'role': UserRole.barberShop,
+      'linkedId': 'bs2',
+    },
+    {
+      'id': 'bs_owner_3',
+      'name': 'Dom Navalha',
+      'email': 'dom@barberhub.com',
+      'password': '123456',
+      'role': UserRole.barberShop,
+      'linkedId': 'bs3',
+    },
   ];
 
   // ── Barbershops ───────────────────────────────────────────────────────────

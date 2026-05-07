@@ -1,4 +1,5 @@
-enum UserRole { client, barber, admin }
+// CORRIGIDO: adicionado valor `barberShop` ao enum, removido durante conflito de merge.
+enum UserRole { client, barberShop, barber, admin }
 
 class UserModel {
   final String id;
@@ -17,6 +18,8 @@ class UserModel {
     switch (role) {
       case UserRole.client:
         return 'Cliente';
+      case UserRole.barberShop:
+        return 'Barbearia';
       case UserRole.barber:
         return 'Barbeiro';
       case UserRole.admin:

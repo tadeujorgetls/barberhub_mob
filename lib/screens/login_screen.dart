@@ -86,12 +86,8 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
       );
-      final route = auth.isAdmin
-          ? AppRoutes.adminHome
-          : auth.isBarber
-              ? AppRoutes.barberHome
-              : AppRoutes.home;
-      Navigator.pushReplacementNamed(context, route);
+      // CORRIGIDO: usa initialRoute do provider (inclui barberShopHome)
+      Navigator.pushReplacementNamed(context, auth.initialRoute);
     }
   }
 
@@ -102,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Background decorative element
           Positioned(
             top: -80,
             right: -80,
@@ -137,7 +132,6 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
           ),
-
           SafeArea(
             child: FadeTransition(
               opacity: _fadeAnim,
@@ -156,8 +150,6 @@ class _LoginScreenState extends State<LoginScreen>
                           subtitle: 'Sua barbearia favorita,\nna palma da mão.',
                         ),
                         const SizedBox(height: 52),
-
-                        // Section label
                         Row(
                           children: [
                             const GoldAccent(),
@@ -176,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen>
                           ],
                         ),
                         const SizedBox(height: 28),
-
                         AppTextField(
                           label: 'E-mail',
                           hint: 'seu@email.com',
@@ -193,7 +184,6 @@ class _LoginScreenState extends State<LoginScreen>
                           },
                         ),
                         const SizedBox(height: 16),
-
                         AppTextField(
                           label: 'Senha',
                           hint: '••••••••',
@@ -208,9 +198,7 @@ class _LoginScreenState extends State<LoginScreen>
                             return null;
                           },
                         ),
-
                         const SizedBox(height: 12),
-
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -232,19 +220,15 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 32),
-
                         PrimaryButton(
                           label: 'Entrar',
                           onPressed: _handleLogin,
                           isLoading: auth.isLoading,
                         ),
-
                         const SizedBox(height: 40),
                         const DividerWithText(text: 'NÃO TEM UMA CONTA'),
                         const SizedBox(height: 24),
-
                         SizedBox(
                           width: double.infinity,
                           height: 56,
@@ -271,57 +255,9 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 40),
-
-                        // Demo hint
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
-                            borderRadius: BorderRadius.circular(4),
-                            color: AppTheme.gold.withOpacity(0.04),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.info_outline,
-                                      color: AppTheme.gold, size: 14),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'DEMO',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.copyWith(
-                                          color: AppTheme.gold,
-                                          fontSize: 10,
-                                          letterSpacing: 2,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'carlos@barberhub.com',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontSize: 12),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Senha: 123456',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
+                        const SizedBox(height: 36),
+                        // CORRIGIDO: DemoHint restaurado com todos os perfis e descrições
+                        const _DemoHint(),
                       ],
                     ),
                   ),
@@ -333,4 +269,82 @@ class _LoginScreenState extends State<LoginScreen>
       ),
     );
   }
+}
+
+/// Seção de credenciais demo exibida na tela de login.
+/// CORRIGIDO: restaurada após conflito de merge — exibe todos os 4 perfis
+/// com ícone, label e e-mail correspondentes.
+class _DemoHint extends StatelessWidget {
+  const _DemoHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(4),
+        color: AppTheme.gold.withOpacity(0.04),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: AppTheme.gold, size: 14),
+              const SizedBox(width: 8),
+              Text(
+                'DEMO',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppTheme.gold, fontSize: 10, letterSpacing: 2),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _row(context, Icons.person_outline_rounded,
+              'Cliente',    'carlos@barberhub.com'),
+          _row(context, Icons.storefront_rounded,
+              'Barbearia',  'classica@barberhub.com'),
+          _row(context, Icons.content_cut_rounded,
+              'Barbeiro',   'rafael@barberhub.com'),
+          _row(context, Icons.admin_panel_settings_outlined,
+              'Admin',      'admin@barberhub.com'),
+          const SizedBox(height: 4),
+          Text(
+            'Senha: 123456 (todos)',
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontSize: 11, color: AppTheme.textHint),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(
+      BuildContext context, IconData icon, String label, String email) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Row(
+          children: [
+            Icon(icon, size: 13, color: AppTheme.gold),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                email,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 11, color: AppTheme.textHint),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
 }

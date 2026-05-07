@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'user_model.dart';
 import '../mock/mock_data.dart';
+import '../routes/app_routes.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserModel? _currentUser;
-  String? _linkedBarberId; // for barber role
+  String? _linkedBarberId;
   bool _isLoading = false;
 
   UserModel? get currentUser => _currentUser;
@@ -12,9 +13,19 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _currentUser != null;
   String? get linkedBarberId => _linkedBarberId;
 
-  bool get isClient => _currentUser?.role == UserRole.client;
-  bool get isBarber => _currentUser?.role == UserRole.barber;
-  bool get isAdmin => _currentUser?.role == UserRole.admin;
+  bool get isClient     => _currentUser?.role == UserRole.client;
+  // CORRIGIDO: getter barberShop ausente após conflito de merge
+  bool get isBarberShop => _currentUser?.role == UserRole.barberShop;
+  bool get isBarber     => _currentUser?.role == UserRole.barber;
+  bool get isAdmin      => _currentUser?.role == UserRole.admin;
+
+  /// Rota inicial com base no perfil do usuário logado.
+  String get initialRoute {
+    if (isAdmin)      return AppRoutes.adminHome;
+    if (isBarberShop) return AppRoutes.barberShopHome; // CORRIGIDO: redirecionamento ausente
+    if (isBarber)     return AppRoutes.barberHome;
+    return AppRoutes.home;
+  }
 
   Future<String?> login(String email, String password) async {
     _isLoading = true;
@@ -36,10 +47,10 @@ class AuthProvider extends ChangeNotifier {
 
     final u = matches.first;
     _currentUser = UserModel(
-      id: u['id'],
-      name: u['name'],
-      email: u['email'],
-      role: u['role'],
+      id:    u['id']   as String,
+      name:  u['name'] as String,
+      email: u['email'] as String,
+      role:  u['role'] as UserRole,
     );
     _linkedBarberId = u['barberId'] as String?;
 
@@ -67,19 +78,19 @@ class AuthProvider extends ChangeNotifier {
     }
 
     final newU = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'name': name.trim(),
-      'email': email.trim().toLowerCase(),
+      'id':       DateTime.now().millisecondsSinceEpoch.toString(),
+      'name':     name.trim(),
+      'email':    email.trim().toLowerCase(),
       'password': password,
-      'role': UserRole.client,
+      'role':     UserRole.client,
     };
     MockData.users.add(newU);
 
     _currentUser = UserModel(
-      id: newU['id'] as String,
-      name: newU['name'] as String,
+      id:    newU['id']    as String,
+      name:  newU['name']  as String,
       email: newU['email'] as String,
-      role: UserRole.client,
+      role:  UserRole.client,
     );
 
     _isLoading = false;
