@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/auth_provider.dart';
+import 'package:barber_hub/features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../routes/app_routes.dart';
@@ -12,13 +12,17 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.watch<LegacyAuthAdapter>();
     final data = context.watch<AppDataProvider>();
     final user = auth.currentUser;
-    final clientId = user?.id ?? '';
+    if (user == null) {
+      return const Scaffold(
+          body: Center(
+              child: CircularProgressIndicator(color: Color(0xFFD4A853))));
+    }
+    final clientId = user.id;
     final initials =
-        user?.name.split(' ').take(2).map((e) => e[0].toUpperCase()).join() ??
-            'U';
+        user.name.split(' ').take(2).map((e) => e[0].toUpperCase()).join();
 
     final allAppts = data.appointmentsForClient(clientId);
     final active = data.activeForClient(clientId);
@@ -79,8 +83,7 @@ class ProfileScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: AppTheme.gold.withOpacity(0.15),
-                            border:
-                                Border.all(color: AppTheme.gold, width: 2),
+                            border: Border.all(color: AppTheme.gold, width: 2),
                           ),
                           child: Center(
                             child: Text(
@@ -98,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                user?.name ?? 'Usuário',
+                                user.name ?? 'Usuário',
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -106,7 +109,7 @@ class ProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                user?.email ?? '',
+                                user.email ?? '',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -114,7 +117,7 @@ class ProfileScreen extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-                              RoleBadge(label: user?.roleLabel ?? 'Cliente'),
+                              RoleBadge(label: user.roleLabel ?? 'Cliente'),
                             ],
                           ),
                         ),
@@ -129,11 +132,9 @@ class ProfileScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: Row(
                   children: [
-                    _StatTile(
-                        value: '${allAppts.length}', label: 'Total'),
+                    _StatTile(value: '${allAppts.length}', label: 'Total'),
                     const SizedBox(width: 10),
-                    _StatTile(
-                        value: '${active.length}', label: 'Ativos'),
+                    _StatTile(value: '${active.length}', label: 'Ativos'),
                     const SizedBox(width: 10),
                     _StatTile(
                         value: 'R\$ ${totalSpent.toInt()}',
@@ -161,8 +162,7 @@ class ProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppTheme.surfaceElevated,
                           borderRadius: BorderRadius.circular(20),
-                          border:
-                              Border.all(color: AppTheme.inputBorder),
+                          border: Border.all(color: AppTheme.inputBorder),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -246,12 +246,11 @@ class ProfileScreen extends StatelessWidget {
                               context, AppRoutes.login);
                         },
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                              color: AppTheme.error, width: 1),
+                          side:
+                              const BorderSide(color: AppTheme.error, width: 1),
                           foregroundColor: AppTheme.error,
                           shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4)),
+                            borderRadius: BorderRadius.all(Radius.circular(4)),
                           ),
                         ),
                         icon: const Icon(Icons.logout_rounded, size: 18),
@@ -325,8 +324,7 @@ class _MenuItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String tag;
-  const _MenuItem(
-      {required this.icon, required this.label, required this.tag});
+  const _MenuItem({required this.icon, required this.label, required this.tag});
 
   @override
   Widget build(BuildContext context) {
@@ -350,15 +348,16 @@ class _MenuItem extends StatelessWidget {
                     ?.copyWith(fontSize: 14)),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: AppTheme.textHint.withOpacity(0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(tag,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 10, color: AppTheme.textHint)),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontSize: 10, color: AppTheme.textHint)),
           ),
           const SizedBox(width: 8),
           const Icon(Icons.chevron_right_rounded,

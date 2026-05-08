@@ -446,4 +446,53 @@ class AppDataProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  /// Cria uma nova barbearia (admin). Persiste em memória enquanto o app roda.
+  void addBarbershop(BarbershopModel shop) {
+    _barbershops.add(shop);
+    notifyListeners();
+  }
+
+  // ── Barbearia: serviços por shop (usados pelo BarberShopServicesScreen) ───
+  // Distintos dos métodos de admin acima (operam em _services global).
+  // Estes operam na lista services de cada BarbershopModel individualmente.
+
+  List<ServiceModel> servicesForShop(String shopId) {
+    final shop = _barbershops.where((s) => s.id == shopId).firstOrNull;
+    return shop?.services ?? [];
+  }
+
+  void addShopService(String shopId, ServiceModel service) {
+    final shop = _barbershops.where((s) => s.id == shopId).firstOrNull;
+    if (shop == null) return;
+    shop.services.add(service);
+    notifyListeners();
+  }
+
+  void updateShopService(String shopId, ServiceModel updated) {
+    final shop = _barbershops.where((s) => s.id == shopId).firstOrNull;
+    if (shop == null) return;
+    final idx = shop.services.indexWhere((s) => s.id == updated.id);
+    if (idx != -1) shop.services[idx] = updated;
+    notifyListeners();
+  }
+
+  void deleteShopService(String shopId, String serviceId) {
+    final shop = _barbershops.where((s) => s.id == shopId).firstOrNull;
+    if (shop == null) return;
+    shop.services.removeWhere((s) => s.id == serviceId);
+    notifyListeners();
+  }
+
+  void toggleShopServiceActive(String shopId, String serviceId) {
+    final shop = _barbershops.where((s) => s.id == shopId).firstOrNull;
+    if (shop == null) return;
+    final idx = shop.services.indexWhere((s) => s.id == serviceId);
+    if (idx != -1) {
+      final s = shop.services[idx];
+      shop.services[idx] = s.copyWith(isActive: !s.isActive);
+    }
+    notifyListeners();
+  }
+
 }

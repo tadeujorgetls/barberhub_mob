@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/cart_provider.dart';
 import '../../models/product_model.dart';
@@ -104,7 +105,8 @@ class CartScreen extends StatelessWidget {
 
 // ── Barbershop badge ──────────────────────────────────────────────────────────
 class _BarbershopBadge extends StatelessWidget {
-  final String name; final IconData iconData;
+  final String name;
+  final IconData iconData;
   const _BarbershopBadge({required this.name, required this.iconData});
 
   @override
@@ -641,4 +643,85 @@ class _CheckoutSuccessDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Barra inferior persistente do Carrinho ────────────────────────────────────
+// Garante que a nav bar permaneça visível mesmo na tela de carrinho (rota push).
+class _CartBottomNav extends StatelessWidget {
+  final BuildContext context;
+  const _CartBottomNav({required this.context});
+
+  @override
+  Widget build(BuildContext _) => Container(
+        decoration: const BoxDecoration(
+          color: AppTheme.surface,
+          border: Border(top: BorderSide(color: AppTheme.divider, width: 1)),
+        ),
+        child: SafeArea(
+            top: false,
+            child: SizedBox(
+                height: 64,
+                child: Row(children: [
+                  _NavBtn(
+                      icon: Icons.storefront_outlined,
+                      label: 'Início',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      }),
+                  _NavBtn(
+                      icon: Icons.calendar_today_outlined,
+                      label: 'Agenda',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      }),
+                  _NavBtn(
+                      icon: Icons.workspace_premium_outlined,
+                      label: 'Assinatura',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      }),
+                  const _NavBtn(
+                      icon: Icons.shopping_bag_rounded,
+                      label: 'Carrinho',
+                      selected: true,
+                      onTap: null),
+                  _NavBtn(
+                      icon: Icons.person_outline_rounded,
+                      label: 'Perfil',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      }),
+                ]))),
+      );
+}
+
+class _NavBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  final bool selected;
+  const _NavBtn(
+      {required this.icon,
+      required this.label,
+      this.onTap,
+      this.selected = false});
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(icon,
+                color: selected ? AppTheme.gold : AppTheme.textHint, size: 22),
+            const SizedBox(height: 4),
+            Text(label,
+                style: GoogleFonts.jost(
+                    fontSize: 10,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    color: selected ? AppTheme.gold : AppTheme.textHint,
+                    letterSpacing: 0.3)),
+          ]),
+        ),
+      );
 }

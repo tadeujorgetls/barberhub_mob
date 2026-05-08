@@ -84,7 +84,25 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                       ]),
                     ])),
                     const SizedBox(width: 12),
-                    Icon(BarbershopIcons.fromKey(shop.coverEmoji), color: AppTheme.gold, size: 36),
+                    Column(children: [
+                      GestureDetector(
+                        onTap: () async {
+                          await ref.read(authNotifierProvider.notifier).logout();
+                          if (context.mounted) Navigator.pushReplacementNamed(context, '/login');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceElevated,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.inputBorder),
+                          ),
+                          child: const Icon(Icons.logout_rounded, color: AppTheme.textSecondary, size: 18),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Icon(BarbershopIcons.fromKey(shop.coverEmoji), color: AppTheme.gold, size: 32),
+                    ]),
                   ]),
                 ]),
               )),
@@ -118,7 +136,7 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                   const SizedBox(height: 14),
                   GridView.count(
                     shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2, childAspectRatio: 1.55,
+                    crossAxisCount: 2, childAspectRatio: 2.4,
                     crossAxisSpacing: 12, mainAxisSpacing: 12,
                     children: [
                       _StatCard(label: 'Hoje', value: '${stats.todayAppointments}',
@@ -241,18 +259,27 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
       color: gold ? AppTheme.gold.withOpacity(0.08) : AppTheme.surfaceElevated,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: gold ? AppTheme.gold.withOpacity(0.3) : AppTheme.inputBorder),
     ),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Icon(icon, color: color, size: 20),
-      const Spacer(),
-      Text(value, style: GoogleFonts.cormorantGaramond(
-          color: gold ? AppTheme.gold : AppTheme.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
-      Text(label, style: GoogleFonts.jost(color: AppTheme.textSecondary, fontSize: 11)),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      Container(
+        width: 36, height: 36,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: color, size: 18),
+      ),
+      const SizedBox(width: 10),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(value, style: GoogleFonts.jost(
+            color: gold ? AppTheme.gold : AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+        Text(label, style: GoogleFonts.jost(color: AppTheme.textSecondary, fontSize: 10)),
+      ])),
     ]),
   );
 }

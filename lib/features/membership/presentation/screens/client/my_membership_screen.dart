@@ -5,7 +5,9 @@ import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/core/routes/app_routes.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/membership/domain/entities/membership_entity.dart';
+import 'package:barber_hub/features/membership/domain/entities/membership_plan_entity.dart';
 import 'package:barber_hub/features/membership/presentation/providers/membership_providers.dart';
+import 'package:barber_hub/features/membership/presentation/screens/client/membership_plans_screen.dart';
 import 'package:barber_hub/features/membership/presentation/widgets/membership_widgets.dart';
 
 /// Tela central de assinaturas do cliente —
@@ -107,14 +109,16 @@ class _State extends ConsumerState<MyMembershipScreen> {
             if (state.isLoading)
               const SliverFillRemaining(
                 child: Center(
-                    child: CircularProgressIndicator(color: AppTheme.gold)),
+                    child:
+                        CircularProgressIndicator(color: AppTheme.gold)),
               )
 
             // ── Empty state ──────────────────────────────────────────────
             else if (state.memberships.isEmpty)
               SliverFillRemaining(
                 child: _EmptyState(
-                  onExplore: () => Navigator.pushNamed(context, AppRoutes.home),
+                  onExplore: () =>
+                      Navigator.pushNamed(context, AppRoutes.home),
                 ),
               )
 
@@ -167,18 +171,21 @@ class _State extends ConsumerState<MyMembershipScreen> {
                     delegate: SliverChildBuilderDelegate(
                       (_, i) {
                         final inactive = state.memberships
-                            .where((m) => m.status != MembershipStatus.active)
+                            .where((m) =>
+                                m.status != MembershipStatus.active)
                             .toList();
                         if (i >= inactive.length) return null;
                         return ActiveMembershipCard(
                           membership: inactive[i],
-                          onTap: inactive[i].status == MembershipStatus.paused
+                          onTap: inactive[i].status ==
+                                  MembershipStatus.paused
                               ? () => _showManageSheet(inactive[i])
                               : null,
                         );
                       },
                       childCount: state.memberships
-                          .where((m) => m.status != MembershipStatus.active)
+                          .where(
+                              (m) => m.status != MembershipStatus.active)
                           .length,
                     ),
                   ),
@@ -200,13 +207,28 @@ class _State extends ConsumerState<MyMembershipScreen> {
       ),
       builder: (_) => _ManageSheet(
         membership: membership,
+        onUpgrade: () {
+          Navigator.pop(context);
+          Navigator.pushNamed(
+            context,
+            AppRoutes.membershipPlans,
+            arguments: MembershipPlansArgs(
+              shopId: membership.barbershopId,
+              shopName: membership.barbershopName,
+            ),
+          );
+        },
         onPause: () {
           Navigator.pop(context);
-          ref.read(clientMembershipProvider.notifier).pause(membership.id);
+          ref
+              .read(clientMembershipProvider.notifier)
+              .pause(membership.id);
         },
         onResume: () {
           Navigator.pop(context);
-          ref.read(clientMembershipProvider.notifier).resume(membership.id);
+          ref
+              .read(clientMembershipProvider.notifier)
+              .resume(membership.id);
         },
         onCancel: () {
           Navigator.pop(context);
@@ -233,13 +255,15 @@ class _State extends ConsumerState<MyMembershipScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                Text('Manter', style: GoogleFonts.jost(color: AppTheme.gold)),
+            child: Text('Manter',
+                style: GoogleFonts.jost(color: AppTheme.gold)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(clientMembershipProvider.notifier).cancel(membership.id);
+              ref
+                  .read(clientMembershipProvider.notifier)
+                  .cancel(membership.id);
             },
             child: Text('Cancelar assinatura',
                 style: GoogleFonts.jost(color: AppTheme.error)),
@@ -274,7 +298,8 @@ class _SectionLabel extends StatelessWidget {
             Expanded(child: Container(height: 1, color: AppTheme.divider)),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: AppTheme.surfaceElevated,
                 borderRadius: BorderRadius.circular(20),
@@ -306,7 +331,8 @@ class _EmptyState extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppTheme.gold.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                border:
+                    Border.all(color: AppTheme.gold.withOpacity(0.2)),
               ),
               child: const Icon(Icons.workspace_premium_outlined,
                   color: AppTheme.gold, size: 40),
@@ -323,7 +349,9 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Explore as barbearias e assine um plano para cortes mensais com desconto.',
               style: GoogleFonts.jost(
-                  color: AppTheme.textSecondary, fontSize: 14, height: 1.5),
+                  color: AppTheme.textSecondary,
+                  fontSize: 14,
+                  height: 1.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -336,7 +364,8 @@ class _EmptyState extends StatelessWidget {
                   backgroundColor: AppTheme.gold,
                   foregroundColor: AppTheme.background,
                   shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4))),
+                      borderRadius:
+                          BorderRadius.all(Radius.circular(4))),
                 ),
                 child: Text(
                   'EXPLORAR BARBEARIAS',
@@ -354,12 +383,14 @@ class _EmptyState extends StatelessWidget {
 
 class _ManageSheet extends StatelessWidget {
   final MembershipEntity membership;
+  final VoidCallback onUpgrade;
   final VoidCallback onPause;
   final VoidCallback onResume;
   final VoidCallback onCancel;
 
   const _ManageSheet({
     required this.membership,
+    required this.onUpgrade,
     required this.onPause,
     required this.onResume,
     required this.onCancel,
@@ -393,11 +424,19 @@ class _ManageSheet extends StatelessWidget {
           ),
           Text(
             membership.barbershopName,
-            style:
-                GoogleFonts.jost(color: AppTheme.textSecondary, fontSize: 14),
+            style: GoogleFonts.jost(
+                color: AppTheme.textSecondary, fontSize: 14),
           ),
           const SizedBox(height: 20),
-          if (isActive)
+          if (isActive && membership.plan.tier != MembershipTier.vip)
+            _SheetAction(
+              icon: Icons.upgrade_rounded,
+              label: 'Fazer upgrade',
+              subtitle: 'Mudar para um plano superior',
+              color: const Color(0xFFB87FE8),
+              onTap: onUpgrade,
+            ),
+        if (isActive)
             _SheetAction(
               icon: Icons.pause_circle_outline_rounded,
               label: 'Pausar assinatura',

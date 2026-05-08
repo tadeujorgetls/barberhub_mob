@@ -94,6 +94,40 @@ class BarberShopProfileScreen extends ConsumerWidget {
               ),
             )),
 
+          // ── Assinaturas ──────────────────────────────────────────────────────
+          SliverToBoxAdapter(child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, AppRoutes.membershipManagement),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceElevated,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+                ),
+                child: Row(children: [
+                  Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      color: AppTheme.gold.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.workspace_premium_rounded, color: AppTheme.gold, size: 18),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Planos de Assinatura', style: GoogleFonts.jost(
+                        color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+                    Text('Criar, editar e gerenciar planos', style: GoogleFonts.jost(
+                        color: AppTheme.textSecondary, fontSize: 12)),
+                  ])),
+                  const Icon(Icons.chevron_right_rounded, color: AppTheme.textHint, size: 20),
+                ]),
+              ),
+            ),
+          )),
+
           // ── Logout ───────────────────────────────────────────────────────────
           SliverToBoxAdapter(child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),

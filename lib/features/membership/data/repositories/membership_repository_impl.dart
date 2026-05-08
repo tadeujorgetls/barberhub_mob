@@ -15,10 +15,7 @@ class MembershipRepositoryImpl implements IMembershipRepository {
       final plans = await _datasource.getPlansForShop(shopId);
       return (plans, null);
     } catch (e) {
-      return (
-        <MembershipPlanEntity>[],
-        const UnknownFailure('Erro ao carregar planos.')
-      );
+      return (const <MembershipPlanEntity>[], const UnknownFailure('Erro ao carregar planos.'));
     }
   }
 
@@ -39,10 +36,7 @@ class MembershipRepositoryImpl implements IMembershipRepository {
       final memberships = await _datasource.getClientMemberships(clientId);
       return (memberships, null);
     } catch (e) {
-      return (
-        <MembershipEntity>[],
-        const UnknownFailure('Erro ao carregar assinaturas.')
-      );
+      return (const <MembershipEntity>[], const UnknownFailure('Erro ao carregar assinaturas.'));
     }
   }
 
@@ -53,10 +47,7 @@ class MembershipRepositoryImpl implements IMembershipRepository {
       final memberships = await _datasource.getShopMemberships(shopId);
       return (memberships, null);
     } catch (e) {
-      return (
-        <MembershipEntity>[],
-        const UnknownFailure('Erro ao carregar assinantes.')
-      );
+      return (const <MembershipEntity>[], const UnknownFailure('Erro ao carregar assinantes.'));
     }
   }
 

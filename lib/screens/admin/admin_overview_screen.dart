@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
@@ -18,6 +19,14 @@ class AdminOverviewScreen extends StatelessWidget {
     final all = data.allAppointmentsSorted;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCreateBarbershopDialog(context, data),
+        backgroundColor: AppTheme.gold,
+        foregroundColor: AppTheme.background,
+        icon: const Icon(Icons.add_business_rounded, size: 18),
+        label: Text('Nova Barbearia', style: GoogleFonts.jost(fontWeight: FontWeight.w600, fontSize: 13)),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+      ),
       body: Stack(
         children: [
           Positioned(
@@ -237,9 +246,8 @@ class AdminOverviewScreen extends StatelessWidget {
                             showClient: true,
                             showBarber: true,
                             showBarbershop: true,
-                            onCancel: all[i].canCancel
-                                ? () => _cancelConfirm(context, data, all[i].id)
-                                : null,
+                            // Admin: somente visualização — sem controle de agendamentos
+                            onCancel: null,
                           ),
                         ),
                         childCount: all.length,
@@ -254,36 +262,7 @@ class AdminOverviewScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _cancelConfirm(
-      BuildContext ctx, AppDataProvider data, String id) async {
-    final ok = await showDialog<bool>(
-      context: ctx,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppTheme.surfaceElevated,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        title: Text('Cancelar agendamento',
-            style: Theme.of(ctx).textTheme.titleLarge),
-        content: Text('Confirmar cancelamento?',
-            style: Theme.of(ctx).textTheme.bodyMedium),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Não')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
-            child: const Text('Cancelar'),
-          ),
-        ],
-      ),
-    );
-    if (ok == true) {
-      await data.cancelAppointment(id);
-      if (ctx.mounted) {
-        AppUtils.showSnack(ctx, 'Agendamento cancelado.', isError: true);
-      }
-    }
-  }
+  // _cancelConfirm removido — admin tem somente leitura de agendamentos.
 }
 
 // ── Shop stat card ─────────────────────────────────────────────────────────────
@@ -454,4 +433,90 @@ class _StatusBreakdown extends StatelessWidget {
       ]),
     );
   }
+
+}
+
+void _showCreateBarbershopDialog(BuildContext context, AppDataProvider data) {
+  final nameCtrl = TextEditingController();
+  final addrCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppTheme.surface,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+    builder: (_) => Padding(
+      padding: EdgeInsets.only(left: 24, right: 24, top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 32),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Center(child: Container(width: 36, height: 4,
+            decoration: BoxDecoration(color: AppTheme.divider, borderRadius: BorderRadius.circular(2)))),
+        const SizedBox(height: 20),
+        Text('Nova Barbearia', style: GoogleFonts.jost(color: AppTheme.textPrimary,
+            fontSize: 18, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 20),
+        _AdminTextField(ctrl: nameCtrl, label: 'Nome da barbearia', icon: Icons.storefront_rounded),
+        const SizedBox(height: 12),
+        _AdminTextField(ctrl: addrCtrl, label: 'Endereço', icon: Icons.location_on_rounded),
+        const SizedBox(height: 12),
+        _AdminTextField(ctrl: phoneCtrl, label: 'Telefone', icon: Icons.phone_rounded),
+        const SizedBox(height: 24),
+        SizedBox(width: double.infinity, height: 52,
+          child: ElevatedButton(
+            onPressed: () {
+              if (nameCtrl.text.trim().isEmpty) return;
+              final id = 'bs_${DateTime.now().millisecondsSinceEpoch}';
+              data.addBarbershop(BarbershopModel(
+                id: id,
+                name: nameCtrl.text.trim(),
+                address: addrCtrl.text.trim(),
+                rating: 0.0,
+                reviewCount: 0,
+                coverEmoji: 'scissors',
+                phone: phoneCtrl.text.trim(),
+                services: [],
+                barbers: [],
+                products: [],
+                isOpen: true,
+              ));
+              Navigator.pop(context);
+              AppUtils.showSnack(context, 'Barbearia criada com sucesso!');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.gold,
+              foregroundColor: AppTheme.background,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+            ),
+            child: Text('CRIAR BARBEARIA', style: GoogleFonts.jost(fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+          ),
+        ),
+      ]),
+    ),
+  );
+}
+
+class _AdminTextField extends StatelessWidget {
+  final TextEditingController ctrl;
+  final String label;
+  final IconData icon;
+  const _AdminTextField({required this.ctrl, required this.label, required this.icon});
+
+  @override
+  Widget build(BuildContext context) => TextField(
+    controller: ctrl,
+    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+      prefixIcon: Icon(icon, color: AppTheme.gold, size: 18),
+      filled: true,
+      fillColor: AppTheme.surfaceElevated,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.inputBorder)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.inputBorder)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.gold)),
+    ),
+  );
 }

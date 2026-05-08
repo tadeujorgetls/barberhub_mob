@@ -83,8 +83,7 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
                                     fontSize: 11,
                                     letterSpacing: 4)),
                         Text('Minha Agenda',
-                            style:
-                                Theme.of(context).textTheme.displayMedium),
+                            style: Theme.of(context).textTheme.displayMedium),
                         if (barbershopName != null) ...[
                           const SizedBox(height: 4),
                           Row(children: [
@@ -132,7 +131,10 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
                     indicator: BoxDecoration(
                         color: AppTheme.gold,
                         borderRadius: BorderRadius.circular(5)),
+                    indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.all(3),
+                    dividerColor: Colors.transparent,
+                    overlayColor: WidgetStateProperty.all(Colors.transparent),
                     labelStyle: GoogleFonts.jost(
                         fontSize: 12, fontWeight: FontWeight.w700),
                     unselectedLabelStyle: GoogleFonts.jost(fontSize: 12),
@@ -210,8 +212,8 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
           context: context,
           builder: (_) => AlertDialog(
             backgroundColor: AppTheme.surfaceElevated,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             title: Text('Cancelar atendimento',
                 style: Theme.of(context).textTheme.titleLarge),
             content: Text('Confirmar cancelamento deste atendimento?',
@@ -225,8 +227,7 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
                   child: const Text('Não')),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                style:
-                    TextButton.styleFrom(foregroundColor: AppTheme.error),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.error),
                 child: const Text('Cancelar'),
               ),
             ],
@@ -284,8 +285,10 @@ class _TodaySummary extends StatelessWidget {
           const Spacer(),
           Text(
             '${appointments.length} atendimento${appointments.length > 1 ? 's' : ''}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 11, color: AppTheme.textSecondary),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontSize: 11, color: AppTheme.textSecondary),
           ),
         ]),
         const SizedBox(height: 12),
@@ -301,8 +304,7 @@ class _TodaySummary extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: AppTheme.surfaceElevated,
                             borderRadius: BorderRadius.circular(8),
-                            border:
-                                Border.all(color: AppTheme.inputBorder)),
+                            border: Border.all(color: AppTheme.inputBorder)),
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -311,8 +313,7 @@ class _TodaySummary extends StatelessWidget {
                                       .textTheme
                                       .titleLarge
                                       ?.copyWith(
-                                          color: AppTheme.gold,
-                                          fontSize: 15)),
+                                          color: AppTheme.gold, fontSize: 15)),
                               const SizedBox(height: 3),
                               Text(a.clientName,
                                   style: Theme.of(context)

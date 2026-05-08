@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
-import 'package:barber_hub/features/auth/presentation/providers/auth_state.dart';
 import 'package:barber_hub/features/membership/domain/entities/membership_entity.dart';
 import 'package:barber_hub/features/membership/domain/entities/membership_plan_entity.dart';
 import 'package:barber_hub/features/membership/presentation/providers/membership_providers.dart';

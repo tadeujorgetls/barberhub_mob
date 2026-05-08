@@ -387,6 +387,12 @@ class AppDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── Admin: Barbershop CRUD ───────────────────────────────────────────────
+  void addBarbershop(BarbershopModel shop) {
+    _barbershops.add(shop);
+    notifyListeners();
+  }
+
   // ── Admin: Service CRUD ───────────────────────────────────────────────────
   Future<void> addService(ServiceModel service) async {
     _isLoading = true;
