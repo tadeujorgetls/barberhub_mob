@@ -12,14 +12,16 @@ import 'client/profile_screen.dart';
 import 'package:barber_hub/features/membership/presentation/screens/client/my_membership_screen.dart';
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  final int initialIndex;
+
+  const MainShell({super.key, this.initialIndex = 0});
 
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   // GlobalKeys para cada item da BottomNav — usados pelo onboarding para
   // calcular a posicao do spotlight em cada etapa.
@@ -30,15 +32,16 @@ class _MainShellState extends State<MainShell> {
   final _navKey3 = GlobalKey(); // Perfil
 
   final List<Widget> _pages = const [
-    BarbershopListScreen(),    // índice 0
-    AppointmentsScreen(),      // índice 1
-    MyMembershipScreen(),      // índice 2 — Assinatura
-    ProfileScreen(),           // índice 3
+    BarbershopListScreen(), // índice 0
+    AppointmentsScreen(), // índice 1
+    MyMembershipScreen(), // índice 2 — Assinatura
+    ProfileScreen(), // índice 3
   ];
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex.clamp(0, 3);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OnboardingProvider>().checkFirstAccess();
     });
@@ -53,6 +56,15 @@ class _MainShellState extends State<MainShell> {
             index: _currentIndex,
             children: _pages,
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.aiAssistant),
+            backgroundColor: AppTheme.gold,
+            foregroundColor: AppTheme.background,
+            tooltip: 'Assistente IA',
+            child: const Icon(Icons.auto_awesome_rounded),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           bottomNavigationBar: _BarberBottomNav(
             currentIndex: _currentIndex,
             onTap: (i) => setState(() => _currentIndex = i),

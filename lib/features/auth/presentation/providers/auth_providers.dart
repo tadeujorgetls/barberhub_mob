@@ -1,10 +1,9 @@
-/// Arquivo de composição de providers Riverpod para a feature auth.
-/// Ponto único de acesso — screens importam apenas este arquivo.
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_hub/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:barber_hub/features/auth/data/datasources/auth_mock_datasource.dart';
+import 'package:barber_hub/features/auth/data/datasources/auth_supabase_datasource.dart';
 import 'package:barber_hub/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:barber_hub/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:barber_hub/features/auth/domain/usecases/auto_login_usecase.dart';
@@ -17,9 +16,12 @@ import 'auth_state.dart';
 export 'auth_state.dart';
 export 'auth_notifier.dart';
 
-// ── Infraestrutura ─────────────────────────────────────────────────────────
 final _mockDatasourceProvider = Provider<AuthMockDatasource>(
   (_) => AuthMockDatasource(),
+);
+
+final _supabaseDatasourceProvider = Provider<AuthSupabaseDatasource>(
+  (_) => AuthSupabaseDatasource(),
 );
 
 final _localDatasourceProvider = Provider<AuthLocalDatasource>(
@@ -29,11 +31,11 @@ final _localDatasourceProvider = Provider<AuthLocalDatasource>(
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
   return AuthRepositoryImpl(
     ref.read(_mockDatasourceProvider),
+    ref.read(_supabaseDatasourceProvider),
     ref.read(_localDatasourceProvider),
   );
 });
 
-// ── Use Cases ──────────────────────────────────────────────────────────────
 final _loginUseCaseProvider = Provider(
   (ref) => LoginUseCase(ref.read(authRepositoryProvider)),
 );
@@ -50,7 +52,6 @@ final _logoutUseCaseProvider = Provider(
   (ref) => LogoutUseCase(ref.read(authRepositoryProvider)),
 );
 
-// ── Notifier (ponto de acesso público) ────────────────────────────────────
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(

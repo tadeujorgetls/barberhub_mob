@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
-import '../../models/auth_provider.dart';
+import '../../features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/appointment_model.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
@@ -35,7 +35,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = context.watch<LegacyAuthAdapter>();
     final data = context.watch<AppDataProvider>();
     final clientId = auth.currentUser?.id ?? '';
 
@@ -47,7 +47,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──────────────────────────────────────────────────
+            // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: Column(
@@ -71,7 +71,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
 
             const SizedBox(height: 20),
 
-            // ── Tab bar ──────────────────────────────────────────────────
+            // â”€â”€ Tab bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
@@ -108,7 +108,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                         ],
                       ),
                     ),
-                    const Tab(text: 'Histórico'),
+                    const Tab(text: 'Historico'),
                   ],
                 ),
               ),
@@ -124,20 +124,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                     appointments: active,
                     emptyTitle: 'Nenhum agendamento',
                     emptySubtitle:
-                        'Você não tem horários marcados.\nQue tal agendar agora?',
+                        'Voce nao tem horarios marcados.\nQue tal agendar agora?',
                     emptyAction: 'Ver barbearias',
                     onEmptyAction: () {
-                      Navigator.pushReplacementNamed(
-                          context, AppRoutes.home);
+                      Navigator.pushReplacementNamed(context, AppRoutes.home);
                     },
                     onCancel: (a) => _confirmCancel(context, a, data),
                     onReschedule: (a) => _showReschedule(context, a),
                   ),
                   _AppointmentList(
                     appointments: past,
-                    emptyTitle: 'Histórico vazio',
+                    emptyTitle: 'Historico vazio',
                     emptySubtitle:
-                        'Seus agendamentos concluídos\naparecerão aqui.',
+                        'Seus agendamentos concluidos\naparecerao aqui.',
                     onCancel: null,
                     onReschedule: null,
                     onReview: (a) => _openReview(context, a),
@@ -165,10 +164,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
             style: Theme.of(context).textTheme.titleLarge),
         content: Text(
           'Cancelar "${a.service.name}" com ${a.barber.name} na ${a.barbershop.name}?',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(height: 1.5),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
         ),
         actions: [
           TextButton(
@@ -218,13 +214,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
       arguments: a,
     );
     if (result == true && context.mounted) {
-      AppUtils.showSnack(context, 'Avaliação enviada! Obrigado. 🌟',
+      AppUtils.showSnack(context, 'Avaliacao enviada! Obrigado.',
           isSuccess: true);
     }
   }
 }
 
-// ── Count badge ───────────────────────────────────────────────────────────────
+// â”€â”€ Count badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _CountBadge extends StatelessWidget {
   final int count;
   const _CountBadge(this.count);
@@ -234,8 +230,8 @@ class _CountBadge extends StatelessWidget {
     return Container(
       width: 18,
       height: 18,
-      decoration: const BoxDecoration(
-          shape: BoxShape.circle, color: AppTheme.goldDark),
+      decoration:
+          const BoxDecoration(shape: BoxShape.circle, color: AppTheme.goldDark),
       child: Center(
         child: Text(
           '$count',
@@ -249,7 +245,7 @@ class _CountBadge extends StatelessWidget {
   }
 }
 
-// ── Appointment list ──────────────────────────────────────────────────────────
+// â”€â”€ Appointment list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _AppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
   final String emptyTitle;
@@ -296,7 +292,7 @@ class _AppointmentList extends StatelessWidget {
   }
 }
 
-// ── Appointment card ──────────────────────────────────────────────────────────
+// â”€â”€ Appointment card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
   final void Function(AppointmentModel)? onCancel;
@@ -333,16 +329,14 @@ class _AppointmentCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Barbershop header ────────────────────────────────────────
+          // â”€â”€ Barbershop header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: AppTheme.gold.withOpacity(0.04),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
-              border: const Border(
-                  bottom: BorderSide(color: AppTheme.divider)),
+              border: const Border(bottom: BorderSide(color: AppTheme.divider)),
             ),
             child: Row(
               children: [
@@ -369,7 +363,7 @@ class _AppointmentCard extends StatelessWidget {
             ),
           ),
 
-          // ── Main content ─────────────────────────────────────────────
+          // â”€â”€ Main content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -382,8 +376,7 @@ class _AppointmentCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: AppTheme.gold.withOpacity(0.2)),
+                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
                   ),
                   child: Column(
                     children: [
@@ -393,19 +386,14 @@ class _AppointmentCard extends StatelessWidget {
                             .textTheme
                             .headlineLarge
                             ?.copyWith(
-                                color: AppTheme.gold,
-                                fontSize: 26,
-                                height: 1),
+                                color: AppTheme.gold, fontSize: 26, height: 1),
                       ),
                       Text(
                         _monthAbbr(a.date.month),
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(
-                                color: AppTheme.gold,
-                                fontSize: 10,
-                                letterSpacing: 1),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: AppTheme.gold,
+                            fontSize: 10,
+                            letterSpacing: 1),
                       ),
                     ],
                   ),
@@ -492,20 +480,19 @@ class _AppointmentCard extends StatelessWidget {
             ),
           ),
 
-          // ── Actions ──────────────────────────────────────────────────
+          // â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           if (a.canCancel || a.canReschedule) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
                   if (a.canReschedule && onReschedule != null)
                     Expanded(
                       child: TextButton.icon(
                         onPressed: () => onReschedule!(a),
-                        icon: const Icon(Icons.edit_calendar_outlined,
-                            size: 15),
+                        icon:
+                            const Icon(Icons.edit_calendar_outlined, size: 15),
                         label: const Text('Remarcar'),
                         style: TextButton.styleFrom(
                           textStyle: GoogleFonts.jost(
@@ -514,8 +501,7 @@ class _AppointmentCard extends StatelessWidget {
                       ),
                     ),
                   if (a.canCancel && a.canReschedule)
-                    Container(
-                        width: 1, height: 20, color: AppTheme.divider),
+                    Container(width: 1, height: 20, color: AppTheme.divider),
                   if (a.canCancel && onCancel != null)
                     Expanded(
                       child: TextButton.icon(
@@ -534,19 +520,19 @@ class _AppointmentCard extends StatelessWidget {
             ),
           ],
 
-          // ── Botão Avaliar / Badge avaliado ────────────────────────────
+          // â”€â”€ BotÃ£o Avaliar / Badge avaliado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           if (a.canReview && onReview != null) ...[
             Container(height: 1, color: AppTheme.divider),
             Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => onReview!(a),
-                borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(10)),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(10)),
                 splashColor: AppTheme.gold.withOpacity(0.08),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 11),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -555,10 +541,7 @@ class _AppointmentCard extends StatelessWidget {
                       const SizedBox(width: 7),
                       Text(
                         'Avaliar atendimento',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: AppTheme.gold,
                               fontSize: 12,
                               letterSpacing: 0.3,
@@ -574,49 +557,43 @@ class _AppointmentCard extends StatelessWidget {
           if (a.isReviewed) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: List.generate(5, (i) => Icon(
-                      i < a.review!.rating
-                          ? Icons.star_rounded
-                          : Icons.star_outline_rounded,
-                      size: 14,
-                      color: AppTheme.gold,
-                    )),
+                    children: List.generate(
+                        5,
+                        (i) => Icon(
+                              i < a.review!.rating
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              size: 14,
+                              color: AppTheme.gold,
+                            )),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       a.review!.comment ?? a.review!.ratingLabel,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12, color: AppTheme.textSecondary),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 7, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppTheme.gold.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       'Avaliado',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
-                              color: AppTheme.gold,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.gold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -630,8 +607,19 @@ class _AppointmentCard extends StatelessWidget {
 
   String _monthAbbr(int m) {
     const months = [
-      '', 'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN',
-      'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
+      '',
+      'JAN',
+      'FEV',
+      'MAR',
+      'ABR',
+      'MAI',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SET',
+      'OUT',
+      'NOV',
+      'DEZ'
     ];
     return months[m];
   }

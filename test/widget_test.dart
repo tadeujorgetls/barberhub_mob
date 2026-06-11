@@ -6,12 +6,13 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:barber_hub/main.dart';
 
 void main() {
   testWidgets('App renderiza sem erros', (WidgetTester tester) async {
-    await tester.pumpWidget(const BarberHubApp());
+    await tester.pumpWidget(const ProviderScope(child: BarberHubApp()));
     expect(find.byType(BarberHubApp), findsOneWidget);
   });
 }

@@ -8,8 +8,9 @@ import 'models/app_data_provider.dart';
 import 'models/cart_provider.dart';
 import 'models/onboarding_provider.dart';
 import 'core/routes/app_routes.dart';
+import 'core/services/supabase_service.dart';
 
-// MELHORIA #12: LoginScreen migrado para a versão Riverpod em features/auth.
+// MELHORIA #12: LoginScreen migrado para a versÃ£o Riverpod em features/auth.
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/providers/auth_providers.dart';
@@ -20,7 +21,7 @@ import 'features/legacy/providers/legacy_auth_adapter.dart';
 import 'features/membership/presentation/screens/client/membership_plans_screen.dart';
 import 'features/membership/presentation/screens/barber_shop/membership_management_screen.dart';
 
-// Telas legadas ainda em migração para Riverpod
+// Telas legadas ainda em migraÃ§Ã£o para Riverpod
 import 'screens/register_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/main_shell.dart';
@@ -32,15 +33,17 @@ import 'screens/client/booking_screen.dart';
 import 'screens/client/product_detail_screen.dart';
 import 'screens/client/cart_screen.dart';
 import 'screens/client/review_screen.dart';
+import 'screens/client/ai_assistant_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
   ));
+  await SupabaseService.initialize();
   runApp(
     const ProviderScope(child: BarberHubApp()),
   );
@@ -53,7 +56,7 @@ class BarberHubApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return provider.MultiProvider(
       providers: [
-        // MELHORIA #12 — TODO: remover após migrar RegisterScreen e
+        // MELHORIA #12 â€” TODO: remover apÃ³s migrar RegisterScreen e
         // ForgotPasswordScreen para Riverpod.
         provider.ChangeNotifierProvider(create: (_) => AuthProvider()),
         provider.ChangeNotifierProvider(create: (_) => AppDataProvider()),
@@ -62,7 +65,7 @@ class BarberHubApp extends ConsumerWidget {
         // BUG #2 CORRIGIDO: LegacyAuthAdapter injetado no MultiProvider.
         provider.ChangeNotifierProvider(create: (_) => LegacyAuthAdapter()),
       ],
-      // BUG #2 CORRIGIDO: _AuthBridge inserido na árvore de widgets.
+      // BUG #2 CORRIGIDO: _AuthBridge inserido na Ã¡rvore de widgets.
       child: _AuthBridge(
         child: MaterialApp(
           title: 'Barber Hub',
@@ -86,7 +89,9 @@ class BarberHubApp extends ConsumerWidget {
                 page = const ForgotPasswordScreen();
                 break;
               case AppRoutes.home:
-                page = const MainShell();
+                final initialIndex =
+                    settings.arguments is int ? settings.arguments as int : 0;
+                page = MainShell(initialIndex: initialIndex);
                 break;
               // BUG #1 CORRIGIDO: rota barberShopHome adicionada.
               case AppRoutes.barberShopHome:
@@ -116,8 +121,11 @@ class BarberHubApp extends ConsumerWidget {
               case AppRoutes.review:
                 page = const ReviewScreen();
                 break;
+              case AppRoutes.aiAssistant:
+                page = const AiAssistantScreen();
+                break;
 
-              // ── Membership ─────────────────────────────────────────────
+              // â”€â”€ Membership â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               case AppRoutes.membershipPlans:
                 page = const MembershipPlansScreen();
                 break;
@@ -142,7 +150,7 @@ class BarberHubApp extends ConsumerWidget {
     );
   }
 
-  // MELHORIA #8: _buildRoutes() removido — era código morto.
+  // MELHORIA #8: _buildRoutes() removido â€” era cÃ³digo morto.
 }
 
 class _AuthBridge extends ConsumerWidget {

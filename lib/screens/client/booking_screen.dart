@@ -3,17 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../mock/mock_data.dart';
-import '../../models/auth_provider.dart';
+import '../../features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/barber_model.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/service_model.dart';
+import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // BookingScreen
 // Recebe via arguments: Map{'service': ServiceModel, 'barbershop': BarbershopModel}
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
 
@@ -41,7 +42,7 @@ class _BookingScreenState extends State<BookingScreen> {
       service = args;
     }
 
-    // Fallback para provider se não vier via args
+    // Fallback para provider se nÃ£o vier via args
     barbershop ??= data.selectedBarbershop ?? data.barbershops.first;
 
     if (service == null) {
@@ -57,11 +58,10 @@ class _BookingScreenState extends State<BookingScreen> {
     final args = ModalRoute.of(context)!.settings.arguments;
     final (service, barbershop) = _parseArgs(args, data);
 
-    // Barbeiros APENAS da barbearia em questão
-    final barbers =
-        barbershop.barbers.where((b) => b.isActive).toList();
+    // Barbeiros APENAS da barbearia em questÃ£o
+    final barbers = barbershop.barbers.where((b) => b.isActive).toList();
 
-    // Horários já ocupados para o barbeiro/data selecionados
+    // Horarios jÃ¡ ocupados para o barbeiro/data selecionados
     final bookedSlots = (_selectedBarber != null && _selectedDate != null)
         ? data.bookedSlotsFor(_selectedBarber!.id, _selectedDate!)
         : <String>{};
@@ -70,7 +70,7 @@ class _BookingScreenState extends State<BookingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top bar ────────────────────────────────────────────────
+            // â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
               child: Row(
@@ -99,13 +99,13 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
             ),
 
-            // ── Step indicator ─────────────────────────────────────────
+            // â”€â”€ Step indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: _StepIndicator(currentStep: _step),
             ),
 
-            // ── Service + Barbershop summary ───────────────────────────
+            // â”€â”€ Service + Barbershop summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
               child: _BookingSummaryBar(
@@ -167,11 +167,10 @@ class _BookingScreenState extends State<BookingScreen> {
           selectedDate: _selectedDate,
           selectedTime: _selectedTime,
           bookedSlots: bookedSlots,
-          onDateSelected: (d) =>
-              setState(() {
-                _selectedDate = d;
-                _selectedTime = null; // reset horário ao trocar data
-              }),
+          onDateSelected: (d) => setState(() {
+            _selectedDate = d;
+            _selectedTime = null; // reset horÃ¡rio ao trocar data
+          }),
           onTimeSelected: (t) => setState(() => _selectedTime = t),
           onNext: () => setState(() => _step = 2),
         );
@@ -196,7 +195,7 @@ class _BookingScreenState extends State<BookingScreen> {
     BarbershopModel barbershop,
     AppDataProvider data,
   ) async {
-    final auth = context.read<AuthProvider>();
+    final auth = context.read<LegacyAuthAdapter>();
     try {
       await data.bookAppointment(
         clientId: auth.currentUser?.id ?? 'guest',
@@ -226,8 +225,7 @@ class _BookingScreenState extends State<BookingScreen> {
       barrierDismissible: false,
       builder: (_) => Dialog(
         backgroundColor: AppTheme.surfaceElevated,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -250,9 +248,11 @@ class _BookingScreenState extends State<BookingScreen> {
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
               Text(
-                'Seu horário em\n$barbershopName\nfoi confirmado!',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.6, color: AppTheme.textSecondary),
+                'Seu horario em\n$barbershopName\nfoi confirmado!',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(height: 1.6, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
@@ -260,9 +260,11 @@ class _BookingScreenState extends State<BookingScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoutes.home,
+                      (route) => false,
+                      arguments: 1,
+                    );
                   },
                   child: const Text('VER AGENDAMENTOS'),
                 ),
@@ -274,7 +276,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
-                child: const Text('Voltar ao início'),
+                child: const Text('Voltar ao inicio'),
               ),
             ],
           ),
@@ -284,7 +286,7 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 }
 
-// ── Step Indicator ────────────────────────────────────────────────────────────
+// â”€â”€ Step Indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _StepIndicator extends StatelessWidget {
   final int currentStep;
   const _StepIndicator({required this.currentStep});
@@ -339,8 +341,7 @@ class _StepIndicator extends StatelessWidget {
               style: GoogleFonts.jost(
                 fontSize: 10,
                 color: active ? AppTheme.gold : AppTheme.textHint,
-                fontWeight:
-                    active ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],
@@ -350,7 +351,7 @@ class _StepIndicator extends StatelessWidget {
   }
 }
 
-// ── Booking summary bar ───────────────────────────────────────────────────────
+// â”€â”€ Booking summary bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _BookingSummaryBar extends StatelessWidget {
   final ServiceModel service;
   final String barbershopName;
@@ -397,8 +398,10 @@ class _BookingSummaryBar extends StatelessWidget {
               ),
               Text(
                 service.formattedPrice,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppTheme.gold, fontSize: 15),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(color: AppTheme.gold, fontSize: 15),
               ),
               const SizedBox(width: 12),
               Container(height: 14, width: 1, color: AppTheme.divider),
@@ -418,7 +421,7 @@ class _BookingSummaryBar extends StatelessWidget {
   }
 }
 
-// ── Step 0: Barber ────────────────────────────────────────────────────────────
+// â”€â”€ Step 0: Barber â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _BarberStep extends StatelessWidget {
   final List<BarberModel> barbers;
   final BarberModel? selected;
@@ -511,7 +514,7 @@ class _BarberStep extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(24),
           child: PrimaryButton(
-            label: 'Próximo',
+            label: 'Proximo',
             onPressed: selected != null ? onNext : null,
           ),
         ),
@@ -520,7 +523,7 @@ class _BarberStep extends StatelessWidget {
   }
 }
 
-// ── Step 1: Data & Hora ───────────────────────────────────────────────────────
+// â”€â”€ Step 1: Data & Hora â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _DateTimeStep extends StatelessWidget {
   final DateTime? selectedDate;
   final String? selectedTime;
@@ -538,6 +541,32 @@ class _DateTimeStep extends StatelessWidget {
     required this.onTimeSelected,
     required this.onNext,
   });
+  bool get _hasUnavailableSlots {
+    if (selectedDate == null) return false;
+    return bookedSlots.isNotEmpty || MockData.timeSlots.any(_isPastSlot);
+  }
+
+  bool _isPastSlot(String slot) {
+    if (selectedDate == null) return false;
+
+    final parts = slot.split(':');
+    if (parts.length != 2) return false;
+
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return false;
+
+    final now = DateTime.now();
+    final slotDateTime = DateTime(
+      selectedDate!.year,
+      selectedDate!.month,
+      selectedDate!.day,
+      hour,
+      minute,
+    );
+
+    return !slotDateTime.isAfter(now);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -546,12 +575,12 @@ class _DateTimeStep extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 4),
-          child: Text('Data e horário',
+          child: Text('Data e horario',
               style: Theme.of(context).textTheme.headlineMedium),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-          child: Text('Quando você quer ser atendido?',
+          child: Text('Quando voce quer ser atendido?',
               style: Theme.of(context).textTheme.bodyMedium),
         ),
         Expanded(
@@ -565,12 +594,9 @@ class _DateTimeStep extends StatelessWidget {
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: selectedDate ??
-                          DateTime.now().add(const Duration(days: 1)),
-                      firstDate:
-                          DateTime.now().add(const Duration(days: 1)),
-                      lastDate:
-                          DateTime.now().add(const Duration(days: 60)),
+                      initialDate: selectedDate ?? DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 60)),
                       builder: (ctx, child) => Theme(
                         data: Theme.of(ctx).copyWith(
                           colorScheme: const ColorScheme.dark(
@@ -611,15 +637,13 @@ class _DateTimeStep extends StatelessWidget {
                           selectedDate != null
                               ? _fmt(selectedDate!)
                               : 'Selecionar data',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(
-                                color: selectedDate != null
-                                    ? AppTheme.textPrimary
-                                    : AppTheme.textHint,
-                                fontSize: 15,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: selectedDate != null
+                                        ? AppTheme.textPrimary
+                                        : AppTheme.textHint,
+                                    fontSize: 15,
+                                  ),
                         ),
                         const Spacer(),
                         const Icon(Icons.chevron_right_rounded,
@@ -631,9 +655,9 @@ class _DateTimeStep extends StatelessWidget {
 
                 if (selectedDate != null) ...[
                   const SizedBox(height: 24),
-                  const SectionHeader(title: 'Horários disponíveis'),
+                  const SectionHeader(title: 'Horarios disponiveis'),
                   const SizedBox(height: 6),
-                  if (bookedSlots.isNotEmpty)
+                  if (_hasUnavailableSlots)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
@@ -642,13 +666,12 @@ class _DateTimeStep extends StatelessWidget {
                               size: 12, color: AppTheme.textHint),
                           const SizedBox(width: 5),
                           Text(
-                            'Horários indisponíveis estão acinzentados.',
+                            'Horarios ocupados ou ja passados ficam indisponiveis.',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                    fontSize: 11,
-                                    color: AppTheme.textHint),
+                                    fontSize: 11, color: AppTheme.textHint),
                           ),
                         ],
                       ),
@@ -660,23 +683,24 @@ class _DateTimeStep extends StatelessWidget {
                     children: MockData.timeSlots.map((slot) {
                       final isSel = selectedTime == slot;
                       final isBooked = bookedSlots.contains(slot);
+                      final isPast = _isPastSlot(slot);
+                      final isUnavailable = isBooked || isPast;
                       return GestureDetector(
-                        onTap: isBooked
-                            ? null
-                            : () => onTimeSelected(slot),
+                        onTap:
+                            isUnavailable ? null : () => onTimeSelected(slot),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                            color: isBooked
+                            color: isUnavailable
                                 ? AppTheme.surface
                                 : isSel
                                     ? AppTheme.gold.withOpacity(0.12)
                                     : AppTheme.surfaceElevated,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: isBooked
+                              color: isUnavailable
                                   ? AppTheme.divider
                                   : isSel
                                       ? AppTheme.gold
@@ -688,15 +712,14 @@ class _DateTimeStep extends StatelessWidget {
                             slot,
                             style: GoogleFonts.jost(
                               fontSize: 14,
-                              fontWeight: isSel
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: isBooked
+                              fontWeight:
+                                  isSel ? FontWeight.w600 : FontWeight.w400,
+                              color: isUnavailable
                                   ? AppTheme.textHint
                                   : isSel
                                       ? AppTheme.gold
                                       : AppTheme.textSecondary,
-                              decoration: isBooked
+                              decoration: isUnavailable
                                   ? TextDecoration.lineThrough
                                   : null,
                             ),
@@ -714,7 +737,7 @@ class _DateTimeStep extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(24),
           child: PrimaryButton(
-            label: 'Próximo',
+            label: 'Proximo',
             onPressed:
                 (selectedDate != null && selectedTime != null) ? onNext : null,
           ),
@@ -725,17 +748,35 @@ class _DateTimeStep extends StatelessWidget {
 
   String _fmt(DateTime d) {
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     const weekdays = [
-      '', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'
+      '',
+      'segunda',
+      'terca',
+      'quarta',
+      'quinta',
+      'sexta',
+      'sabado',
+      'domingo'
     ];
     return '${weekdays[d.weekday]}, ${d.day} de ${months[d.month]} de ${d.year}';
   }
 }
 
-// ── Step 2: Confirmar ─────────────────────────────────────────────────────────
+// â”€â”€ Step 2: Confirmar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ConfirmStep extends StatelessWidget {
   final ServiceModel service;
   final BarberModel barber;
@@ -785,7 +826,7 @@ class _ConfirmStep extends StatelessWidget {
                 const SizedBox(height: 12),
                 _ConfirmRow(
                   icon: Icons.content_cut_rounded,
-                  label: 'Serviço',
+                  label: 'Servico',
                   value: service.name,
                   subValue: service.formattedPrice,
                 ),
@@ -806,7 +847,7 @@ class _ConfirmStep extends StatelessWidget {
                 const SizedBox(height: 12),
                 _ConfirmRow(
                   icon: Icons.schedule_outlined,
-                  label: 'Horário',
+                  label: 'Horario',
                   value: timeSlot,
                   subValue: service.formattedDuration,
                 ),
@@ -816,8 +857,7 @@ class _ConfirmStep extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(8),
-                    border:
-                        Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [
@@ -826,7 +866,7 @@ class _ConfirmStep extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Chegue 5 minutos antes do horário marcado.',
+                          'Chegue 5 minutos antes do horario marcado.',
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
@@ -854,8 +894,19 @@ class _ConfirmStep extends StatelessWidget {
 
   String _fmtDate(DateTime d) {
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     return '${d.day} de ${months[d.month]} de ${d.year}';
   }
@@ -893,8 +944,10 @@ class _ConfirmRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 11, letterSpacing: 0.5),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontSize: 11, letterSpacing: 0.5),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -907,8 +960,10 @@ class _ConfirmRow extends StatelessWidget {
                 if (subValue != null)
                   Text(
                     subValue!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: 12, color: AppTheme.gold),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontSize: 12, color: AppTheme.gold),
                   ),
               ],
             ),

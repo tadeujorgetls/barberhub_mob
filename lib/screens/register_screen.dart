@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../models/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/auth/presentation/providers/auth_providers.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen>
+class _RegisterScreenState extends ConsumerState<RegisterScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -62,12 +62,12 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
 
-    final auth = context.read<AuthProvider>();
-    final error = await auth.register(
-      name: _nameController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
-    );
+    final error = await ref.read(authNotifierProvider.notifier).register(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+          confirmPassword: _confirmController.text,
+        );
 
     if (!mounted) return;
 
@@ -96,13 +96,16 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
         ),
       );
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      final state = ref.read(authNotifierProvider);
+      final route =
+          state is AuthAuthenticated ? state.user.initialRoute : AppRoutes.home;
+      Navigator.pushReplacementNamed(context, route);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final isLoading = ref.watch(authNotifierProvider) is AuthLoading;
 
     return Scaffold(
       body: Stack(
@@ -184,14 +187,13 @@ class _RegisterScreenState extends State<RegisterScreen>
                               const GoldAccent(),
                               const SizedBox(height: 12),
                               Text(
-                                'Preencha os dados abaixo para começar.',
+                                'Preencha os dados abaixo para comeÃ§ar.',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
                                     ?.copyWith(height: 1.5),
                               ),
                               const SizedBox(height: 40),
-
                               AppTextField(
                                 label: 'Nome completo',
                                 hint: 'Seu nome',
@@ -212,7 +214,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 },
                               ),
                               const SizedBox(height: 16),
-
                               AppTextField(
                                 label: 'E-mail',
                                 hint: 'seu@email.com',
@@ -228,16 +229,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   }
                                   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
                                       .hasMatch(v)) {
-                                    return 'E-mail inválido';
+                                    return 'E-mail invÃ¡lido';
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 16),
-
                               AppTextField(
                                 label: 'Senha',
-                                hint: 'Mínimo 6 caracteres',
+                                hint: 'MÃ­nimo 6 caracteres',
                                 controller: _passwordController,
                                 focusNode: _passwordFocus,
                                 isPassword: true,
@@ -249,13 +249,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     return 'Crie uma senha';
                                   }
                                   if (v.length < 6) {
-                                    return 'Mínimo 6 caracteres';
+                                    return 'MÃ­nimo 6 caracteres';
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 16),
-
                               AppTextField(
                                 label: 'Confirmar senha',
                                 hint: 'Repita a senha',
@@ -269,27 +268,23 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     return 'Confirme a senha';
                                   }
                                   if (v != _passwordController.text) {
-                                    return 'As senhas não coincidem';
+                                    return 'As senhas nÃ£o coincidem';
                                   }
                                   return null;
                                 },
                               ),
-
                               const SizedBox(height: 36),
-
                               PrimaryButton(
                                 label: 'Cadastrar',
                                 onPressed: _handleRegister,
-                                isLoading: auth.isLoading,
+                                isLoading: isLoading,
                               ),
-
                               const SizedBox(height: 28),
-
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Já tem uma conta? ',
+                                    'JÃ¡ tem uma conta? ',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium

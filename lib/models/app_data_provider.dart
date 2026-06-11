@@ -3,8 +3,11 @@ import 'service_model.dart';
 import 'barber_model.dart';
 import 'appointment_model.dart';
 import '../mock/mock_data.dart';
+import '../data/supabase_appointment_datasource.dart';
+import '../data/supabase_catalog_datasource.dart';
 
 class AppDataProvider extends ChangeNotifier {
+  final _appointmentDatasource = SupabaseAppointmentDatasource();
   late List<BarbershopModel> _barbershops;
   late List<ServiceModel> _services;
   late List<BarberModel> _barbers;
@@ -19,9 +22,42 @@ class AppDataProvider extends ChangeNotifier {
     _barbers = MockData.barbers();
     _appointments = MockData.seedAppointments(_barbershops);
     _reviews = MockData.seedReviews(_appointments);
+    _loadCatalogFromSupabase();
   }
 
-  // ── Getters gerais ────────────────────────────────────────────────────────
+  Future<void> _loadCatalogFromSupabase() async {
+    final datasource = SupabaseCatalogDatasource();
+    if (!datasource.isConfigured) return;
+
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final remoteShops = await datasource.loadBarbershops();
+      if (remoteShops.isNotEmpty) {
+        _barbershops = remoteShops;
+        _services = remoteShops.expand((shop) => shop.services).toList();
+        _barbers = remoteShops.expand((shop) => shop.barbers).toList();
+        _appointments =
+            await _appointmentDatasource.loadAppointments(_barbershops);
+        _reviews = MockData.seedReviews(_appointments);
+
+        if (_selectedBarbershop != null) {
+          _selectedBarbershop = _barbershops
+              .where((shop) => shop.id == _selectedBarbershop!.id)
+              .firstOrNull;
+        }
+      }
+    } catch (error) {
+      debugPrint('[AppDataProvider] Falha ao carregar catalogo Supabase: ' +
+          error.toString());
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Getters gerais Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   List<BarbershopModel> get barbershops => List.unmodifiable(_barbershops);
   BarbershopModel? get selectedBarbershop => _selectedBarbershop;
   bool get isBarbershopSelected => _selectedBarbershop != null;
@@ -49,26 +85,26 @@ class AppDataProvider extends ChangeNotifier {
 
   List<AppointmentModel> get appointments => List.unmodifiable(_appointments);
 
-  // ── Reviews ───────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Reviews Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   List<ReviewModel> get allReviews => List.unmodifiable(_reviews);
 
-  /// Avaliações de uma barbearia, da mais recente para a mais antiga.
+  /// AvaliaÃƒÂ§ÃƒÂµes de uma barbearia, da mais recente para a mais antiga.
   List<ReviewModel> reviewsForShop(String shopId) =>
       _reviews.where((r) => r.barbershopId == shopId).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  /// Avaliações de um barbeiro específico.
+  /// AvaliaÃƒÂ§ÃƒÂµes de um barbeiro especÃƒÂ­fico.
   List<ReviewModel> reviewsForBarber(String barberId) =>
       _reviews.where((r) => r.barberId == barberId).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  /// Avaliações feitas por um cliente.
+  /// AvaliaÃƒÂ§ÃƒÂµes feitas por um cliente.
   List<ReviewModel> reviewsByClient(String clientId) =>
       _reviews.where((r) => r.clientId == clientId).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  /// Média de rating de uma barbearia calculada a partir das avaliações reais.
+  /// MÃƒÂ©dia de rating de uma barbearia calculada a partir das avaliaÃƒÂ§ÃƒÂµes reais.
   double ratingForShop(String shopId) {
     final reviews = reviewsForShop(shopId);
     if (reviews.isEmpty) return 0.0;
@@ -76,7 +112,7 @@ class AppDataProvider extends ChangeNotifier {
     return sum / reviews.length;
   }
 
-  /// Média de rating de um barbeiro.
+  /// MÃƒÂ©dia de rating de um barbeiro.
   double ratingForBarber(String barberId) {
     final reviews = reviewsForBarber(barberId);
     if (reviews.isEmpty) return 0.0;
@@ -84,7 +120,7 @@ class AppDataProvider extends ChangeNotifier {
     return sum / reviews.length;
   }
 
-  /// Distribuição de notas (1–5) de uma barbearia.
+  /// DistribuiÃƒÂ§ÃƒÂ£o de notas (1Ã¢â‚¬â€œ5) de uma barbearia.
   Map<int, int> ratingDistributionForShop(String shopId) {
     final dist = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
     for (final r in reviewsForShop(shopId)) {
@@ -93,7 +129,7 @@ class AppDataProvider extends ChangeNotifier {
     return dist;
   }
 
-  /// Distribuição de notas (1–5) de um barbeiro.
+  /// DistribuiÃƒÂ§ÃƒÂ£o de notas (1Ã¢â‚¬â€œ5) de um barbeiro.
   Map<int, int> ratingDistributionForBarber(String barberId) {
     final dist = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
     for (final r in reviewsForBarber(barberId)) {
@@ -102,7 +138,7 @@ class AppDataProvider extends ChangeNotifier {
     return dist;
   }
 
-  /// Submete uma nova avaliação para um agendamento concluído.
+  /// Submete uma nova avaliaÃƒÂ§ÃƒÂ£o para um agendamento concluÃƒÂ­do.
   Future<ReviewModel> submitReview({
     required AppointmentModel appointment,
     required int rating,
@@ -110,7 +146,7 @@ class AppDataProvider extends ChangeNotifier {
   }) async {
     if (!appointment.canReview) {
       throw StateError(
-          'Este agendamento não pode ser avaliado (já avaliado ou não concluído).');
+          'Este agendamento nao pode ser avaliado (ja avaliado ou nao concluido).');
     }
     if (rating < 1 || rating > 5) {
       throw ArgumentError('A nota deve ser entre 1 e 5.');
@@ -137,11 +173,11 @@ class AppDataProvider extends ChangeNotifier {
 
     _reviews.add(review);
 
-    // Vincula a avaliação ao agendamento
+    // Vincula a avaliaÃƒÂ§ÃƒÂ£o ao agendamento
     final apptIdx = _appointments.indexWhere((a) => a.id == appointment.id);
     if (apptIdx != -1) _appointments[apptIdx].review = review;
 
-    // Atualiza rating em memória da barbearia
+    // Atualiza rating em memÃƒÂ³ria da barbearia
     final shopIdx =
         _barbershops.indexWhere((s) => s.id == appointment.barbershop.id);
     if (shopIdx != -1) {
@@ -153,7 +189,7 @@ class AppDataProvider extends ChangeNotifier {
       );
     }
 
-    // Atualiza rating em memória do barbeiro
+    // Atualiza rating em memÃƒÂ³ria do barbeiro
     final allBarbers = _barbershops.expand((s) => s.barbers).toList()
       ..addAll(_barbers);
     for (final b in allBarbers) {
@@ -170,7 +206,7 @@ class AppDataProvider extends ChangeNotifier {
     return review;
   }
 
-  // ── Produtos ──────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Produtos Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   List<ProductModel> get products {
     final src = _selectedBarbershop?.availableProducts ?? [];
     return List.unmodifiable(src);
@@ -196,7 +232,7 @@ class AppDataProvider extends ChangeNotifier {
     return ProductCategory.values.where((c) => cats.contains(c)).toList();
   }
 
-  // ── Seleção de barbearia ──────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ SeleÃƒÂ§ÃƒÂ£o de barbearia Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   void selectBarbershop(BarbershopModel shop) {
     _selectedBarbershop = shop;
     notifyListeners();
@@ -207,7 +243,7 @@ class AppDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Queries por barbearia ─────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Queries por barbearia Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   List<ServiceModel> servicesFor(BarbershopModel shop) =>
       shop.services.where((s) => s.isActive).toList();
 
@@ -217,7 +253,7 @@ class AppDataProvider extends ChangeNotifier {
   List<AppointmentModel> appointmentsForShop(String shopId) =>
       _appointments.where((a) => a.barbershop.id == shopId).toList();
 
-  // ── Queries de cliente ────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Queries de cliente Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   List<AppointmentModel> appointmentsForClient(String clientId) =>
       _appointments.where((a) => a.clientId == clientId).toList();
 
@@ -233,7 +269,7 @@ class AppDataProvider extends ChangeNotifier {
           .toList()
         ..sort((a, b) => b.date.compareTo(a.date));
 
-  // ── Queries de barbeiro ───────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Queries de barbeiro Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   List<AppointmentModel> appointmentsForBarber(String barberId) =>
       _appointments.where((a) => a.barber.id == barberId).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
@@ -247,7 +283,7 @@ class AppDataProvider extends ChangeNotifier {
     }).toList();
   }
 
-  // ── Admin ─────────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Admin Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   List<AppointmentModel> get allAppointmentsSorted =>
       List.of(_appointments)..sort((a, b) => b.date.compareTo(a.date));
 
@@ -263,7 +299,7 @@ class AppDataProvider extends ChangeNotifier {
       .where((a) => a.status == AppointmentStatus.completed)
       .length;
 
-  // ── Validações ────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ ValidaÃƒÂ§ÃƒÂµes Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   bool isServiceFromShop(ServiceModel service, BarbershopModel shop) =>
       shop.services.any((s) => s.id == service.id);
 
@@ -282,7 +318,7 @@ class AppDataProvider extends ChangeNotifier {
         .toSet();
   }
 
-  // ── Client: Agendar ───────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Client: Agendar Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   Future<AppointmentModel> bookAppointment({
     required String clientId,
     required String clientName,
@@ -294,42 +330,63 @@ class AppDataProvider extends ChangeNotifier {
   }) async {
     if (!isServiceFromShop(service, barbershop)) {
       throw ArgumentError(
-          'O serviço "${service.name}" não pertence à barbearia "${barbershop.name}".');
+          'O servico "${service.name}" nao pertence a barbearia "${barbershop.name}".');
     }
     if (!isBarberFromShop(barber, barbershop)) {
       throw ArgumentError(
-          'O barbeiro "${barber.name}" não pertence à barbearia "${barbershop.name}".');
+          'O barbeiro "${barber.name}" nao pertence a barbearia "${barbershop.name}".');
     }
 
     _isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 900));
 
-    final appt = AppointmentModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      clientId: clientId,
-      clientName: clientName,
-      service: service,
-      barber: barber,
-      barbershop: barbershop,
-      date: date,
-      timeSlot: timeSlot,
-    );
+    try {
+      final appt = _appointmentDatasource.isConfigured
+          ? await _appointmentDatasource.createAppointment(
+              clientId: clientId,
+              clientName: clientName,
+              service: service,
+              barber: barber,
+              barbershop: barbershop,
+              date: date,
+              timeSlot: timeSlot,
+            )
+          : AppointmentModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              clientId: clientId,
+              clientName: clientName,
+              service: service,
+              barber: barber,
+              barbershop: barbershop,
+              date: date,
+              timeSlot: timeSlot,
+            );
 
-    _appointments.add(appt);
-    _isLoading = false;
-    notifyListeners();
-    return appt;
+      _appointments.add(appt);
+      return appt;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> cancelAppointment(String id) async {
     _isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 600));
-    final idx = _appointments.indexWhere((a) => a.id == id);
-    if (idx != -1) _appointments[idx].status = AppointmentStatus.cancelled;
-    _isLoading = false;
-    notifyListeners();
+
+    try {
+      if (_appointmentDatasource.isConfigured) {
+        await _appointmentDatasource.updateStatus(
+          id,
+          AppointmentStatus.cancelled,
+        );
+      }
+      final idx = _appointments.indexWhere((a) => a.id == id);
+      if (idx != -1) _appointments[idx].status = AppointmentStatus.cancelled;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<AppointmentModel?> rescheduleAppointment({
@@ -340,54 +397,62 @@ class AppDataProvider extends ChangeNotifier {
   }) async {
     _isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 900));
 
-    final idx = _appointments.indexWhere((a) => a.id == id);
-    if (idx == -1) {
+    try {
+      final idx = _appointments.indexWhere((a) => a.id == id);
+      if (idx == -1) return null;
+
+      final old = _appointments[idx];
+      if (!isBarberFromShop(newBarber, old.barbershop)) {
+        throw ArgumentError(
+            'O barbeiro "${newBarber.name}" nao pertence a barbearia "${old.barbershop.name}".');
+      }
+
+      final newAppt = _appointmentDatasource.isConfigured
+          ? await _appointmentDatasource.rescheduleAppointment(
+              old: old,
+              newDate: newDate,
+              newTimeSlot: newTimeSlot,
+              newBarber: newBarber,
+            )
+          : AppointmentModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              clientId: old.clientId,
+              clientName: old.clientName,
+              service: old.service,
+              barber: newBarber,
+              barbershop: old.barbershop,
+              date: newDate,
+              timeSlot: newTimeSlot,
+            );
+
+      old.status = AppointmentStatus.cancelled;
+      _appointments.add(newAppt);
+      return newAppt;
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return null;
     }
-
-    final old = _appointments[idx];
-    if (!isBarberFromShop(newBarber, old.barbershop)) {
-      _isLoading = false;
-      notifyListeners();
-      throw ArgumentError(
-          'O barbeiro "${newBarber.name}" não pertence à barbearia "${old.barbershop.name}".');
-    }
-
-    old.status = AppointmentStatus.cancelled;
-
-    final newAppt = AppointmentModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      clientId: old.clientId,
-      clientName: old.clientName,
-      service: old.service,
-      barber: newBarber,
-      barbershop: old.barbershop,
-      date: newDate,
-      timeSlot: newTimeSlot,
-    );
-
-    _appointments.add(newAppt);
-    _isLoading = false;
-    notifyListeners();
-    return newAppt;
   }
 
   Future<void> updateAppointmentStatus(
       String id, AppointmentStatus status) async {
     _isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 500));
-    final idx = _appointments.indexWhere((a) => a.id == id);
-    if (idx != -1) _appointments[idx].status = status;
-    _isLoading = false;
-    notifyListeners();
+
+    try {
+      if (_appointmentDatasource.isConfigured) {
+        await _appointmentDatasource.updateStatus(id, status);
+      }
+      final idx = _appointments.indexWhere((a) => a.id == id);
+      if (idx != -1) _appointments[idx].status = status;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  // ── Admin: Service CRUD ───────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Admin: Service CRUD Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   Future<void> addService(ServiceModel service) async {
     _isLoading = true;
     notifyListeners();
@@ -417,7 +482,7 @@ class AppDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Admin: Barber CRUD ────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Admin: Barber CRUD Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   Future<void> addBarber(BarberModel barber) async {
     _isLoading = true;
     notifyListeners();
@@ -447,14 +512,14 @@ class AppDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Cria uma nova barbearia (admin). Persiste em memória enquanto o app roda.
+  /// Cria uma nova barbearia (admin). Persiste em memÃƒÂ³ria enquanto o app roda.
   void addBarbershop(BarbershopModel shop) {
     _barbershops.add(shop);
     notifyListeners();
   }
 
-  // ── Barbearia: serviços por shop (usados pelo BarberShopServicesScreen) ───
-  // Distintos dos métodos de admin acima (operam em _services global).
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Barbearia: serviÃƒÂ§os por shop (usados pelo BarberShopServicesScreen) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // Distintos dos mÃƒÂ©todos de admin acima (operam em _services global).
   // Estes operam na lista services de cada BarbershopModel individualmente.
 
   List<ServiceModel> servicesForShop(String shopId) {
@@ -494,5 +559,4 @@ class AppDataProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
 }
