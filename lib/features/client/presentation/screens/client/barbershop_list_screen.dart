@@ -51,7 +51,7 @@ class _BarbershopListScreenState extends ConsumerState<BarbershopListScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(colors: [
-                  AppTheme.gold.withOpacity(0.06),
+                  AppTheme.gold.withValues(alpha: 0.06),
                   Colors.transparent,
                 ]),
               ),
@@ -211,8 +211,8 @@ class _AvatarButton extends StatelessWidget {
       height: 36,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppTheme.gold.withOpacity(0.12),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+        color: AppTheme.gold.withValues(alpha: 0.12),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
       ),
       child: Center(
         child: Text(
@@ -242,12 +242,12 @@ class _NextAppointmentBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.gold.withOpacity(0.16),
-            AppTheme.gold.withOpacity(0.04),
+            AppTheme.gold.withValues(alpha: 0.16),
+            AppTheme.gold.withValues(alpha: 0.04),
           ],
         ),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.28)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.28)),
       ),
       child: Row(
         children: [
@@ -255,9 +255,9 @@ class _NextAppointmentBanner extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: AppTheme.gold.withOpacity(0.15),
+              color: AppTheme.gold.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
             ),
             child: const Icon(Icons.calendar_month_outlined,
                 color: AppTheme.gold, size: 22),
@@ -367,12 +367,12 @@ class _BarbershopCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.gold.withOpacity(0.18),
-                    AppTheme.gold.withOpacity(0.04),
+                    AppTheme.gold.withValues(alpha: 0.18),
+                    AppTheme.gold.withValues(alpha: 0.04),
                   ],
                 ),
                 border: Border(
-                    bottom: BorderSide(color: AppTheme.gold.withOpacity(0.12))),
+                    bottom: BorderSide(color: AppTheme.gold.withValues(alpha: 0.12))),
               ),
               child: Stack(
                 children: [
@@ -462,7 +462,7 @@ class _OpenBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         isOpen ? 'Aberto' : 'Fechado',
@@ -484,9 +484,9 @@ class _RatingBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.gold.withOpacity(0.1),
+        color: AppTheme.gold.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.25)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

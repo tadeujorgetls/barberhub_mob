@@ -5,14 +5,8 @@ import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/membership/presentation/providers/membership_providers.dart';
 import 'package:barber_hub/features/membership/presentation/widgets/membership_widgets.dart';
+import 'package:barber_hub/features/membership/presentation/models/membership_plans_args.dart';
 import 'package:barber_hub/shared/widgets/app_widgets.dart';
-
-/// Argumentos passados via Navigator para esta tela.
-class MembershipPlansArgs {
-  final String shopId;
-  final String shopName;
-  const MembershipPlansArgs({required this.shopId, required this.shopName});
-}
 
 /// Tela de seleção de planos de uma barbearia — lado do cliente.
 class MembershipPlansScreen extends ConsumerStatefulWidget {

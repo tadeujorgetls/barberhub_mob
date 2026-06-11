@@ -60,7 +60,7 @@ class _BarberScheduleScreenState extends State<BarberScheduleScreen>
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(colors: [
-                      AppTheme.gold.withOpacity(.05),
+                      AppTheme.gold.withValues(alpha: .05),
                       Colors.transparent
                     ]))),
           ),
@@ -244,9 +244,9 @@ class _TodayBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.gold.withOpacity(.1),
+        color: AppTheme.gold.withValues(alpha: .1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.gold.withOpacity(.3)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: .3)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         const Icon(Icons.today_rounded, color: AppTheme.gold, size: 14),
@@ -268,11 +268,11 @@ class _TodaySummary extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [
-          AppTheme.gold.withOpacity(.12),
-          AppTheme.gold.withOpacity(.04)
+          AppTheme.gold.withValues(alpha: .12),
+          AppTheme.gold.withValues(alpha: .04)
         ]),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.gold.withOpacity(.2)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: .2)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [

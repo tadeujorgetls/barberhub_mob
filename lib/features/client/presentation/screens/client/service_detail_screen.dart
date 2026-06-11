@@ -64,10 +64,10 @@ class ServiceDetailScreen extends StatelessWidget {
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: AppTheme.gold.withOpacity(0.08),
+                          color: AppTheme.gold.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                              color: AppTheme.gold.withOpacity(0.25)),
+                              color: AppTheme.gold.withValues(alpha: 0.25)),
                         ),
                         child: Icon(
                           ServiceCard.iconFor(service.iconName),
@@ -86,10 +86,10 @@ class ServiceDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppTheme.gold.withOpacity(0.08),
+                            color: AppTheme.gold.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: AppTheme.gold.withOpacity(0.2)),
+                                color: AppTheme.gold.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,

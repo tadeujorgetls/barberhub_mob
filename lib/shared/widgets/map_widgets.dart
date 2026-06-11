@@ -125,7 +125,7 @@ class _WebMapViewState extends State<_WebMapView> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: AppTheme.gold.withOpacity(0.20),
+                      color: AppTheme.gold.withValues(alpha: 0.20),
                       width: 1.5,
                     ),
                   ),
@@ -221,7 +221,7 @@ class LocationSection extends StatelessWidget {
                     width: 34,
                     height: 34,
                     decoration: BoxDecoration(
-                      color: AppTheme.gold.withOpacity(0.10),
+                      color: AppTheme.gold.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.location_on_rounded,
@@ -312,9 +312,9 @@ class MapLinkButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AppTheme.gold.withOpacity(0.10),
+            color: AppTheme.gold.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppTheme.gold.withOpacity(0.25)),
+            border: Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -343,7 +343,7 @@ class MapLinkButton extends StatelessWidget {
         label: const Text('Abrir no Google Maps'),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.gold,
-          side: BorderSide(color: AppTheme.gold.withOpacity(0.4)),
+          side: BorderSide(color: AppTheme.gold.withValues(alpha: 0.4)),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8))),
           padding: const EdgeInsets.symmetric(vertical: 13),
@@ -366,9 +366,9 @@ class NeighborhoodBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: AppTheme.gold.withOpacity(0.08),
+        color: AppTheme.gold.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.18)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -406,7 +406,7 @@ class _OpenMapsButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.gold.withOpacity(0.35),
+              color: AppTheme.gold.withValues(alpha: 0.35),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -494,7 +494,7 @@ class _LoadingSkeletonState extends State<_LoadingSkeleton>
                       height: 28,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: AppTheme.gold.withOpacity(0.6),
+                        color: AppTheme.gold.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -552,7 +552,7 @@ class _OfflineFallback extends StatelessWidget {
                         color: AppTheme.gold,
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.gold.withOpacity(0.4),
+                            color: AppTheme.gold.withValues(alpha: 0.4),
                             blurRadius: 16,
                             spreadRadius: 2,
                           ),
@@ -567,7 +567,7 @@ class _OfflineFallback extends StatelessWidget {
                       height: 6,
                       margin: const EdgeInsets.only(top: 2),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.25),
+                        color: Colors.black.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
@@ -583,7 +583,7 @@ class _OfflineFallback extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.65),
+                      color: Colors.black.withValues(alpha: 0.65),
                       borderRadius: BorderRadius.circular(7),
                     ),
                     child: Row(
@@ -612,7 +612,7 @@ class _OfflineFallback extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -638,7 +638,7 @@ class _OfflineFallback extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                        color: AppTheme.gold.withOpacity(0.18), width: 1.5),
+                        color: AppTheme.gold.withValues(alpha: 0.18), width: 1.5),
                   ),
                 ),
               ),

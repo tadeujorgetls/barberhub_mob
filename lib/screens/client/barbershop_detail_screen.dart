@@ -6,7 +6,7 @@ import '../../models/barbershop_model.dart';
 import '../../models/cart_provider.dart';
 import '../../models/review_model.dart';
 import '../../models/service_model.dart';
-import '../../routes/app_routes.dart';
+import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
@@ -231,8 +231,8 @@ class _TabCount extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
         color: active
-            ? AppTheme.background.withOpacity(0.25)
-            : AppTheme.textHint.withOpacity(0.2),
+            ? AppTheme.background.withValues(alpha: 0.25)
+            : AppTheme.textHint.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -459,7 +459,7 @@ class _FilterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: selected
-              ? AppTheme.gold.withOpacity(0.15)
+              ? AppTheme.gold.withValues(alpha: 0.15)
               : AppTheme.surfaceElevated,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -507,7 +507,7 @@ class _FeaturedProductCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppTheme.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+          border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,7 +516,7 @@ class _FeaturedProductCard extends StatelessWidget {
             Container(
               height: 100,
               decoration: BoxDecoration(
-                color: AppTheme.gold.withOpacity(0.07),
+                color: AppTheme.gold.withValues(alpha: 0.07),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
               ),
@@ -612,9 +612,9 @@ class _ProductCard extends StatelessWidget {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withOpacity(0.07),
+                    color: AppTheme.gold.withValues(alpha: 0.07),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.15)),
+                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.15)),
                   ),
                   child: Center(
                     child: Text(product.imageEmoji,
@@ -702,7 +702,7 @@ class _ProductCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 5, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppTheme.error.withOpacity(0.15),
+                                color: AppTheme.error.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -888,7 +888,7 @@ class _RatingSummary extends StatelessWidget {
                             minHeight: 6,
                             backgroundColor: AppTheme.inputBorder,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              AppTheme.gold.withOpacity(0.7),
+                              AppTheme.gold.withValues(alpha: 0.7),
                             ),
                           ),
                         ),
@@ -944,8 +944,8 @@ class _ReviewCard extends StatelessWidget {
                 height: 36,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.gold.withOpacity(0.12),
-                  border: Border.all(color: AppTheme.gold.withOpacity(0.25)),
+                  color: AppTheme.gold.withValues(alpha: 0.12),
+                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
                 ),
                 child: Center(
                   child: Text(
@@ -1057,11 +1057,11 @@ class _CoverCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.gold.withOpacity(0.20),
-            AppTheme.gold.withOpacity(0.04),
+            AppTheme.gold.withValues(alpha: 0.20),
+            AppTheme.gold.withValues(alpha: 0.04),
           ],
         ),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.22)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.22)),
       ),
       child: Stack(
         children: [
@@ -1092,7 +1092,7 @@ class _OpenBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
@@ -1185,9 +1185,9 @@ class _RatingPill extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: AppTheme.gold.withOpacity(0.10),
+            color: AppTheme.gold.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppTheme.gold.withOpacity(0.28)),
+            border: Border.all(color: AppTheme.gold.withValues(alpha: 0.28)),
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.star_rounded, size: 14, color: AppTheme.gold),
@@ -1302,9 +1302,9 @@ class _BarberChip extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppTheme.gold.withOpacity(0.12),
+              color: AppTheme.gold.withValues(alpha: 0.12),
               border:
-                  Border.all(color: AppTheme.gold.withOpacity(0.3), width: 1.5),
+                  Border.all(color: AppTheme.gold.withValues(alpha: 0.3), width: 1.5),
             ),
             child: Center(
               child: Text(barber.avatarInitials,
@@ -1378,9 +1378,9 @@ class _ServiceBookingCard extends StatelessWidget {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withOpacity(0.08),
+                    color: AppTheme.gold.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Icon(ServiceCard.iconFor(service.iconName),
                       color: AppTheme.gold, size: 22),
@@ -1439,7 +1439,7 @@ class _ServiceBookingCard extends StatelessWidget {
               ),
               borderRadius:
                   const BorderRadius.vertical(bottom: Radius.circular(10)),
-              splashColor: AppTheme.gold.withOpacity(0.08),
+              splashColor: AppTheme.gold.withValues(alpha: 0.08),
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
@@ -1491,7 +1491,7 @@ class _ProductCardActions extends StatelessWidget {
                   AppRoutes.productDetail,
                   arguments: {'product': product, 'barbershop': shop},
                 ),
-                splashColor: AppTheme.gold.withOpacity(0.06),
+                splashColor: AppTheme.gold.withValues(alpha: 0.06),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 11),
                   child: Row(
@@ -1548,7 +1548,7 @@ class _ProductCardActions extends StatelessWidget {
                         }
                       }
                     : null,
-                splashColor: AppTheme.gold.withOpacity(0.08),
+                splashColor: AppTheme.gold.withValues(alpha: 0.08),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 11),
                   child: Row(

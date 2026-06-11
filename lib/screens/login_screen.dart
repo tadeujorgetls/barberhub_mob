@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/auth_provider.dart';
-import '../routes/app_routes.dart';
+import '../core/routes/app_routes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
 
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.gold.withOpacity(0.06),
+                    AppTheme.gold.withValues(alpha: 0.06),
                     Colors.transparent,
                   ],
                 ),
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.gold.withOpacity(0.04),
+                    AppTheme.gold.withValues(alpha: 0.04),
                     Colors.transparent,
                   ],
                 ),
@@ -282,9 +282,9 @@ class _DemoHint extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
         borderRadius: BorderRadius.circular(4),
-        color: AppTheme.gold.withOpacity(0.04),
+        color: AppTheme.gold.withValues(alpha: 0.04),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

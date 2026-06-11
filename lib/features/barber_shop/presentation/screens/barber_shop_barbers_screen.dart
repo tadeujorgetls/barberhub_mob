@@ -105,11 +105,11 @@ class _BarberTile extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: barber.isActive
-                  ? AppTheme.gold.withOpacity(0.12)
+                  ? AppTheme.gold.withValues(alpha: 0.12)
                   : AppTheme.surface,
               border: Border.all(
                   color: barber.isActive
-                      ? AppTheme.gold.withOpacity(0.3)
+                      ? AppTheme.gold.withValues(alpha: 0.3)
                       : AppTheme.divider),
             ),
             child: Center(

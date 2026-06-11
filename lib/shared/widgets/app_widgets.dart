@@ -377,9 +377,9 @@ class ServiceCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-                color: AppTheme.gold.withOpacity(.08),
+                color: AppTheme.gold.withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.gold.withOpacity(.2))),
+                border: Border.all(color: AppTheme.gold.withValues(alpha: .2))),
             child:
                 Icon(iconFor(service.iconName), color: AppTheme.gold, size: 22),
           ),
@@ -477,7 +477,7 @@ class AppointmentCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: AppTheme.gold.withOpacity(0.04),
+              color: AppTheme.gold.withValues(alpha: 0.04),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(10)),
               border: const Border(
@@ -498,7 +498,7 @@ class AppointmentCard extends StatelessWidget {
               StatusBadge(
                 label: a.statusLabel.toUpperCase(),
                 color: statusColor,
-                bgColor: statusColor.withOpacity(.1),
+                bgColor: statusColor.withValues(alpha: .1),
               ),
             ]),
           ),
@@ -525,7 +525,7 @@ class AppointmentCard extends StatelessWidget {
                         StatusBadge(
                             label: a.statusLabel.toUpperCase(),
                             color: statusColor,
-                            bgColor: statusColor.withOpacity(.1)),
+                            bgColor: statusColor.withValues(alpha: .1)),
                       ])
                     else
                       Text(a.service.name,
@@ -598,9 +598,9 @@ class _DateBox extends StatelessWidget {
         width: 50,
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-            color: AppTheme.gold.withOpacity(.08),
+            color: AppTheme.gold.withValues(alpha: .08),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppTheme.gold.withOpacity(.2))),
+            border: Border.all(color: AppTheme.gold.withValues(alpha: .2))),
         child: Column(children: [
           Text('$day',
               style: Theme.of(context)
@@ -692,9 +692,9 @@ class RoleBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-            color: AppTheme.gold.withOpacity(.1),
+            color: AppTheme.gold.withValues(alpha: .1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.gold.withOpacity(.3))),
+            border: Border.all(color: AppTheme.gold.withValues(alpha: .3))),
         child: Text(label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: AppTheme.gold, fontSize: 10, letterSpacing: 1)),
@@ -721,7 +721,7 @@ class BarberAvatar extends StatelessWidget {
         decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: selected
-                ? AppTheme.gold.withOpacity(.2)
+                ? AppTheme.gold.withValues(alpha: .2)
                 : AppTheme.surfaceElevated,
             border: Border.all(
                 color: selected ? AppTheme.gold : AppTheme.inputBorder,
@@ -776,7 +776,7 @@ class BarberListTile extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: selected
-                ? AppTheme.gold.withOpacity(.06)
+                ? AppTheme.gold.withValues(alpha: .06)
                 : AppTheme.surfaceElevated,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(

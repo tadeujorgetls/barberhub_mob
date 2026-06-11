@@ -135,7 +135,7 @@ class _MobileWebViewContainerState
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: AppTheme.gold.withOpacity(0.18),
+                        color: AppTheme.gold.withValues(alpha: 0.18),
                         width: 1.5,
                       ),
                     ),
@@ -155,7 +155,7 @@ class _MobileWebViewContainerState
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.gold.withOpacity(0.35),
+                          color: AppTheme.gold.withValues(alpha: 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),

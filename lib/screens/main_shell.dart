@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_provider.dart';
 import '../models/onboarding_provider.dart';
-import '../routes/app_routes.dart';
+import '../core/routes/app_routes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/onboarding_overlay.dart';
 import 'client/barbershop_list_screen.dart';

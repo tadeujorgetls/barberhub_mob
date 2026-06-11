@@ -191,9 +191,9 @@ class _ActionChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: color.withValues(alpha: .08),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withOpacity(.2)),
+          border: Border.all(color: color.withValues(alpha: .2)),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, size: 13, color: color),
@@ -312,7 +312,7 @@ class _BarberFormDialogState extends State<_BarberFormDialog> {
                     duration: const Duration(milliseconds: 150),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: sel ? AppTheme.gold.withOpacity(.12) : AppTheme.surfaceElevated,
+                      color: sel ? AppTheme.gold.withValues(alpha: .12) : AppTheme.surfaceElevated,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: sel ? AppTheme.gold : AppTheme.inputBorder, width: sel ? 1.5 : 1),
                     ),

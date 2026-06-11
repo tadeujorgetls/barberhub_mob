@@ -7,7 +7,7 @@ import 'package:barber_hub/features/auth/presentation/providers/auth_providers.d
 import 'package:barber_hub/features/membership/domain/entities/membership_entity.dart';
 import 'package:barber_hub/features/membership/domain/entities/membership_plan_entity.dart';
 import 'package:barber_hub/features/membership/presentation/providers/membership_providers.dart';
-import 'package:barber_hub/features/membership/presentation/screens/client/membership_plans_screen.dart';
+import 'package:barber_hub/features/membership/presentation/models/membership_plans_args.dart';
 import 'package:barber_hub/features/membership/presentation/widgets/membership_widgets.dart';
 
 /// Tela central de assinaturas do cliente —
@@ -60,10 +60,10 @@ class _State extends ConsumerState<MyMembershipScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppTheme.gold.withOpacity(0.15),
+                            color: AppTheme.gold.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: AppTheme.gold.withOpacity(0.3)),
+                                color: AppTheme.gold.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -329,10 +329,10 @@ class _EmptyState extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppTheme.gold.withOpacity(0.08),
+                color: AppTheme.gold.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20),
                 border:
-                    Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
               ),
               child: const Icon(Icons.workspace_premium_outlined,
                   color: AppTheme.gold, size: 40),

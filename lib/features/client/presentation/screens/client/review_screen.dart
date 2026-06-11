@@ -231,7 +231,7 @@ class _AppointmentSummary extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -239,9 +239,9 @@ class _AppointmentSummary extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppTheme.gold.withOpacity(0.12),
+              color: AppTheme.gold.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
             ),
             child: Center(
               child: Icon(a.barbershop.coverIconData, color: AppTheme.gold, size: 26),

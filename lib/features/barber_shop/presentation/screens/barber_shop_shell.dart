@@ -83,7 +83,7 @@ class _MembershipFab extends ConsumerWidget {
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppTheme.gold.withOpacity(0.4)),
+        side: BorderSide(color: AppTheme.gold.withValues(alpha: 0.4)),
       ),
     );
   }

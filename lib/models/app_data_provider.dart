@@ -49,8 +49,7 @@ class AppDataProvider extends ChangeNotifier {
         }
       }
     } catch (error) {
-      debugPrint('[AppDataProvider] Falha ao carregar catalogo Supabase: ' +
-          error.toString());
+      debugPrint('[AppDataProvider] Falha ao carregar catalogo Supabase: $error');
     } finally {
       _isLoading = false;
       notifyListeners();

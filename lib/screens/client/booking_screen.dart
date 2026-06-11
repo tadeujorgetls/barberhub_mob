@@ -7,7 +7,7 @@ import '../../features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/barber_model.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/service_model.dart';
-import '../../routes/app_routes.dart';
+import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
@@ -236,9 +236,9 @@ class _BookingScreenState extends State<BookingScreen> {
                 height: 72,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.gold.withOpacity(0.12),
+                  color: AppTheme.gold.withValues(alpha: 0.12),
                   border: Border.all(
-                      color: AppTheme.gold.withOpacity(0.3), width: 2),
+                      color: AppTheme.gold.withValues(alpha: 0.3), width: 2),
                 ),
                 child: const Icon(Icons.check_rounded,
                     color: AppTheme.gold, size: 36),
@@ -317,7 +317,7 @@ class _StepIndicator extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: active
-                    ? AppTheme.gold.withOpacity(0.15)
+                    ? AppTheme.gold.withValues(alpha: 0.15)
                     : AppTheme.surfaceElevated,
                 border: Border.all(
                   color: active ? AppTheme.gold : AppTheme.inputBorder,
@@ -379,7 +379,7 @@ class _BookingSummaryBar extends StatelessWidget {
                 barbershopName,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontSize: 11,
-                      color: AppTheme.gold.withOpacity(0.85),
+                      color: AppTheme.gold.withValues(alpha: 0.85),
                     ),
               ),
             ],
@@ -466,7 +466,7 @@ class _BarberStep extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isSel
-                        ? AppTheme.gold.withOpacity(0.06)
+                        ? AppTheme.gold.withValues(alpha: 0.06)
                         : AppTheme.surfaceElevated,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -696,7 +696,7 @@ class _DateTimeStep extends StatelessWidget {
                             color: isUnavailable
                                 ? AppTheme.surface
                                 : isSel
-                                    ? AppTheme.gold.withOpacity(0.12)
+                                    ? AppTheme.gold.withValues(alpha: 0.12)
                                     : AppTheme.surfaceElevated,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
@@ -855,9 +855,9 @@ class _ConfirmStep extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withOpacity(0.06),
+                    color: AppTheme.gold.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [

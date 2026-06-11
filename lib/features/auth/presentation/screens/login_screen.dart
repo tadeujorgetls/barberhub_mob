@@ -169,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     width: size, height: size,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
-      gradient: RadialGradient(colors: [AppTheme.gold.withOpacity(opacity), Colors.transparent]),
+      gradient: RadialGradient(colors: [AppTheme.gold.withValues(alpha: opacity), Colors.transparent]),
     ),
   );
 }
@@ -180,9 +180,9 @@ class _DemoHint extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
         borderRadius: BorderRadius.circular(4),
-        color: AppTheme.gold.withOpacity(0.04),
+        color: AppTheme.gold.withValues(alpha: 0.04),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [

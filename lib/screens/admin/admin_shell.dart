@@ -86,7 +86,7 @@ class _BarbershopSelector extends StatelessWidget {
                             horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: isSel
-                              ? AppTheme.gold.withOpacity(0.15)
+                              ? AppTheme.gold.withValues(alpha: 0.15)
                               : AppTheme.surfaceElevated,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(

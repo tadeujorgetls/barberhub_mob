@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:barber_hub/features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
-import '../../routes/app_routes.dart';
+import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
@@ -54,8 +54,8 @@ class ProfileScreen extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppTheme.gold.withOpacity(0.12),
-                          AppTheme.gold.withOpacity(0.02),
+                          AppTheme.gold.withValues(alpha: 0.12),
+                          AppTheme.gold.withValues(alpha: 0.02),
                         ],
                       ),
                     ),
@@ -82,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
                           height: 72,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppTheme.gold.withOpacity(0.15),
+                            color: AppTheme.gold.withValues(alpha: 0.15),
                             border: Border.all(color: AppTheme.gold, width: 2),
                           ),
                           child: Center(
@@ -350,7 +350,7 @@ class _MenuItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: AppTheme.textHint.withOpacity(0.15),
+              color: AppTheme.textHint.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(tag,

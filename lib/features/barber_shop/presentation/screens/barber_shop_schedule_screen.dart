@@ -73,7 +73,7 @@ class _State extends ConsumerState<BarberShopScheduleScreen>
               child: TabBar(
                 controller: _tab,
                 indicator: BoxDecoration(
-                  color: AppTheme.gold.withOpacity(0.12),
+                  color: AppTheme.gold.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppTheme.gold),
                 ),
@@ -193,9 +193,9 @@ class _AgendaTab extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppTheme.error.withOpacity(0.08),
+                color: AppTheme.error.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.error.withOpacity(0.4)),
+                border: Border.all(color: AppTheme.error.withValues(alpha: 0.4)),
               ),
               child: Row(children: [
                 const Icon(Icons.block_rounded,
@@ -258,7 +258,7 @@ class _AppointmentCard extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppTheme.gold.withOpacity(0.1),
+            color: AppTheme.gold.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
@@ -292,9 +292,9 @@ class _AppointmentCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: statusColor.withOpacity(0.4)),
+              border: Border.all(color: statusColor.withValues(alpha: 0.4)),
             ),
             child: Text(
                 appt.status == AppointmentStatus.scheduled
@@ -376,10 +376,10 @@ class _BlocksTab extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppTheme.error.withOpacity(0.08),
+                          color: AppTheme.error.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                              color: AppTheme.error.withOpacity(0.3)),
+                              color: AppTheme.error.withValues(alpha: 0.3)),
                         ),
                         child: Center(
                             child: Icon(b.type.iconData,
@@ -409,10 +409,10 @@ class _BlocksTab extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppTheme.error.withOpacity(0.08),
+                                color: AppTheme.error.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: AppTheme.error.withOpacity(0.3)),
+                                    color: AppTheme.error.withValues(alpha: 0.3)),
                               ),
                               child: Text(b.type.label,
                                   style: GoogleFonts.jost(
@@ -500,7 +500,7 @@ class _BlockModalState extends ConsumerState<_BlockModal> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: _type == t
-                      ? AppTheme.gold.withOpacity(0.08)
+                      ? AppTheme.gold.withValues(alpha: 0.08)
                       : AppTheme.surfaceElevated,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(

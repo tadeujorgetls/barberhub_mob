@@ -164,7 +164,7 @@ class _FilterChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
             color: selected
-                ? AppTheme.gold.withOpacity(0.12)
+                ? AppTheme.gold.withValues(alpha: 0.12)
                 : AppTheme.surfaceElevated,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -194,9 +194,9 @@ class _ProductTile extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: AppTheme.gold.withOpacity(0.08),
+              color: AppTheme.gold.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
             ),
             child: Center(
                 child: Icon(product.iconData, color: AppTheme.gold, size: 24)),
@@ -231,12 +231,12 @@ class _ProductTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: product.stockQty > 0
                           ? AppTheme.surface
-                          : AppTheme.error.withOpacity(0.1),
+                          : AppTheme.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                           color: product.stockQty > 0
                               ? AppTheme.divider
-                              : AppTheme.error.withOpacity(0.4)),
+                              : AppTheme.error.withValues(alpha: 0.4)),
                     ),
                     child: Text('Estoque: ${product.stockQty}',
                         style: GoogleFonts.jost(

@@ -1,7 +1,6 @@
 ﻿import 'package:barber_hub/core/services/supabase_service.dart';
 import 'package:barber_hub/models/barber_model.dart';
 import 'package:barber_hub/models/barbershop_model.dart';
-import 'package:barber_hub/models/product_model.dart';
 import 'package:barber_hub/models/service_model.dart';
 
 class SupabaseCatalogDatasource {

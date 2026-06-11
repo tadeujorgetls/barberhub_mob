@@ -51,8 +51,8 @@ class ProfileScreen extends ConsumerWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppTheme.gold.withOpacity(0.12),
-                          AppTheme.gold.withOpacity(0.02),
+                          AppTheme.gold.withValues(alpha: 0.12),
+                          AppTheme.gold.withValues(alpha: 0.02),
                         ],
                       ),
                     ),
@@ -79,7 +79,7 @@ class ProfileScreen extends ConsumerWidget {
                           height: 72,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppTheme.gold.withOpacity(0.15),
+                            color: AppTheme.gold.withValues(alpha: 0.15),
                             border:
                                 Border.all(color: AppTheme.gold, width: 2),
                           ),
@@ -354,7 +354,7 @@ class _MenuItem extends ConsumerWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: AppTheme.textHint.withOpacity(0.15),
+              color: AppTheme.textHint.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(tag,

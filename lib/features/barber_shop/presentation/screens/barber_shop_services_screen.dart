@@ -197,7 +197,7 @@ class _Tile extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: service.isActive
-                  ? AppTheme.gold.withOpacity(0.1)
+                  ? AppTheme.gold.withValues(alpha: 0.1)
                   : AppTheme.inputBorder,
               borderRadius: BorderRadius.circular(10),
             ),
@@ -520,9 +520,9 @@ class _EmptyState extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: AppTheme.gold.withOpacity(0.08),
+                  color: AppTheme.gold.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                 ),
                 child: const Icon(Icons.content_cut_rounded,
                     color: AppTheme.gold, size: 36),

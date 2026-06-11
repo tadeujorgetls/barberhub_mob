@@ -38,7 +38,7 @@ class MembershipPlanCard extends StatelessWidget {
             color: isSelected
                 ? color
                 : (isPremium
-                    ? color.withOpacity(0.3)
+                    ? color.withValues(alpha: 0.3)
                     : AppTheme.inputBorder),
             width: isSelected ? 2 : 1,
           ),
@@ -50,7 +50,7 @@ class MembershipPlanCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.08),
+                color: color.withValues(alpha: 0.08),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(11)),
               ),
@@ -60,9 +60,9 @@ class MembershipPlanCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: color.withOpacity(0.4)),
+                      border: Border.all(color: color.withValues(alpha: 0.4)),
                     ),
                     child: Icon(plan.tier.icon, color: color, size: 18),
                   ),
@@ -88,7 +88,7 @@ class MembershipPlanCard extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.2),
+                                  color: color.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -107,7 +107,7 @@ class MembershipPlanCard extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.15),
+                                  color: Colors.green.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -220,7 +220,7 @@ class ActiveMembershipCard extends StatelessWidget {
           color: AppTheme.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isActive ? color.withOpacity(0.4) : AppTheme.inputBorder,
+            color: isActive ? color.withValues(alpha: 0.4) : AppTheme.inputBorder,
           ),
         ),
         child: Column(
@@ -346,9 +346,9 @@ class MembershipStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, bg) = switch (status) {
-      MembershipStatus.active    => (Colors.green, Colors.green.withOpacity(0.12)),
-      MembershipStatus.paused    => (AppTheme.gold, AppTheme.gold.withOpacity(0.12)),
-      MembershipStatus.cancelled => (AppTheme.error, AppTheme.error.withOpacity(0.12)),
+      MembershipStatus.active    => (Colors.green, Colors.green.withValues(alpha: 0.12)),
+      MembershipStatus.paused    => (AppTheme.gold, AppTheme.gold.withValues(alpha: 0.12)),
+      MembershipStatus.cancelled => (AppTheme.error, AppTheme.error.withValues(alpha: 0.12)),
       MembershipStatus.expired   => (AppTheme.textHint, AppTheme.inputBorder),
     };
 
@@ -357,7 +357,7 @@ class MembershipStatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         status.label.toUpperCase(),

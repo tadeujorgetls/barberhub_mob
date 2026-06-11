@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/auth_provider.dart';
-import '../routes/app_routes.dart';
+import '../core/routes/app_routes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
 
@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.gold.withOpacity(0.07),
+                    AppTheme.gold.withValues(alpha: 0.07),
                     Colors.transparent,
                   ],
                 ),
@@ -181,12 +181,12 @@ class HomeScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                AppTheme.gold.withOpacity(0.12),
-                                AppTheme.gold.withOpacity(0.04),
+                                AppTheme.gold.withValues(alpha: 0.12),
+                                AppTheme.gold.withValues(alpha: 0.04),
                               ],
                             ),
                             border: Border.all(
-                              color: AppTheme.gold.withOpacity(0.25),
+                              color: AppTheme.gold.withValues(alpha: 0.25),
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -262,8 +262,8 @@ class _StatusCard extends StatelessWidget {
             height: 46,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppTheme.gold.withOpacity(0.12),
-              border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+              color: AppTheme.gold.withValues(alpha: 0.12),
+              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
             ),
             child: const Icon(
               Icons.person_outline_rounded,

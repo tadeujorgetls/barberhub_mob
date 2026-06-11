@@ -6,7 +6,7 @@ import '../../models/app_data_provider.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/product_model.dart';
 import '../../models/service_model.dart';
-import '../../routes/app_routes.dart';
+import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
@@ -23,7 +23,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
   _AssistantIntent _lastIntent = _AssistantIntent.none;
 
   final List<_ChatMessage> _messages = [
-    _ChatMessage.assistant(
+    const _ChatMessage.assistant(
       _AssistantReply(
         text:
             'Oi, eu sou o assistente do Barber Hub. Posso recomendar servicos, barbearias, barbeiros, produtos e te ajudar a iniciar um agendamento.',
@@ -780,9 +780,9 @@ class _SuggestionCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.background.withOpacity(0.45),
+        color: AppTheme.background.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.18)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -185,7 +185,7 @@ class _ServiceFormDialogState extends State<_ServiceFormDialog> {
                     duration: const Duration(milliseconds: 150),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: sel ? AppTheme.gold.withOpacity(.12) : AppTheme.surfaceElevated,
+                      color: sel ? AppTheme.gold.withValues(alpha: .12) : AppTheme.surfaceElevated,
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(color: sel ? AppTheme.gold : AppTheme.inputBorder, width: sel ? 1.5 : 1),
                     ),

@@ -113,9 +113,9 @@ class _BarbershopBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.gold.withOpacity(0.06),
+        color: AppTheme.gold.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -230,9 +230,9 @@ class _CartItemCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: AppTheme.gold.withOpacity(0.07),
+                color: AppTheme.gold.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.gold.withOpacity(0.15)),
+                border: Border.all(color: AppTheme.gold.withValues(alpha: 0.15)),
               ),
               child: Center(
                 child: Text(product.imageEmoji,
@@ -364,9 +364,9 @@ class _QtyBtn extends StatelessWidget {
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          color: AppTheme.gold.withOpacity(0.1),
+          color: AppTheme.gold.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppTheme.gold.withOpacity(0.25)),
+          border: Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
         ),
         child: Icon(icon, size: 14, color: AppTheme.gold),
       ),
@@ -573,9 +573,9 @@ class _CheckoutSuccessDialog extends StatelessWidget {
                     height: 72,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.gold.withOpacity(0.12),
+                      color: AppTheme.gold.withValues(alpha: 0.12),
                       border: Border.all(
-                          color: AppTheme.gold.withOpacity(0.3), width: 2),
+                          color: AppTheme.gold.withValues(alpha: 0.3), width: 2),
                     ),
                     child: const Icon(Icons.check_rounded,
                         color: AppTheme.gold, size: 36),

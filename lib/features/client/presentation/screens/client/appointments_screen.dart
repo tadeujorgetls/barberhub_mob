@@ -340,7 +340,7 @@ class _AppointmentCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: AppTheme.gold.withOpacity(0.04),
+              color: AppTheme.gold.withValues(alpha: 0.04),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
               border: const Border(
@@ -365,7 +365,7 @@ class _AppointmentCard extends StatelessWidget {
                 StatusBadge(
                   label: a.statusLabel.toUpperCase(),
                   color: _statusColor,
-                  bgColor: _statusColor.withOpacity(0.1),
+                  bgColor: _statusColor.withValues(alpha: 0.1),
                 ),
               ],
             ),
@@ -382,10 +382,10 @@ class _AppointmentCard extends StatelessWidget {
                   width: 54,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withOpacity(0.08),
+                    color: AppTheme.gold.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: AppTheme.gold.withOpacity(0.2)),
+                        color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     children: [
@@ -545,7 +545,7 @@ class _AppointmentCard extends StatelessWidget {
                 onTap: () => onReview!(a),
                 borderRadius: const BorderRadius.vertical(
                     bottom: Radius.circular(10)),
-                splashColor: AppTheme.gold.withOpacity(0.08),
+                splashColor: AppTheme.gold.withValues(alpha: 0.08),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 11),
@@ -607,7 +607,7 @@ class _AppointmentCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppTheme.gold.withOpacity(0.1),
+                      color: AppTheme.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(

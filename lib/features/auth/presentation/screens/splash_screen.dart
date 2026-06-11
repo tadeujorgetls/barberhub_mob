@@ -59,10 +59,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withOpacity(0.12),
+                    color: AppTheme.gold.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: AppTheme.gold.withOpacity(0.3), width: 1.5),
+                        color: AppTheme.gold.withValues(alpha: 0.3), width: 1.5),
                   ),
                   child: const Center(
                     child: Icon(LucideIcons.scissors,
@@ -92,7 +92,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.gold.withOpacity(0.7)),
+                        AppTheme.gold.withValues(alpha: 0.7)),
                   ),
                 ),
               ]),
@@ -109,7 +109,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-              colors: [AppTheme.gold.withOpacity(opacity), Colors.transparent]),
+              colors: [AppTheme.gold.withValues(alpha: opacity), Colors.transparent]),
         ),
       );
 }

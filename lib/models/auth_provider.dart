@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'user_model.dart';
 import '../mock/mock_data.dart';
-import '../routes/app_routes.dart';
+import '../core/routes/app_routes.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserModel? _currentUser;
@@ -22,7 +22,7 @@ class AuthProvider extends ChangeNotifier {
   /// Rota inicial com base no perfil do usuário logado.
   String get initialRoute {
     if (isAdmin)      return AppRoutes.adminHome;
-    if (isBarberShop) return AppRoutes.barberShopHome; // CORRIGIDO: redirecionamento ausente
+    if (isBarberShop) return AppRoutes.barberShopHome; 
     if (isBarber)     return AppRoutes.barberHome;
     return AppRoutes.home;
   }

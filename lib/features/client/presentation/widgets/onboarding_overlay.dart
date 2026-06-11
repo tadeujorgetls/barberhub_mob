@@ -243,17 +243,17 @@ class _OnboardingOverlayState extends State<OnboardingOverlay>
             color: AppTheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppTheme.gold.withOpacity(0.25),
+              color: AppTheme.gold.withValues(alpha: 0.25),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 blurRadius: 32,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: AppTheme.gold.withOpacity(0.08),
+                color: AppTheme.gold.withValues(alpha: 0.08),
                 blurRadius: 24,
                 offset: const Offset(0, 4),
               ),
@@ -270,10 +270,10 @@ class _OnboardingOverlayState extends State<OnboardingOverlay>
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppTheme.gold.withOpacity(0.12),
+                      color: AppTheme.gold.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppTheme.gold.withOpacity(0.3),
+                        color: AppTheme.gold.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -395,7 +395,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppTheme.gold.withOpacity(0.6),
+                color: AppTheme.gold.withValues(alpha: 0.6),
                 width: 2,
               ),
             ),
@@ -420,7 +420,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay>
           decoration: BoxDecoration(
             color: isActive
                 ? AppTheme.gold
-                : AppTheme.textHint.withOpacity(0.5),
+                : AppTheme.textHint.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(3),
           ),
         );
@@ -449,7 +449,7 @@ class _SpotlightPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black.withOpacity(0.78);
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.78);
 
     if (highlightRect == null) {
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
@@ -470,7 +470,7 @@ class _SpotlightPainter extends CustomPainter {
     canvas.drawPath(combined, paint);
 
     final borderPaint = Paint()
-      ..color = AppTheme.gold.withOpacity(0.45)
+      ..color = AppTheme.gold.withValues(alpha: 0.45)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawRRect(

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:barber_hub/features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
-import '../../routes/app_routes.dart';
+import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
@@ -41,8 +41,8 @@ class BarberProfileScreen extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.gold.withOpacity(.1),
-                    AppTheme.gold.withOpacity(.02)
+                    AppTheme.gold.withValues(alpha: .1),
+                    AppTheme.gold.withValues(alpha: .02)
                   ],
                 ),
               ),
@@ -219,7 +219,7 @@ class _MenuItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-                color: AppTheme.textHint.withOpacity(.15),
+                color: AppTheme.textHint.withValues(alpha: .15),
                 borderRadius: BorderRadius.circular(4)),
             child: Text('Em breve',
                 style: Theme.of(context)
@@ -281,7 +281,7 @@ class _BarberReviewsSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppTheme.surfaceElevated,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -345,7 +345,7 @@ class _BarberReviewsSection extends StatelessWidget {
                                 minHeight: 5,
                                 backgroundColor: AppTheme.inputBorder,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppTheme.gold.withOpacity(0.65)),
+                                    AppTheme.gold.withValues(alpha: 0.65)),
                               ),
                             ),
                           ),

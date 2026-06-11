@@ -62,10 +62,10 @@ class ProductDetailScreen extends StatelessWidget {
                             width: 150,
                             height: 150,
                             decoration: BoxDecoration(
-                              color: AppTheme.gold.withOpacity(0.07),
+                              color: AppTheme.gold.withValues(alpha: 0.07),
                               borderRadius: BorderRadius.circular(30),
                               border: Border.all(
-                                  color: AppTheme.gold.withOpacity(0.2)),
+                                  color: AppTheme.gold.withValues(alpha: 0.2)),
                             ),
                             child: Center(
                               child: Icon(product.iconData,
@@ -449,7 +449,7 @@ class _QuantityRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surfaceElevated,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -501,9 +501,9 @@ class _QtyButton extends StatelessWidget {
         width: 30,
         height: 30,
         decoration: BoxDecoration(
-          color: AppTheme.gold.withOpacity(0.12),
+          color: AppTheme.gold.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+          border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
         ),
         child: Icon(icon, size: 16, color: AppTheme.gold),
       ),
@@ -547,9 +547,9 @@ class _FeaturedChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppTheme.gold.withOpacity(0.12),
+        color: AppTheme.gold.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -647,9 +647,9 @@ class _OutOfStockBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.error.withOpacity(0.06),
+        color: AppTheme.error.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.error.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.error.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [

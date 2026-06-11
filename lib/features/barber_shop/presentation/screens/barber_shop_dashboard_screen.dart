@@ -48,7 +48,7 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft, end: Alignment.bottomRight,
-                    colors: [AppTheme.gold.withOpacity(0.14), AppTheme.gold.withOpacity(0.02)],
+                    colors: [AppTheme.gold.withValues(alpha: 0.14), AppTheme.gold.withValues(alpha: 0.02)],
                   ),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -57,9 +57,9 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppTheme.gold.withOpacity(0.15),
+                          color: AppTheme.gold.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+                          border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
                         ),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                           const Icon(Icons.storefront_rounded, color: AppTheme.gold, size: 11),
@@ -114,9 +114,9 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppTheme.gold.withOpacity(0.06),
+                      color: AppTheme.gold.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.gold.withOpacity(0.25)),
+                      border: Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
                     ),
                     child: Row(children: [
                       const Icon(Icons.block_rounded, color: AppTheme.gold, size: 16),
@@ -162,7 +162,7 @@ class _State extends ConsumerState<BarberShopDashboardScreen> {
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceElevated,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
+                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Row(children: [
                     const Icon(Icons.star_rounded, color: AppTheme.gold, size: 32),
@@ -261,15 +261,15 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: gold ? AppTheme.gold.withOpacity(0.08) : AppTheme.surfaceElevated,
+      color: gold ? AppTheme.gold.withValues(alpha: 0.08) : AppTheme.surfaceElevated,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: gold ? AppTheme.gold.withOpacity(0.3) : AppTheme.inputBorder),
+      border: Border.all(color: gold ? AppTheme.gold.withValues(alpha: 0.3) : AppTheme.inputBorder),
     ),
     child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
       Container(
         width: 36, height: 36,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: color, size: 18),
@@ -301,7 +301,7 @@ class _ApptTile extends StatelessWidget {
     child: Row(children: [
       Container(
         width: 44, height: 44,
-        decoration: BoxDecoration(color: AppTheme.gold.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(color: AppTheme.gold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
         child: Center(child: Text(appt.timeSlot, style: GoogleFonts.jost(
             color: AppTheme.gold, fontSize: 11, fontWeight: FontWeight.w700))),
       ),

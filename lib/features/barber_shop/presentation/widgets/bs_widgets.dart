@@ -50,7 +50,7 @@ class BsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: highlight ? AppTheme.gold.withOpacity(0.4) : AppTheme.inputBorder),
+        border: Border.all(color: highlight ? AppTheme.gold.withValues(alpha: 0.4) : AppTheme.inputBorder),
       ),
       child: child,
     ),
@@ -72,7 +72,7 @@ class BsStatusBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: bg, borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(isActive ? (activeLabel ?? 'Ativo') : (inactiveLabel ?? 'Inativo'),
           style: GoogleFonts.jost(color: color, fontSize: 10, fontWeight: FontWeight.w600)),

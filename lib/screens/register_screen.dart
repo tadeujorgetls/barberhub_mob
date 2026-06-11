@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
-import '../routes/app_routes.dart';
+import '../core/routes/app_routes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
 
@@ -121,7 +121,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.gold.withOpacity(0.05),
+                    AppTheme.gold.withValues(alpha: 0.05),
                     Colors.transparent,
                   ],
                 ),

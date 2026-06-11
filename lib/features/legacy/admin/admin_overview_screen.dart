@@ -38,7 +38,7 @@ class AdminOverviewScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(colors: [
-                  AppTheme.gold.withOpacity(.05),
+                  AppTheme.gold.withValues(alpha: .05),
                   Colors.transparent
                 ]),
               ),
@@ -317,10 +317,10 @@ class _ShopStatCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
               border:
-                  Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+                  Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.3)),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.attach_money_rounded,
@@ -415,7 +415,7 @@ class _StatusBreakdown extends StatelessWidget {
                     value: pct,
                     backgroundColor: AppTheme.inputBorder,
                     valueColor:
-                        AlwaysStoppedAnimation<Color>(color.withOpacity(.7)),
+                        AlwaysStoppedAnimation<Color>(color.withValues(alpha: .7)),
                     minHeight: 6,
                   ),
                 ),

@@ -27,14 +27,14 @@ class BarberShopProfileScreen extends ConsumerWidget {
             width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
             decoration: BoxDecoration(
               gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-                  colors: [AppTheme.gold.withOpacity(0.12), AppTheme.gold.withOpacity(0.02)]),
+                  colors: [AppTheme.gold.withValues(alpha: 0.12), AppTheme.gold.withValues(alpha: 0.02)]),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
               Container(
                 width: 80, height: 80,
                 decoration: BoxDecoration(shape: BoxShape.circle,
-                    color: AppTheme.gold.withOpacity(0.15),
-                    border: Border.all(color: AppTheme.gold.withOpacity(0.4), width: 2)),
+                    color: AppTheme.gold.withValues(alpha: 0.15),
+                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.4), width: 2)),
                 child: Center(child: Text(user?.initials ?? 'BH',
                     style: GoogleFonts.cormorantGaramond(
                         color: AppTheme.gold, fontSize: 28, fontWeight: FontWeight.w700))),
@@ -47,9 +47,9 @@ class BarberShopProfileScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.gold.withOpacity(0.1),
+                  color: AppTheme.gold.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
                 ),
                 child: Text('PROPRIETÁRIO', style: GoogleFonts.jost(
                     color: AppTheme.gold, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 2)),
@@ -104,13 +104,13 @@ class BarberShopProfileScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceElevated,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
                 ),
                 child: Row(children: [
                   Container(
                     width: 36, height: 36,
                     decoration: BoxDecoration(
-                      color: AppTheme.gold.withOpacity(0.1),
+                      color: AppTheme.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.workspace_premium_rounded, color: AppTheme.gold, size: 18),
@@ -142,7 +142,7 @@ class BarberShopProfileScreen extends ConsumerWidget {
                 label: const Text('Sair da conta'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.error,
-                  side: BorderSide(color: AppTheme.error.withOpacity(0.5)),
+                  side: BorderSide(color: AppTheme.error.withValues(alpha: 0.5)),
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
                 ),
               ),
