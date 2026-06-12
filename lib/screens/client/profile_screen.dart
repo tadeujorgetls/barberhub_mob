@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
-import 'package:barber_hub/features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<LegacyAuthAdapter>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
     final data = context.watch<AppDataProvider>();
-    final user = auth.currentUser;
+    final user = authState is AuthAuthenticated ? authState.user : null;
     if (user == null) {
       return const Scaffold(
           body: Center(
@@ -67,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
                       icon: const Icon(Icons.logout_rounded,
                           color: AppTheme.textSecondary, size: 20),
                       onPressed: () {
-                        auth.logout();
+                        ref.read(authNotifierProvider.notifier).logout();
                         Navigator.pushReplacementNamed(
                             context, AppRoutes.login);
                       },
@@ -101,7 +102,7 @@ class ProfileScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                user.name ?? 'Usuário',
+                                user.name,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -109,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                user.email ?? '',
+                                user.email,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -117,7 +118,7 @@ class ProfileScreen extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-                              RoleBadge(label: user.roleLabel ?? 'Cliente'),
+                              RoleBadge(label: user.roleLabel),
                             ],
                           ),
                         ),
@@ -241,7 +242,7 @@ class ProfileScreen extends StatelessWidget {
                       height: 52,
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          auth.logout();
+                          ref.read(authNotifierProvider.notifier).logout();
                           Navigator.pushReplacementNamed(
                               context, AppRoutes.login);
                         },

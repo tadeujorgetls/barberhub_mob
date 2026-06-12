@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../mock/mock_data.dart';
-import '../../features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/barber_model.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/service_model.dart';
 import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // BookingScreen
 // Recebe via arguments: Map{'service': ServiceModel, 'barbershop': BarbershopModel}
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-class BookingScreen extends StatefulWidget {
+class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
 
   @override
-  State<BookingScreen> createState() => _BookingScreenState();
+  ConsumerState<BookingScreen> createState() => _BookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen> {
+class _BookingScreenState extends ConsumerState<BookingScreen> {
   BarberModel? _selectedBarber;
   DateTime? _selectedDate;
   String? _selectedTime;
@@ -195,11 +196,12 @@ class _BookingScreenState extends State<BookingScreen> {
     BarbershopModel barbershop,
     AppDataProvider data,
   ) async {
-    final auth = context.read<LegacyAuthAdapter>();
+    final authState = ref.read(authNotifierProvider);
+    final authUser = authState is AuthAuthenticated ? authState.user : null;
     try {
       await data.bookAppointment(
-        clientId: auth.currentUser?.id ?? 'guest',
-        clientName: auth.currentUser?.name ?? 'Visitante',
+        clientId: authUser?.id ?? 'guest',
+        clientName: authUser?.name ?? 'Visitante',
         service: service,
         barber: _selectedBarber!,
         barbershop: barbershop,

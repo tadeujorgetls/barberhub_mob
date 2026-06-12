@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
-import '../../models/auth_provider.dart';
 import '../../models/appointment_model.dart';
 import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
-class BarbershopListScreen extends StatefulWidget {
+class BarbershopListScreen extends ConsumerStatefulWidget {
   const BarbershopListScreen({super.key});
 
   @override
-  State<BarbershopListScreen> createState() => _BarbershopListScreenState();
+  ConsumerState<BarbershopListScreen> createState() => _BarbershopListScreenState();
 }
 
-class _BarbershopListScreenState extends State<BarbershopListScreen> {
+class _BarbershopListScreenState extends ConsumerState<BarbershopListScreen> {
   String _search = '';
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final authState = ref.watch(authNotifierProvider);
+    final authUser = authState is AuthAuthenticated ? authState.user : null;
     final data = context.watch<AppDataProvider>();
-    final firstName = auth.currentUser?.name.split(' ').first ?? 'Visitante';
-    final clientId = auth.currentUser?.id ?? '';
+    final firstName = authUser?.name.split(' ').first ?? 'Visitante';
+    final clientId = authUser?.id ?? '';
 
     final nextAppt = data.activeForClient(clientId).isNotEmpty
         ? data.activeForClient(clientId).first

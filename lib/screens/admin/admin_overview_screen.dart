@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
 import '../../models/appointment_model.dart';
-import '../../models/auth_provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_utils.dart';
 import '../../widgets/app_widgets.dart';
+import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
-class AdminOverviewScreen extends StatelessWidget {
+class AdminOverviewScreen extends ConsumerWidget {
   const AdminOverviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+  Widget build(BuildContext context, WidgetRef ref) {
     final data = context.watch<AppDataProvider>();
     final all = data.allAppointmentsSorted;
 
@@ -76,7 +76,7 @@ class AdminOverviewScreen extends StatelessWidget {
                         icon: const Icon(Icons.logout_rounded,
                             color: AppTheme.textSecondary, size: 20),
                         onPressed: () {
-                          auth.logout();
+                          ref.read(authNotifierProvider.notifier).logout();
                           Navigator.pushReplacementNamed(
                               context, AppRoutes.login);
                         },

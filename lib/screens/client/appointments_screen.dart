@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_data_provider.dart';
-import '../../features/legacy/providers/legacy_auth_adapter.dart';
 import '../../models/appointment_model.dart';
 import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/app_utils.dart';
 import '../../widgets/app_widgets.dart';
 import 'reschedule_sheet.dart';
+import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
-class AppointmentsScreen extends StatefulWidget {
+class AppointmentsScreen extends ConsumerStatefulWidget {
   const AppointmentsScreen({super.key});
 
   @override
-  State<AppointmentsScreen> createState() => _AppointmentsScreenState();
+  ConsumerState<AppointmentsScreen> createState() => _AppointmentsScreenState();
 }
 
-class _AppointmentsScreenState extends State<AppointmentsScreen>
+class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tab;
 
@@ -35,9 +36,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<LegacyAuthAdapter>();
+    final authState = ref.watch(authNotifierProvider);
+    final authUser = authState is AuthAuthenticated ? authState.user : null;
     final data = context.watch<AppDataProvider>();
-    final clientId = auth.currentUser?.id ?? '';
+    final clientId = authUser?.id ?? '';
 
     final active = data.activeForClient(clientId);
     final past = data.pastForClient(clientId);
