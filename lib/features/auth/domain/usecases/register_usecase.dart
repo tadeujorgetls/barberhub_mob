@@ -17,13 +17,13 @@ class RegisterUseCase {
       return (null, const ValidationFailure('Nome muito curto.'));
     }
     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email.trim())) {
-      return (null, const ValidationFailure('E-mail inválido.'));
+      return (null, const ValidationFailure('E-mail invalido.'));
     }
     if (password.length < 6) {
-      return (null, const ValidationFailure('Senha deve ter mínimo 6 caracteres.'));
+      return (null, const ValidationFailure('Senha deve ter minimo 6 caracteres.'));
     }
     if (password != confirmPassword) {
-      return (null, const ValidationFailure('As senhas não coincidem.'));
+      return (null, const ValidationFailure('As senhas nao coincidem.'));
     }
     return _repository.register(
       name: name.trim(),

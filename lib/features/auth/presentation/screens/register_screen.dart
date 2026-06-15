@@ -80,7 +80,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         Text('Conta criada com sucesso!'),
       ]),
     ));
-    Navigator.pushReplacementNamed(context, AppRoutes.home);
+    final state = ref.read(authNotifierProvider);
+    final route =
+        state is AuthAuthenticated ? state.user.initialRoute : AppRoutes.home;
+    Navigator.pushReplacementNamed(context, route);
   }
 
   @override
@@ -161,7 +164,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                 return 'Informe o e-mail';
                               }
                               if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v)) {
-                                return 'E-mail inválido';
+                                return 'E-mail invalido';
                               }
                               return null;
                             },
@@ -169,7 +172,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                           const SizedBox(height: 16),
                           AppTextField(
                             label: 'Senha',
-                            hint: 'Mínimo 6 caracteres',
+                            hint: 'Minimo 6 caracteres',
                             controller: _passCtrl,
                             focusNode: _passFocus,
                             isPassword: true,
@@ -180,7 +183,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               if (v == null || v.isEmpty) {
                                 return 'Crie uma senha';
                               }
-                              if (v.length < 6) return 'Mínimo 6 caracteres';
+                              if (v.length < 6) return 'Minimo 6 caracteres';
                               return null;
                             },
                           ),
@@ -198,7 +201,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                 return 'Confirme a senha';
                               }
                               if (v != _passCtrl.text) {
-                                return 'As senhas não coincidem';
+                                return 'As senhas nao coincidem';
                               }
                               return null;
                             },
@@ -212,7 +215,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                           Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Já tem uma conta? ',
+                                Text('Ja tem uma conta? ',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium

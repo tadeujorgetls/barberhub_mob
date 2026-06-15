@@ -20,6 +20,6 @@ abstract interface class IAuthRepository {
   /// Encerra sessão.
   Future<void> logout();
 
-  /// Simula envio de link de redefinição de senha.
-  Future<void> sendPasswordReset(String email);
+  /// Envia link de redefinicao de senha.
+  Future<Failure?> sendPasswordReset(String email);
 }

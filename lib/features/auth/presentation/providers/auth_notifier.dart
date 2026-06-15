@@ -1,9 +1,9 @@
 /// Por que Riverpod?
 ///
-/// - Compile-time safety: providers não podem ser acessados fora do
+/// - Compile-time safety: providers nao podem ser acessados fora do
 ///   ProviderScope, eliminando erros de runtime comuns com Provider.
-/// - Sem dependência de BuildContext para leitura/escrita de estado.
-/// - Testabilidade: fácil substituição de dependências sem InheritedWidget.
+/// - Sem dependencia de BuildContext para leitura/escrita de estado.
+/// - Testabilidade: facil substituicao de dependencias sem InheritedWidget.
 /// - AsyncNotifier nativo + watch/listen/ref.invalidate sem boilerplate.
 library;
 
@@ -13,6 +13,7 @@ import 'package:barber_hub/features/auth/domain/usecases/login_usecase.dart';
 import 'package:barber_hub/features/auth/domain/usecases/register_usecase.dart';
 import 'package:barber_hub/features/auth/domain/usecases/auto_login_usecase.dart';
 import 'package:barber_hub/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:barber_hub/features/auth/domain/usecases/send_password_reset_usecase.dart';
 import 'auth_state.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -20,19 +21,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final RegisterUseCase _register;
   final AutoLoginUseCase _autoLogin;
   final LogoutUseCase _logout;
+  final SendPasswordResetUseCase _sendPasswordReset;
 
   AuthNotifier({
     required LoginUseCase login,
     required RegisterUseCase register,
     required AutoLoginUseCase autoLogin,
     required LogoutUseCase logout,
+    required SendPasswordResetUseCase sendPasswordReset,
   })  : _login = login,
         _register = register,
         _autoLogin = autoLogin,
         _logout = logout,
+        _sendPasswordReset = sendPasswordReset,
         super(const AuthInitial());
-
-  // ── Auto-login ─────────────────────────────────────────────────────────────
 
   /// Chamado pelo SplashScreen. Retorna a rota inicial.
   Future<String> tryAutoLogin() async {
@@ -44,25 +46,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return user.initialRoute;
       }
     } catch (e, st) {
-      // RISCO #5 CORRIGIDO: o catch original era `catch (_) {}` — engolia
-      // qualquer exceção sem deixar rastro, tornando falhas de SharedPreferences
-      // corrompido ou decode inválido completamente invisíveis em debug.
-      //
-      // Em modo debug, loga o erro completo com stack trace para facilitar
-      // diagnóstico. Em release, o bloco é removido pelo compilador (kDebugMode).
-      // Integre aqui um serviço de crash reporting (ex: Firebase Crashlytics)
-      // quando o backend real for implementado:
-      //   FirebaseCrashlytics.instance.recordError(e, st);
       if (kDebugMode) {
-        debugPrint('[AuthNotifier.tryAutoLogin] Erro ao restaurar sessão: $e');
+        debugPrint('[AuthNotifier.tryAutoLogin] Erro ao restaurar sessao: $e');
         debugPrint(st.toString());
       }
     }
     state = const AuthUnauthenticated();
     return '/login';
   }
-
-  // ── Login ──────────────────────────────────────────────────────────────────
 
   /// Retorna null em sucesso, mensagem de erro em falha.
   Future<String?> login(String email, String password) async {
@@ -75,8 +66,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthAuthenticated(user!);
     return null;
   }
-
-  // ── Register ───────────────────────────────────────────────────────────────
 
   Future<String?> register({
     required String name,
@@ -99,18 +88,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return null;
   }
 
-  // ── Logout ─────────────────────────────────────────────────────────────────
-
   Future<void> logout() async {
     await _logout();
     state = const AuthUnauthenticated();
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  Future<void> sendPasswordReset(String email) async {
-    // No estado atual apenas simula — em produção dispara AuthLoading etc.
-    await Future.delayed(const Duration(milliseconds: 700));
+  Future<String?> sendPasswordReset(String email) async {
+    state = const AuthLoading();
+    final failure = await _sendPasswordReset(email);
+    if (failure != null) {
+      state = AuthError(failure.message);
+      return failure.message;
+    }
+    state = const AuthUnauthenticated();
+    return null;
   }
 
   void clearError() {

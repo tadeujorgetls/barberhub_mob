@@ -105,11 +105,11 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
-  Future<void> sendPasswordReset(String email) async {
+  Future<Failure?> sendPasswordReset(String email) async {
     if (_useSupabase) {
-      await _supabase.sendPasswordReset(email);
-      return;
+      return _supabase.sendPasswordReset(email);
     }
     await Future.delayed(const Duration(milliseconds: 700));
+    return null;
   }
 }

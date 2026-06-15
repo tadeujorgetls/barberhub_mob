@@ -26,7 +26,11 @@ class AuthSupabaseDatasource {
       }
 
       final profile = await _loadProfile(authUser.id);
-      return (_toUser(authUser, profile), null);
+      final user = _toUser(authUser, profile);
+      final profileFailure = _validateProfile(user);
+      if (profileFailure != null) return (null, profileFailure);
+
+      return (user, null);
     } on AuthException catch (e) {
       return (null, AuthFailure(_authMessage(e.message)));
     } catch (_) {
@@ -78,7 +82,9 @@ class AuthSupabaseDatasource {
     if (client == null || authUser == null) return null;
 
     final profile = await _loadProfile(authUser.id);
-    return _toUser(authUser, profile);
+    final user = _toUser(authUser, profile);
+    if (_validateProfile(user) != null) return null;
+    return user;
   }
 
   Future<void> logout() async {
@@ -87,10 +93,18 @@ class AuthSupabaseDatasource {
     await client.auth.signOut();
   }
 
-  Future<void> sendPasswordReset(String email) async {
+  Future<Failure?> sendPasswordReset(String email) async {
     final client = _client;
-    if (client == null) return;
-    await client.auth.resetPasswordForEmail(email);
+    if (client == null) return const AuthFailure('Supabase nao configurado.');
+
+    try {
+      await client.auth.resetPasswordForEmail(email);
+      return null;
+    } on AuthException catch (e) {
+      return AuthFailure(_authMessage(e.message));
+    } catch (_) {
+      return const UnknownFailure();
+    }
   }
 
   Future<Map<String, dynamic>?> _loadProfile(String id) async {
@@ -139,6 +153,21 @@ class AuthSupabaseDatasource {
     );
   }
 
+  Failure? _validateProfile(UserModel user) {
+    final linkedId = user.linkedId?.trim() ?? '';
+    if (user.role.isBarberShop && linkedId.isEmpty) {
+      return const AuthFailure(
+        'Perfil de barbearia sem vinculo. Verifique o linked_id no Supabase.',
+      );
+    }
+    if (user.role.isBarber && linkedId.isEmpty) {
+      return const AuthFailure(
+        'Perfil de barbeiro sem vinculo. Verifique o linked_id no Supabase.',
+      );
+    }
+    return null;
+  }
+
   String _authMessage(String message) {
     final normalized = message.toLowerCase();
     if (normalized.contains('invalid login credentials')) {
@@ -150,6 +179,9 @@ class AuthSupabaseDatasource {
     }
     if (normalized.contains('email not confirmed')) {
       return 'Confirme seu e-mail antes de entrar.';
+    }
+    if (normalized.contains('rate limit')) {
+      return 'Muitas tentativas em pouco tempo. Aguarde alguns minutos.';
     }
     return message;
   }

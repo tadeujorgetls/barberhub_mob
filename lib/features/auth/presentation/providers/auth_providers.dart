@@ -10,6 +10,7 @@ import 'package:barber_hub/features/auth/domain/usecases/auto_login_usecase.dart
 import 'package:barber_hub/features/auth/domain/usecases/login_usecase.dart';
 import 'package:barber_hub/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:barber_hub/features/auth/domain/usecases/register_usecase.dart';
+import 'package:barber_hub/features/auth/domain/usecases/send_password_reset_usecase.dart';
 import 'auth_notifier.dart';
 import 'auth_state.dart';
 
@@ -52,6 +53,9 @@ final _logoutUseCaseProvider = Provider(
   (ref) => LogoutUseCase(ref.read(authRepositoryProvider)),
 );
 
+final _sendPasswordResetUseCaseProvider = Provider(
+  (ref) => SendPasswordResetUseCase(ref.read(authRepositoryProvider)),
+);
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
@@ -59,5 +63,6 @@ final authNotifierProvider =
     register: ref.read(_registerUseCaseProvider),
     autoLogin: ref.read(_autoLoginUseCaseProvider),
     logout: ref.read(_logoutUseCaseProvider),
+    sendPasswordReset: ref.read(_sendPasswordResetUseCaseProvider),
   );
 });
