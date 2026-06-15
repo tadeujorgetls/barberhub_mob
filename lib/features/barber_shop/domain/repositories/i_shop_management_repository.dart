@@ -1,5 +1,6 @@
 import 'package:barber_hub/features/barber_shop/domain/entities/shop_settings_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
+import 'package:barber_hub/features/barber_shop/domain/entities/product_order_entity.dart';
 import 'package:barber_hub/features/client/data/models/barber_model.dart';
 import 'package:barber_hub/features/client/data/models/product_model.dart';
 
@@ -21,6 +22,13 @@ abstract interface class IShopManagementRepository {
   Future<void> addProduct(ProductModel product);
   Future<void> updateProduct(ProductModel product);
   Future<void> deleteProduct(String shopId, String productId);
+
+  Future<List<ProductOrderEntity>> getProductOrders(String shopId);
+  Future<void> updateProductOrderStatus(
+    String shopId,
+    String orderId,
+    String status,
+  );
 
   // ── Bloqueios de data ─────────────────────────────────────────────────────
   Future<List<BlockedDateEntity>> getBlockedDates(String shopId);

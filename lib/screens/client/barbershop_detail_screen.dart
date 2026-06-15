@@ -533,9 +533,8 @@ class _FeaturedProductCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Center(
-                    child: Text(product.imageEmoji,
-                        style: const TextStyle(fontSize: 44)),
-                  ),
+                      child: Icon(product.category.iconData,
+                          color: AppTheme.gold, size: 30)),
                   if (product.hasDiscount)
                     Positioned(
                       top: 6,
@@ -603,42 +602,46 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = product.brand.trim();
+    final meta = brand.isEmpty
+        ? product.category.label
+        : '$brand - ${product.category.label}';
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceElevated,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.inputBorder),
       ),
       child: Column(
         children: [
-          // â”€â”€ ConteÃºdo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Emoji / imagem
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 58,
+                  height: 58,
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withValues(alpha: 0.07),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.15)),
+                    color: AppTheme.gold.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppTheme.gold.withValues(alpha: 0.22)),
                   ),
-                  child: Center(
-                    child: Text(product.imageEmoji,
-                        style: const TextStyle(fontSize: 30)),
+                  child: Icon(
+                    product.category.iconData,
+                    color: AppTheme.gold,
+                    size: 26,
                   ),
                 ),
                 const SizedBox(width: 14),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Nome + destaque
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
@@ -646,41 +649,54 @@ class _ProductCard extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
-                                  ?.copyWith(fontSize: 14),
+                                  ?.copyWith(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (product.isFeatured)
-                            const Icon(Icons.star_rounded,
-                                size: 14, color: AppTheme.gold),
+                          if (product.isFeatured) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.gold.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Icon(Icons.star_rounded,
+                                  size: 13, color: AppTheme.gold),
+                            ),
+                          ],
                         ],
                       ),
-                      const SizedBox(height: 3),
-
-                      // Marca + categoria
+                      const SizedBox(height: 4),
                       Text(
-                        '${product.brand} Â· ${product.category.label}',
+                        meta,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontSize: 11,
                               color: AppTheme.textHint,
                             ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 6),
-
-                      // DescriÃ§Ã£o curta
+                      const SizedBox(height: 8),
                       Text(
                         product.description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontSize: 12,
                               color: AppTheme.textSecondary,
-                              height: 1.4,
+                              height: 1.35,
                             ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
-
-                      // PreÃ§o
-                      Row(
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             product.formattedPrice,
@@ -689,12 +705,11 @@ class _ProductCard extends StatelessWidget {
                                 .titleLarge
                                 ?.copyWith(
                                   color: AppTheme.gold,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
                                 ),
                           ),
-                          if (product.hasDiscount) ...[
-                            const SizedBox(width: 8),
+                          if (product.hasDiscount)
                             Text(
                               product.formattedOriginalPrice!,
                               style: Theme.of(context)
@@ -707,27 +722,7 @@ class _ProductCard extends StatelessWidget {
                                     decorationColor: AppTheme.textHint,
                                   ),
                             ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 5, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppTheme.error.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                '-${product.discountPercent}%',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color: AppTheme.error,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
-                            ),
-                          ],
+                          _ProductStatusChip(product: product),
                         ],
                       ),
                     ],
@@ -736,8 +731,6 @@ class _ProductCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // â”€â”€ CTA (dois botÃµes lado a lado) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Container(height: 1, color: AppTheme.divider),
           _ProductCardActions(product: product, shop: shop),
         ],
@@ -746,7 +739,36 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// â”€â”€ Tab 2: Reviews â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+class _ProductStatusChip extends StatelessWidget {
+  final ProductModel product;
+
+  const _ProductStatusChip({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final inStock = product.inStock;
+    final label = inStock ? 'Estoque: ${product.stockQty}' : 'Indisponivel';
+    final color = inStock ? const Color(0xFF2ECC71) : AppTheme.error;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+      ),
+    );
+  }
+}
+
 class _ReviewsTab extends StatelessWidget {
   final BarbershopModel shop;
   const _ReviewsTab({required this.shop});
@@ -955,7 +977,8 @@ class _ReviewCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppTheme.gold.withValues(alpha: 0.12),
-                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
+                  border:
+                      Border.all(color: AppTheme.gold.withValues(alpha: 0.25)),
                 ),
                 child: Center(
                   child: Text(
@@ -1312,8 +1335,8 @@ class _BarberChip extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppTheme.gold.withValues(alpha: 0.12),
-              border:
-                  Border.all(color: AppTheme.gold.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(
+                  color: AppTheme.gold.withValues(alpha: 0.3), width: 1.5),
             ),
             child: Center(
               child: Text(barber.avatarInitials,
@@ -1389,7 +1412,8 @@ class _ServiceBookingCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
+                    border:
+                        Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Icon(ServiceCard.iconFor(service.iconName),
                       color: AppTheme.gold, size: 22),

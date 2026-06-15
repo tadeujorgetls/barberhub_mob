@@ -19,18 +19,35 @@ final shopManagementRepositoryProvider = Provider<IShopManagementRepository>(
 );
 
 // ── Use Cases ──────────────────────────────────────────────────────────────
-final _ucGetSettings    = Provider((ref) => GetSettingsUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucSaveSettings   = Provider((ref) => SaveSettingsUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucGetBarbers     = Provider((ref) => GetBarbersUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucAddBarber      = Provider((ref) => AddBarberUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucUpdateBarber   = Provider((ref) => UpdateBarberUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucGetProducts    = Provider((ref) => GetProductsUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucAddProduct     = Provider((ref) => AddProductUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucUpdateProduct  = Provider((ref) => UpdateProductUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucDeleteProduct  = Provider((ref) => DeleteProductUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucGetBlocked     = Provider((ref) => GetBlockedDatesUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucAddBlocked     = Provider((ref) => AddBlockedDateUseCase(ref.read(shopManagementRepositoryProvider)));
-final _ucRemoveBlocked  = Provider((ref) => RemoveBlockedDateUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucGetSettings = Provider(
+    (ref) => GetSettingsUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucSaveSettings = Provider(
+    (ref) => SaveSettingsUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucGetBarbers = Provider(
+    (ref) => GetBarbersUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucAddBarber = Provider(
+    (ref) => AddBarberUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucUpdateBarber = Provider(
+    (ref) => UpdateBarberUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucGetProducts = Provider(
+    (ref) => GetProductsUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucAddProduct = Provider(
+    (ref) => AddProductUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucUpdateProduct = Provider(
+    (ref) => UpdateProductUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucDeleteProduct = Provider(
+    (ref) => DeleteProductUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucGetProductOrders = Provider((ref) =>
+    GetProductOrdersUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucUpdateProductOrderStatus = Provider((ref) =>
+    UpdateProductOrderStatusUseCase(
+        ref.read(shopManagementRepositoryProvider)));
+final _ucGetBlocked = Provider((ref) =>
+    GetBlockedDatesUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucAddBlocked = Provider(
+    (ref) => AddBlockedDateUseCase(ref.read(shopManagementRepositoryProvider)));
+final _ucRemoveBlocked = Provider((ref) =>
+    RemoveBlockedDateUseCase(ref.read(shopManagementRepositoryProvider)));
 
 // ── Notifier principal ────────────────────────────────────────────────────
 final shopManagementProvider =
@@ -46,6 +63,8 @@ final shopManagementProvider =
     addProduct: ref.read(_ucAddProduct),
     updateProduct: ref.read(_ucUpdateProduct),
     deleteProduct: ref.read(_ucDeleteProduct),
+    getProductOrders: ref.read(_ucGetProductOrders),
+    updateProductOrderStatus: ref.read(_ucUpdateProductOrderStatus),
     getBlockedDates: ref.read(_ucGetBlocked),
     addBlockedDate: ref.read(_ucAddBlocked),
     removeBlockedDate: ref.read(_ucRemoveBlocked),

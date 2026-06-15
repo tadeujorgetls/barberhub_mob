@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:barber_hub/data/supabase_catalog_datasource.dart';
 import 'package:barber_hub/features/barber_shop/data/datasources/shop_management_datasource.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
+import 'package:barber_hub/features/barber_shop/domain/entities/product_order_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/shop_settings_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/working_hours_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/repositories/i_shop_management_repository.dart';
@@ -170,6 +171,41 @@ class ShopManagementRepositoryImpl implements IShopManagementRepository {
     await _ds.saveProducts(shopId, list);
   }
 
+  @override
+  Future<List<ProductOrderEntity>> getProductOrders(String shopId) async {
+    final remote = await _loadRemoteProductOrders(shopId);
+    return remote ?? const [];
+  }
+
+  @override
+  Future<void> updateProductOrderStatus(
+    String shopId,
+    String orderId,
+    String status,
+  ) async {
+    final client = SupabaseService.client;
+    if (client == null) return;
+
+    await client
+        .from('orders')
+        .update({
+          'status': status,
+          'payment_status': status == 'completed'
+              ? 'paid'
+              : status == 'cancelled'
+                  ? 'cancelled'
+                  : 'pending',
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', orderId)
+        .eq('barbershop_id', _remoteShopId(shopId))
+        .timeout(
+          const Duration(seconds: 12),
+          onTimeout: () => throw TimeoutException(
+            'Tempo esgotado ao atualizar pedido no Supabase.',
+          ),
+        );
+  }
   // Blocked Dates
 
   @override
@@ -188,6 +224,62 @@ class ShopManagementRepositoryImpl implements IShopManagementRepository {
     final list = await getBlockedDates(shopId);
     list.removeWhere((b) => b.id == blockId);
     await _ds.saveBlockedDates(shopId, list);
+  }
+
+  Future<List<ProductOrderEntity>?> _loadRemoteProductOrders(
+      String shopId) async {
+    final client = SupabaseService.client;
+    if (client == null) return null;
+
+    final rows = await client
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('barbershop_id', _remoteShopId(shopId))
+        .order('created_at', ascending: false)
+        .timeout(const Duration(seconds: 12));
+
+    return rows
+        .whereType<Map>()
+        .map((row) => _productOrderFromRow(Map<String, dynamic>.from(row)))
+        .toList();
+  }
+
+  ProductOrderEntity _productOrderFromRow(Map<String, dynamic> row) {
+    final rawItems = row['order_items'];
+    final items = rawItems is List
+        ? rawItems
+            .whereType<Map>()
+            .map((item) => _productOrderItemFromRow(
+                  Map<String, dynamic>.from(item),
+                ))
+            .toList()
+        : <ProductOrderItemEntity>[];
+
+    return ProductOrderEntity(
+      id: row['id']?.toString() ?? '',
+      orderNumber: row['order_number']?.toString() ?? '',
+      clientName: row['client_name']?.toString() ?? 'Cliente',
+      clientEmail: row['client_email']?.toString() ?? '',
+      barbershopId: row['barbershop_id']?.toString() ?? '',
+      status: row['status']?.toString() ?? 'pending',
+      paymentMethod: row['payment_method']?.toString() ?? 'pay_on_pickup',
+      paymentStatus: row['payment_status']?.toString() ?? 'pending',
+      total: (row['total'] as num?)?.toDouble() ?? 0,
+      createdAt: DateTime.tryParse(row['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      items: items,
+    );
+  }
+
+  ProductOrderItemEntity _productOrderItemFromRow(Map<String, dynamic> row) {
+    return ProductOrderItemEntity(
+      id: row['id']?.toString() ?? '',
+      productId: row['product_id']?.toString() ?? '',
+      productName: row['product_name']?.toString() ?? 'Produto',
+      quantity: (row['quantity'] as num?)?.toInt() ?? 0,
+      unitPrice: (row['unit_price'] as num?)?.toDouble() ?? 0,
+      subtotal: (row['subtotal'] as num?)?.toDouble() ?? 0,
+    );
   }
 
   Future<List<ProductModel>?> _loadRemoteProducts(String shopId) async {

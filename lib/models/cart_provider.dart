@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:barber_hub/data/supabase_product_order_datasource.dart';
 import 'barbershop_model.dart';
 
 /// Representa um item no carrinho: produto + quantidade.
@@ -14,22 +15,22 @@ class CartItem {
       'R\$ ${subtotal.toStringAsFixed(2).replaceAll('.', ',')}';
 }
 
-/// Provider que gerencia o estado do carrinho em memória.
-/// O carrinho é vinculado a uma única barbearia por vez.
+/// Provider que gerencia o estado do carrinho em memoria.
+/// O carrinho e vinculado a uma unica barbearia por vez.
 /// Ao tentar adicionar produto de outra barbearia, o provider
-/// expõe um [pendingConflict] para que a UI possa confirmar
+/// expoe um [pendingConflict] para que a UI possa confirmar
 /// o descarte do carrinho atual antes de trocar.
 class CartProvider extends ChangeNotifier {
+  final SupabaseProductOrderDatasource _ordersRemote =
+      SupabaseProductOrderDatasource();
   final List<CartItem> _items = [];
   BarbershopModel? _barbershop;
 
-  // ── Conflito pendente ──────────────────────────────────────────────────────
-  // Quando o usuário tenta adicionar um produto de outra barbearia,
-  // guardamos a intenção aqui para resolver via diálogo na UI.
+  // Quando o usuario tenta adicionar um produto de outra barbearia,
+  // guardamos a intencao aqui para resolver via dialogo na UI.
   _PendingAdd? _pendingConflict;
   _PendingAdd? get pendingConflict => _pendingConflict;
 
-  // ── Getters ────────────────────────────────────────────────────────────────
   List<CartItem> get items => List.unmodifiable(_items);
   BarbershopModel? get barbershop => _barbershop;
 
@@ -51,15 +52,9 @@ class CartProvider extends ChangeNotifier {
     return idx == -1 ? 0 : _items[idx].quantity;
   }
 
-  // ── Verificação de barbearia ──────────────────────────────────────────────
-  bool _isSameBarbershop(ProductModel product) =>
-      _barbershop == null || _barbershop!.id == product.barbershopId;
-
-  // ── Adicionar ao carrinho ─────────────────────────────────────────────────
   /// Retorna `true` se adicionado com sucesso.
   /// Retorna `false` se houver conflito de barbearia (ver [pendingConflict]).
   bool addItem(ProductModel product, BarbershopModel shop) {
-    // Conflito: carrinho tem itens de outra barbearia
     if (_barbershop != null && _barbershop!.id != shop.id && isNotEmpty) {
       _pendingConflict = _PendingAdd(product: product, shop: shop);
       notifyListeners();
@@ -93,7 +88,6 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Remover / alterar quantidade ──────────────────────────────────────────
   void removeItem(String productId) {
     _items.removeWhere((i) => i.product.id == productId);
     if (_items.isEmpty) _barbershop = null;
@@ -119,7 +113,6 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  // ── Limpar ────────────────────────────────────────────────────────────────
   void clearCart() {
     _items.clear();
     _barbershop = null;
@@ -127,11 +120,37 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Finalizar compra (simulado) ───────────────────────────────────────────
   Future<CartCheckoutResult> checkout() async {
-    await Future.delayed(const Duration(milliseconds: 1100));
+    if (_items.isEmpty || _barbershop == null) {
+      throw StateError('Adicione produtos antes de finalizar o pedido.');
+    }
+
+    if (_ordersRemote.isConfigured) {
+      final remote = await _ordersRemote.createOrder(
+        barbershop: _barbershop!,
+        items: _items
+            .map(
+              (item) => ProductOrderItemInput(
+                product: item.product,
+                quantity: item.quantity,
+              ),
+            )
+            .toList(),
+      );
+
+      final result = CartCheckoutResult(
+        barbershopName: remote.barbershopName,
+        itemCount: remote.itemCount,
+        total: _formatCurrency(remote.total),
+        orderId: remote.orderNumber,
+      );
+      clearCart();
+      return result;
+    }
+
+    await Future.delayed(const Duration(milliseconds: 700));
     final result = CartCheckoutResult(
-      barbershopName: _barbershop?.name ?? '',
+      barbershopName: _barbershop!.name,
       itemCount: itemCount,
       total: formattedTotal,
       orderId: DateTime.now().millisecondsSinceEpoch.toString().substring(5),
@@ -139,9 +158,12 @@ class CartProvider extends ChangeNotifier {
     clearCart();
     return result;
   }
+
+  String _formatCurrency(double value) =>
+      'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
 }
 
-/// Dados do pedido após checkout simulado.
+/// Dados do pedido apos checkout.
 class CartCheckoutResult {
   final String barbershopName;
   final int itemCount;
@@ -156,7 +178,7 @@ class CartCheckoutResult {
   });
 }
 
-/// Intenção pendente de adição ao carrinho (conflito de barbearia).
+/// Intencao pendente de adicao ao carrinho (conflito de barbearia).
 class _PendingAdd {
   final ProductModel product;
   final BarbershopModel shop;

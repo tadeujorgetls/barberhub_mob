@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/shop_settings_entity.dart';
+import 'package:barber_hub/features/barber_shop/domain/entities/product_order_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/usecases/shop_management_usecases.dart';
 import 'package:barber_hub/features/client/data/models/barber_model.dart';
 import 'package:barber_hub/features/client/data/models/product_model.dart';
@@ -19,6 +20,8 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
   final AddProductUseCase _addProduct;
   final UpdateProductUseCase _updateProduct;
   final DeleteProductUseCase _deleteProduct;
+  final GetProductOrdersUseCase _getProductOrders;
+  final UpdateProductOrderStatusUseCase _updateProductOrderStatus;
   final GetBlockedDatesUseCase _getBlockedDates;
   final AddBlockedDateUseCase _addBlockedDate;
   final RemoveBlockedDateUseCase _removeBlockedDate;
@@ -34,6 +37,8 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
     required AddProductUseCase addProduct,
     required UpdateProductUseCase updateProduct,
     required DeleteProductUseCase deleteProduct,
+    required GetProductOrdersUseCase getProductOrders,
+    required UpdateProductOrderStatusUseCase updateProductOrderStatus,
     required GetBlockedDatesUseCase getBlockedDates,
     required AddBlockedDateUseCase addBlockedDate,
     required RemoveBlockedDateUseCase removeBlockedDate,
@@ -47,6 +52,8 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
         _addProduct = addProduct,
         _updateProduct = updateProduct,
         _deleteProduct = deleteProduct,
+        _getProductOrders = getProductOrders,
+        _updateProductOrderStatus = updateProductOrderStatus,
         _getBlockedDates = getBlockedDates,
         _addBlockedDate = addBlockedDate,
         _removeBlockedDate = removeBlockedDate,
@@ -67,10 +74,11 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
     }
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final (settings, barbers, products, blockedDates) = await (
+      final (settings, barbers, products, productOrders, blockedDates) = await (
         _getSettings(shopId),
         _getBarbers(shopId),
         _getProducts(shopId),
+        _getProductOrders(shopId),
         _getBlockedDates(shopId),
       ).wait;
 
@@ -79,6 +87,7 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
         settings: settings,
         barbers: barbers,
         products: products,
+        productOrders: productOrders,
         blockedDates: blockedDates,
       );
     } catch (e) {
@@ -200,6 +209,41 @@ class ShopManagementNotifier extends StateNotifier<ShopManagementState> {
     }
   }
 
+  Future<void> updateProductOrderStatus(String orderId, String status) async {
+    final shopId = _shopId;
+    if (shopId == null) return;
+    state = state.copyWith(isSaving: true, clearError: true);
+    try {
+      await _updateProductOrderStatus(shopId, orderId, status).timeout(
+        const Duration(seconds: 12),
+        onTimeout: () => throw TimeoutException(
+          'Tempo esgotado ao atualizar pedido. Verifique a conexao e as permissoes do Supabase.',
+        ),
+      );
+      final updated = state.productOrders
+          .map((order) => order.id == orderId
+              ? ProductOrderEntity(
+                  id: order.id,
+                  orderNumber: order.orderNumber,
+                  clientName: order.clientName,
+                  clientEmail: order.clientEmail,
+                  barbershopId: order.barbershopId,
+                  status: status,
+                  paymentMethod: order.paymentMethod,
+                  paymentStatus:
+                      status == 'completed' ? 'paid' : order.paymentStatus,
+                  total: order.total,
+                  createdAt: order.createdAt,
+                  items: order.items,
+                )
+              : order)
+          .toList();
+      state = state.copyWith(isSaving: false, productOrders: updated);
+    } catch (e) {
+      state = state.copyWith(isSaving: false, error: e.toString());
+      rethrow;
+    }
+  }
   // Blocked Dates
 
   Future<void> addBlockedDate(BlockedDateEntity block) async {

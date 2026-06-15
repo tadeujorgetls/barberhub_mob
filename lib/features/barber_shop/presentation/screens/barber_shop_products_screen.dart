@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
+import 'package:barber_hub/features/barber_shop/domain/entities/product_order_entity.dart';
 import 'package:barber_hub/features/barber_shop/presentation/providers/shop_management_providers.dart';
 import 'package:barber_hub/features/barber_shop/presentation/widgets/bs_widgets.dart';
 import 'package:barber_hub/features/client/data/models/product_model.dart';
@@ -16,11 +17,13 @@ class BarberShopProductsScreen extends ConsumerStatefulWidget {
 
 class _State extends ConsumerState<BarberShopProductsScreen> {
   ProductCategory? _filter;
+  int _view = 0;
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(shopManagementProvider);
     final all = state.products;
+    final orders = state.productOrders;
     final products = _filter == null
         ? all
         : all.where((p) => p.category == _filter).toList();
@@ -32,7 +35,7 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
               child: Column(children: [
             BsScreenHeader(
               eyebrow: 'gestao',
-              title: 'Produtos',
+              title: _view == 0 ? 'Produtos' : 'Pedidos',
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 16),
@@ -43,30 +46,42 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            // Filtro por categoria
-            SizedBox(
-              height: 36,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: [
-                  _FilterChip(
-                      label: 'Todos',
-                      selected: _filter == null,
-                      onTap: () => setState(() => _filter = null)),
-                  ...ProductCategory.values.map((c) => _FilterChip(
-                        label: c.label,
-                        icon: c.iconData,
-                        selected: _filter == c,
-                        onTap: () =>
-                            setState(() => _filter = _filter == c ? null : c),
-                      )),
-                ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _ViewSwitcher(
+                selected: _view,
+                onChanged: (value) => setState(() => _view = value),
               ),
             ),
             const SizedBox(height: 16),
+            if (_view == 0) ...[
+              // Filtro por categoria
+              SizedBox(
+                height: 36,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  children: [
+                    _FilterChip(
+                        label: 'Todos',
+                        selected: _filter == null,
+                        onTap: () => setState(() => _filter = null)),
+                    ...ProductCategory.values.map((c) => _FilterChip(
+                          label: c.label,
+                          icon: c.iconData,
+                          selected: _filter == c,
+                          onTap: () =>
+                              setState(() => _filter = _filter == c ? null : c),
+                        )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
           ])),
-          if (products.isEmpty)
+          if (_view == 1)
+            _OrdersSliver(orders: orders)
+          else if (products.isEmpty)
             SliverFillRemaining(
                 child: BsEmptyState(
               icon: Icons.inventory_2_outlined,
@@ -141,6 +156,321 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
     if (ok == true) {
       ref.read(shopManagementProvider.notifier).deleteProduct(p.id);
     }
+  }
+}
+
+class _ViewSwitcher extends StatelessWidget {
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  const _ViewSwitcher({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppTheme.inputBorder),
+      ),
+      child: Row(children: [
+        _SwitchButton(
+          label: 'Produtos',
+          icon: Icons.inventory_2_outlined,
+          selected: selected == 0,
+          onTap: () => onChanged(0),
+        ),
+        _SwitchButton(
+          label: 'Pedidos',
+          icon: Icons.receipt_long_outlined,
+          selected: selected == 1,
+          onTap: () => onChanged(1),
+        ),
+      ]),
+    );
+  }
+}
+
+class _SwitchButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SwitchButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.gold : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(icon,
+                size: 14,
+                color: selected ? AppTheme.background : AppTheme.textSecondary),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.jost(
+                color: selected ? AppTheme.background : AppTheme.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrdersSliver extends ConsumerWidget {
+  final List<ProductOrderEntity> orders;
+
+  const _OrdersSliver({required this.orders});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (orders.isEmpty) {
+      return const SliverFillRemaining(
+        child: BsEmptyState(
+          icon: Icons.receipt_long_outlined,
+          message: 'Nenhum pedido de produto encontrado.',
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (_, i) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _OrderTile(order: orders[i]),
+          ),
+          childCount: orders.length,
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderTile extends ConsumerWidget {
+  final ProductOrderEntity order;
+
+  const _OrderTile({required this.order});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = _statusColor(order.status);
+    final createdAt = _formatDateTime(order.createdAt);
+
+    return BsCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+            ),
+            child: Icon(Icons.receipt_long_rounded, color: color, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('#${order.orderNumber}',
+                  style: GoogleFonts.jost(
+                      color: AppTheme.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+              const SizedBox(height: 2),
+              Text(order.clientName,
+                  style: GoogleFonts.jost(
+                      color: AppTheme.textSecondary, fontSize: 12)),
+              const SizedBox(height: 2),
+              Text(createdAt,
+                  style:
+                      GoogleFonts.jost(color: AppTheme.textHint, fontSize: 11)),
+            ]),
+          ),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            _StatusChip(label: order.statusLabel, color: color),
+            const SizedBox(height: 8),
+            Text(order.formattedTotal,
+                style: GoogleFonts.jost(
+                    color: AppTheme.gold,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800)),
+          ]),
+        ]),
+        const SizedBox(height: 14),
+        Container(height: 1, color: AppTheme.divider),
+        const SizedBox(height: 12),
+        ...order.items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(children: [
+                Expanded(
+                  child: Text('${item.quantity}x ${item.productName}',
+                      style: GoogleFonts.jost(
+                          color: AppTheme.textPrimary, fontSize: 13)),
+                ),
+                Text(item.formattedSubtotal,
+                    style: GoogleFonts.jost(
+                        color: AppTheme.textSecondary, fontSize: 12)),
+              ]),
+            )),
+        const SizedBox(height: 4),
+        Row(children: [
+          const Icon(Icons.payments_outlined,
+              color: AppTheme.textHint, size: 14),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(order.paymentLabel,
+                style:
+                    GoogleFonts.jost(color: AppTheme.textHint, fontSize: 11)),
+          ),
+        ]),
+        if (order.canMarkReady || order.canComplete || order.canCancel) ...[
+          const SizedBox(height: 14),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            if (order.canMarkReady)
+              _OrderActionButton(
+                label: 'Pronto',
+                icon: Icons.done_rounded,
+                onTap: () => _updateStatus(context, ref, 'ready'),
+              ),
+            if (order.canComplete)
+              _OrderActionButton(
+                label: 'Entregar',
+                icon: Icons.shopping_bag_outlined,
+                onTap: () => _updateStatus(context, ref, 'completed'),
+              ),
+            if (order.canCancel)
+              _OrderActionButton(
+                label: 'Cancelar',
+                icon: Icons.close_rounded,
+                danger: true,
+                onTap: () => _updateStatus(context, ref, 'cancelled'),
+              ),
+          ]),
+        ],
+      ]),
+    );
+  }
+
+  Future<void> _updateStatus(
+    BuildContext context,
+    WidgetRef ref,
+    String status,
+  ) async {
+    try {
+      await ref
+          .read(shopManagementProvider.notifier)
+          .updateProductOrderStatus(order.id, status);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pedido atualizado.')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: AppTheme.error,
+          content: Text('Nao foi possivel atualizar o pedido.'),
+        ),
+      );
+    }
+  }
+
+  Color _statusColor(String status) => switch (status) {
+        'ready' => Colors.blueAccent,
+        'completed' => const Color(0xFF2ECC71),
+        'cancelled' => AppTheme.error,
+        _ => Colors.orangeAccent,
+      };
+
+  String _formatDateTime(DateTime value) {
+    final local = value.toLocal();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(local.day)}/${two(local.month)}/${local.year} as ${two(local.hour)}:${two(local.minute)}';
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _StatusChip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(label,
+          style: GoogleFonts.jost(
+              color: color, fontSize: 10, fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
+class _OrderActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool danger;
+  final VoidCallback onTap;
+
+  const _OrderActionButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = danger ? AppTheme.error : AppTheme.gold;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.09),
+          borderRadius: BorderRadius.circular(7),
+          border: Border.all(color: color.withValues(alpha: 0.28)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 6),
+          Text(label,
+              style: GoogleFonts.jost(
+                  color: color, fontSize: 12, fontWeight: FontWeight.w700)),
+        ]),
+      ),
+    );
   }
 }
 

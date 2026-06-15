@@ -233,7 +233,8 @@ class _CartItemCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppTheme.gold.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.gold.withValues(alpha: 0.15)),
+                border:
+                    Border.all(color: AppTheme.gold.withValues(alpha: 0.15)),
               ),
               child: Center(
                 child: Text(product.imageEmoji,
@@ -390,26 +391,43 @@ class _CartFooterState extends State<_CartFooter> {
   Future<void> _checkout() async {
     setState(() => _loading = true);
 
-    // Captura o navigator ANTES do await.
-    // Depois do checkout() o carrinho é limpo → _CartFooter pode ser
-    // desmontado → context fica inválido. Usar o navigator capturado
-    // previamente garante que as chamadas de pop funcionem corretamente.
     final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
 
-    final result = await widget.cart.checkout();
+    try {
+      final result = await widget.cart.checkout();
 
-    // Não usar `mounted` aqui: o widget pode ter sido desmontado
-    // exatamente porque o carrinho ficou vazio. Usamos `navigator`
-    // capturado antes, que permanece válido.
-    if (_loading) {
-      try {
-        setState(() => _loading = false);
-      } catch (_) {
-        // widget já desmontado — ignora
-      }
+      _stopLoadingIfPossible();
+      _showSuccessDialog(navigator, result);
+    } catch (error) {
+      _stopLoadingIfPossible();
+      messenger.showSnackBar(
+        SnackBar(
+          backgroundColor: AppTheme.error,
+          content: Text(_checkoutErrorMessage(error)),
+        ),
+      );
     }
+  }
 
-    _showSuccessDialog(navigator, result);
+  void _stopLoadingIfPossible() {
+    if (!_loading) return;
+    try {
+      setState(() => _loading = false);
+    } catch (_) {
+      // O carrinho pode desmontar o footer ao ser limpo no checkout.
+    }
+  }
+
+  String _checkoutErrorMessage(Object error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('estoque')) {
+      return 'Produto sem estoque suficiente. Revise o carrinho.';
+    }
+    if (message.contains('entre na sua conta')) {
+      return 'Entre na sua conta para finalizar o pedido.';
+    }
+    return 'Nao foi possivel finalizar o pedido. Tente novamente.';
   }
 
   void _showSuccessDialog(NavigatorState navigator, CartCheckoutResult result) {
@@ -576,7 +594,8 @@ class _CheckoutSuccessDialog extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: AppTheme.gold.withValues(alpha: 0.12),
                       border: Border.all(
-                          color: AppTheme.gold.withValues(alpha: 0.3), width: 2),
+                          color: AppTheme.gold.withValues(alpha: 0.3),
+                          width: 2),
                     ),
                     child: const Icon(Icons.check_rounded,
                         color: AppTheme.gold, size: 36),

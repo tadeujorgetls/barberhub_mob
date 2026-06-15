@@ -5,6 +5,7 @@ library;
 
 import 'package:barber_hub/features/barber_shop/domain/entities/shop_settings_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
+import 'package:barber_hub/features/barber_shop/domain/entities/product_order_entity.dart';
 import 'package:barber_hub/features/barber_shop/domain/repositories/i_shop_management_repository.dart';
 import 'package:barber_hub/features/client/data/models/barber_model.dart';
 import 'package:barber_hub/features/client/data/models/product_model.dart';
@@ -20,7 +21,8 @@ class GetSettingsUseCase {
 class SaveSettingsUseCase {
   final IShopManagementRepository _repo;
   const SaveSettingsUseCase(this._repo);
-  Future<void> call(ShopSettingsEntity settings) => _repo.saveSettings(settings);
+  Future<void> call(ShopSettingsEntity settings) =>
+      _repo.saveSettings(settings);
 }
 
 // ── Barbers ───────────────────────────────────────────────────────────────────
@@ -72,6 +74,19 @@ class DeleteProductUseCase {
       _repo.deleteProduct(shopId, productId);
 }
 
+class GetProductOrdersUseCase {
+  final IShopManagementRepository _repo;
+  const GetProductOrdersUseCase(this._repo);
+  Future<List<ProductOrderEntity>> call(String shopId) =>
+      _repo.getProductOrders(shopId);
+}
+
+class UpdateProductOrderStatusUseCase {
+  final IShopManagementRepository _repo;
+  const UpdateProductOrderStatusUseCase(this._repo);
+  Future<void> call(String shopId, String orderId, String status) =>
+      _repo.updateProductOrderStatus(shopId, orderId, status);
+}
 // ── Blocked Dates ─────────────────────────────────────────────────────────────
 
 class GetBlockedDatesUseCase {
