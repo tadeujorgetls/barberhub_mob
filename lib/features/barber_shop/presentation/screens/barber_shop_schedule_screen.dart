@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
-import 'package:barber_hub/core/utils/app_utils.dart';
+import 'package:barber_hub/utils/app_utils.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
 import 'package:barber_hub/features/barber_shop/presentation/providers/shop_management_providers.dart';
@@ -102,6 +102,8 @@ class _State extends ConsumerState<BarberShopScheduleScreen>
               appointments: dayAppts,
               isBlocked: isBlocked,
               onDayChanged: (d) => setState(() => _selectedDay = d),
+              onStatusChange: (id, status) =>
+                  data.updateAppointmentStatus(id, status),
             ),
 
             // ── TAB 2: Bloqueios ────────────────────────────────────────────
@@ -138,11 +140,13 @@ class _AgendaTab extends StatelessWidget {
   final List<AppointmentModel> appointments;
   final bool isBlocked;
   final ValueChanged<DateTime> onDayChanged;
+  final Future<void> Function(String, AppointmentStatus) onStatusChange;
   const _AgendaTab(
       {required this.selectedDay,
       required this.appointments,
       required this.isBlocked,
-      required this.onDayChanged});
+      required this.onDayChanged,
+      required this.onStatusChange});
 
   @override
   Widget build(BuildContext context) => CustomScrollView(slivers: [
@@ -197,7 +201,8 @@ class _AgendaTab extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppTheme.error.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.error.withValues(alpha: 0.4)),
+                border:
+                    Border.all(color: AppTheme.error.withValues(alpha: 0.4)),
               ),
               child: Row(children: [
                 const Icon(Icons.block_rounded,
@@ -232,7 +237,10 @@ class _AgendaTab extends StatelessWidget {
                 delegate: SliverChildBuilderDelegate(
               (_, i) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: _AppointmentCard(appt: appointments[i]),
+                child: _AppointmentCard(
+                  appt: appointments[i],
+                  onStatusChange: onStatusChange,
+                ),
               ),
               childCount: appointments.length,
             )),
@@ -244,73 +252,159 @@ class _AgendaTab extends StatelessWidget {
 // ── Appointment Card ──────────────────────────────────────────────────────────
 class _AppointmentCard extends StatelessWidget {
   final AppointmentModel appt;
-  const _AppointmentCard({required this.appt});
+  final Future<void> Function(String, AppointmentStatus) onStatusChange;
+
+  const _AppointmentCard({
+    required this.appt,
+    required this.onStatusChange,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = appt.status == AppointmentStatus.scheduled
-        ? const Color(0xFF2ECC71)
-        : appt.status == AppointmentStatus.completed
-            ? AppTheme.gold
-            : AppTheme.error;
+    final (statusColor, _) = AppUtils.statusColors(appt.effectiveStatus);
+    final canManage = appt.canComplete || appt.canMarkNoShow || appt.canCancel;
 
     return BsCard(
-      child: Row(children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppTheme.gold.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-              child: Text(appt.timeSlot,
-                  style: GoogleFonts.jost(
-                      color: AppTheme.gold,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700))),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(appt.clientName,
-              style: GoogleFonts.jost(
-                  color: AppTheme.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 3),
-          Text('${appt.service.name} · ${appt.barber.name}',
-              style: GoogleFonts.jost(
-                  color: AppTheme.textSecondary, fontSize: 12)),
-        ])),
-        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('R\$ ${appt.service.price.toStringAsFixed(0)}',
-              style: GoogleFonts.jost(
-                  color: AppTheme.gold,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
+              color: AppTheme.gold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: statusColor.withValues(alpha: 0.4)),
             ),
-            child: Text(
-                appt.status == AppointmentStatus.scheduled
-                    ? 'Agendado'
-                    : appt.status == AppointmentStatus.completed
-                        ? 'Concluído'
-                        : 'Cancelado',
-                style: GoogleFonts.jost(
-                    color: statusColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600)),
+            child: Center(
+                child: Text(appt.timeSlot,
+                    style: GoogleFonts.jost(
+                        color: AppTheme.gold,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700))),
           ),
+          const SizedBox(width: 14),
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(appt.clientName,
+                    style: GoogleFonts.jost(
+                        color: AppTheme.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600)),
+                const SizedBox(height: 3),
+                Text('${appt.service.name} - ${appt.barber.name}',
+                    style: GoogleFonts.jost(
+                        color: AppTheme.textSecondary, fontSize: 12)),
+              ])),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text('R\$ ${appt.service.price.toStringAsFixed(0)}',
+                style: GoogleFonts.jost(
+                    color: AppTheme.gold,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+              ),
+              child: Text(appt.statusLabel,
+                  style: GoogleFonts.jost(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600)),
+            ),
+          ]),
         ]),
+        if (canManage) ...[
+          const SizedBox(height: 12),
+          Container(height: 1, color: AppTheme.divider),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              if (appt.canComplete)
+                _StatusActionButton(
+                  icon: Icons.check_rounded,
+                  label: 'Concluir',
+                  color: const Color(0xFF2ECC71),
+                  onTap: () => _changeStatus(
+                    context,
+                    AppointmentStatus.completed,
+                    'Atendimento concluído.',
+                  ),
+                ),
+              if (appt.canMarkNoShow)
+                _StatusActionButton(
+                  icon: Icons.person_off_outlined,
+                  label: 'Não veio',
+                  color: const Color(0xFFFF7043),
+                  onTap: () => _changeStatus(
+                    context,
+                    AppointmentStatus.noShow,
+                    'Marcado como não compareceu.',
+                  ),
+                ),
+              if (appt.canCancel)
+                _StatusActionButton(
+                  icon: Icons.close_rounded,
+                  label: 'Cancelar',
+                  color: AppTheme.error,
+                  onTap: () => _changeStatus(
+                    context,
+                    AppointmentStatus.cancelled,
+                    'Agendamento cancelado.',
+                  ),
+                ),
+            ],
+          ),
+        ],
       ]),
+    );
+  }
+
+  Future<void> _changeStatus(
+    BuildContext context,
+    AppointmentStatus status,
+    String message,
+  ) async {
+    await onStatusChange(appt.id, status);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _StatusActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _StatusActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 15),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: color,
+        side: BorderSide(color: color.withValues(alpha: 0.45)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        textStyle: GoogleFonts.jost(fontSize: 11, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
     );
   }
 }
@@ -414,7 +508,8 @@ class _BlocksTab extends StatelessWidget {
                                 color: AppTheme.error.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: AppTheme.error.withValues(alpha: 0.3)),
+                                    color:
+                                        AppTheme.error.withValues(alpha: 0.3)),
                               ),
                               child: Text(b.type.label,
                                   style: GoogleFonts.jost(

@@ -6,9 +6,18 @@ import 'review_model.dart';
 export 'barbershop_model.dart';
 export 'review_model.dart';
 
-enum AppointmentStatus { scheduled, completed, cancelled }
+enum AppointmentStatus {
+  scheduled,
+  pendingCompletion,
+  completed,
+  cancelled,
+  noShow,
+  expired,
+}
 
 class AppointmentModel {
+  static const staleGracePeriod = Duration(hours: 24);
+
   final String id;
   final String clientId;
   final String clientName;
@@ -19,8 +28,8 @@ class AppointmentModel {
   final String timeSlot;
   AppointmentStatus status;
 
-  /// Avaliação do cliente para este agendamento.
-  /// null = ainda não avaliado.
+  /// Avaliacao do cliente para este agendamento.
+  /// null = ainda nao avaliado.
   ReviewModel? review;
 
   AppointmentModel({
@@ -37,58 +46,127 @@ class AppointmentModel {
   }) {
     assert(
       barbershop.services.any((s) => s.id == service.id),
-      'O serviço "${service.name}" não pertence à barbearia "${barbershop.name}".',
+      'O servico "${service.name}" nao pertence a barbearia "${barbershop.name}".',
     );
     assert(
       barbershop.barbers.any((b) => b.id == barber.id),
-      'O barbeiro "${barber.name}" não pertence à barbearia "${barbershop.name}".',
+      'O barbeiro "${barber.name}" nao pertence a barbearia "${barbershop.name}".',
     );
   }
 
-  // ── Status ─────────────────────────────────────────────────────────────────
+  DateTime get startsAt {
+    final parts = timeSlot.split(':');
+    final hour = parts.isNotEmpty ? int.tryParse(parts[0]) ?? 0 : 0;
+    final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+    return DateTime(date.year, date.month, date.day, hour, minute);
+  }
+
+  DateTime get endsAt =>
+      startsAt.add(Duration(minutes: service.durationMinutes));
+
+  DateTime get staleAt => endsAt.add(staleGracePeriod);
+
+  bool get hasStarted => !DateTime.now().isBefore(startsAt);
+
+  bool get hasEnded => DateTime.now().isAfter(endsAt);
+
+  bool get isStale => DateTime.now().isAfter(staleAt);
+
+  AppointmentStatus get effectiveStatus {
+    if (status != AppointmentStatus.scheduled) return status;
+    if (isStale) return AppointmentStatus.expired;
+    if (hasEnded) return AppointmentStatus.pendingCompletion;
+    return AppointmentStatus.scheduled;
+  }
+
   String get statusLabel {
-    switch (status) {
-      case AppointmentStatus.scheduled:  return 'Agendado';
-      case AppointmentStatus.completed:  return 'Concluído';
-      case AppointmentStatus.cancelled:  return 'Cancelado';
+    switch (effectiveStatus) {
+      case AppointmentStatus.scheduled:
+        return 'Agendado';
+      case AppointmentStatus.pendingCompletion:
+        return 'Aguardando finalização';
+      case AppointmentStatus.completed:
+        return 'Concluído';
+      case AppointmentStatus.cancelled:
+        return 'Cancelado';
+      case AppointmentStatus.noShow:
+        return 'Não compareceu';
+      case AppointmentStatus.expired:
+        return 'Expirado';
     }
   }
 
-  bool get canCancel     => status == AppointmentStatus.scheduled;
-  bool get canReschedule => status == AppointmentStatus.scheduled;
-  bool get canComplete   => status == AppointmentStatus.scheduled;
+  bool get canCancel =>
+      effectiveStatus == AppointmentStatus.scheduled && !hasStarted;
+  bool get canReschedule => canCancel;
 
-  bool get isUpcoming =>
-      status == AppointmentStatus.scheduled && date.isAfter(DateTime.now());
+  bool get canComplete =>
+      (status == AppointmentStatus.scheduled && hasStarted) ||
+      status == AppointmentStatus.expired;
 
-  /// O cliente pode avaliar somente agendamentos concluídos e ainda não avaliados.
-  bool get canReview =>
-      status == AppointmentStatus.completed && review == null;
+  bool get canMarkNoShow => canComplete;
+
+  bool get isUpcoming => effectiveStatus == AppointmentStatus.scheduled;
+
+  /// O cliente pode avaliar somente agendamentos concluidos e ainda nao avaliados.
+  bool get canReview => status == AppointmentStatus.completed && review == null;
 
   bool get isReviewed =>
       status == AppointmentStatus.completed && review != null;
 
-  // ── Date formatters ────────────────────────────────────────────────────────
   String get formattedDate {
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     return '${date.day} de ${months[date.month]}';
   }
 
   String get formattedDateFull {
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     return '${date.day} de ${months[date.month]} de ${date.year}';
   }
 
   String get monthAbbr {
     const months = [
-      '', 'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN',
-      'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
+      '',
+      'JAN',
+      'FEV',
+      'MAR',
+      'ABR',
+      'MAI',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SET',
+      'OUT',
+      'NOV',
+      'DEZ'
     ];
     return months[date.month];
   }

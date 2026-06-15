@@ -725,7 +725,7 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
                   (v?.trim().isEmpty ?? true) ? 'Obrigatorio' : null),
           const SizedBox(height: 14),
           BsTextField(
-              label: 'Descricao',
+              label: 'Descrição',
               controller: _descCtrl,
               maxLines: 2,
               validator: (v) =>
@@ -734,7 +734,7 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
           Row(children: [
             Expanded(
                 child: BsTextField(
-              label: 'Preco (R\$)',
+              label: 'Preço (R\$)',
               controller: _priceCtrl,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),

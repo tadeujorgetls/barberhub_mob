@@ -309,13 +309,19 @@ class _AppointmentCard extends StatelessWidget {
   });
 
   Color get _statusColor {
-    switch (appointment.status) {
+    switch (appointment.effectiveStatus) {
       case AppointmentStatus.scheduled:
         return const Color(0xFF4CAF50);
       case AppointmentStatus.completed:
         return AppTheme.gold;
       case AppointmentStatus.cancelled:
         return AppTheme.error;
+      case AppointmentStatus.pendingCompletion:
+        return Colors.orangeAccent;
+      case AppointmentStatus.noShow:
+        return const Color(0xFFFF7043);
+      case AppointmentStatus.expired:
+        return AppTheme.textHint;
     }
   }
 
@@ -378,7 +384,8 @@ class _AppointmentCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
+                    border:
+                        Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     children: [

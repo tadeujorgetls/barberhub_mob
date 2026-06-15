@@ -4,15 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
-import 'package:barber_hub/features/auth/presentation/providers/auth_state.dart';
+import 'package:barber_hub/models/app_data_provider.dart';
 import 'package:barber_hub/models/service_model.dart';
 
-// CORREÃ‡ÃƒO: import corrigido â€” usa models/app_data_provider.dart (registrado
-// no MultiProvider de main.dart), nÃ£o features/client/presentation/providers/.
-// Os dois sÃ£o classes Dart distintas; usar a errada causa ProviderNotFoundException.
-import 'package:barber_hub/models/app_data_provider.dart';
-
-/// Tela de ServiÃ§os da Barbearia â€” CRUD completo.
 class BarberShopServicesScreen extends ConsumerWidget {
   const BarberShopServicesScreen({super.key});
 
@@ -21,8 +15,6 @@ class BarberShopServicesScreen extends ConsumerWidget {
     final authState = ref.watch(authNotifierProvider);
     final shopId =
         authState is AuthAuthenticated ? authState.user.linkedId : null;
-
-    // LÃª o AppDataProvider registrado no MultiProvider (models/app_data_provider.dart)
     final data = context.watch<AppDataProvider>();
     final services =
         shopId != null ? data.servicesForShop(shopId) : <ServiceModel>[];
@@ -32,7 +24,6 @@ class BarberShopServicesScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
               child: Row(children: [
@@ -41,15 +32,16 @@ class BarberShopServicesScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'SERVIÃ‡OS',
+                        'SERVIÇOS',
                         style: GoogleFonts.jost(
-                            color: AppTheme.gold,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 4),
+                          color: AppTheme.gold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 4,
+                        ),
                       ),
                       Text(
-                        'Meus ServiÃ§os',
+                        'Meus Serviços',
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium
@@ -58,7 +50,6 @@ class BarberShopServicesScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                // â”€â”€ BotÃ£o Novo â”€â”€
                 GestureDetector(
                   onTap: shopId == null
                       ? null
@@ -67,8 +58,9 @@ class BarberShopServicesScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                        color: AppTheme.gold,
-                        borderRadius: BorderRadius.circular(8)),
+                      color: AppTheme.gold,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       const Icon(Icons.add_rounded,
                           color: AppTheme.background, size: 16),
@@ -76,28 +68,24 @@ class BarberShopServicesScreen extends ConsumerWidget {
                       Text(
                         'Novo',
                         style: GoogleFonts.jost(
-                            color: AppTheme.background,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13),
+                          color: AppTheme.background,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
                       ),
                     ]),
                   ),
                 ),
               ]),
             ),
-
-            // â”€â”€ Contador â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
               child: Text(
-                '${services.length} serviÃ§o${services.length != 1 ? "s" : ""} '
-                'cadastrado${services.length != 1 ? "s" : ""}',
+                '${services.length} serviço${services.length != 1 ? "s" : ""} cadastrado${services.length != 1 ? "s" : ""}',
                 style: GoogleFonts.jost(
                     color: AppTheme.textSecondary, fontSize: 13),
               ),
             ),
-
-            // â”€â”€ Lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Expanded(
               child: shopId == null
                   ? const Center(
@@ -127,66 +115,79 @@ class BarberShopServicesScreen extends ConsumerWidget {
     );
   }
 
-  // â”€â”€ Sheet helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  void _showSheet(
+    BuildContext ctx,
+    AppDataProvider data,
+    String shopId,
+    ServiceModel? existing,
+  ) {
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) =>
+          _FormSheet(data: data, shopId: shopId, existing: existing),
+    );
+  }
 
-  void _showSheet(BuildContext ctx, AppDataProvider data, String shopId,
-          ServiceModel? existing) =>
-      showModalBottomSheet(
-        context: ctx,
-        isScrollControlled: true,
-        backgroundColor: AppTheme.surface,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-        builder: (_) =>
-            _FormSheet(data: data, shopId: shopId, existing: existing),
-      );
-
-  void _confirmDelete(BuildContext ctx, AppDataProvider data, String shopId,
-          ServiceModel s) =>
-      showDialog(
-        context: ctx,
-        builder: (_) => AlertDialog(
-          backgroundColor: AppTheme.surfaceElevated,
-          title: Text(
-            'Excluir serviÃ§o?',
-            style: GoogleFonts.jost(
-                color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+  void _confirmDelete(
+    BuildContext ctx,
+    AppDataProvider data,
+    String shopId,
+    ServiceModel service,
+  ) {
+    showDialog(
+      context: ctx,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppTheme.surfaceElevated,
+        title: Text(
+          'Excluir serviço?',
+          style: GoogleFonts.jost(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w600,
           ),
-          content: Text(
-            'Tem certeza que deseja excluir "${s.name}"?',
-            style: GoogleFonts.jost(color: AppTheme.textSecondary),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancelar',
-                  style: GoogleFonts.jost(color: AppTheme.textSecondary)),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await data.deleteShopService(shopId, s.id);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
-                }
-              },
-              child: Text('Excluir',
-                  style: GoogleFonts.jost(color: AppTheme.error)),
-            ),
-          ],
         ),
-      );
+        content: Text(
+          'Tem certeza que deseja excluir "${service.name}"?',
+          style: GoogleFonts.jost(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancelar',
+              style: GoogleFonts.jost(color: AppTheme.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await data.deleteShopService(shopId, service.id);
+                if (ctx.mounted) Navigator.pop(ctx);
+              } catch (e) {
+                if (!ctx.mounted) return;
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+              }
+            },
+            child:
+                Text('Excluir', style: GoogleFonts.jost(color: AppTheme.error)),
+          ),
+        ],
+      ),
+    );
+  }
 }
-
-// â”€â”€ Tile de serviÃ§o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _Tile extends StatelessWidget {
   final ServiceModel service;
-  final VoidCallback onEdit, onDelete, onToggle;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onToggle;
 
   const _Tile({
     required this.service,
@@ -208,9 +209,11 @@ class _Tile extends StatelessWidget {
                   : AppTheme.inputBorder,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.content_cut_rounded,
-                color: service.isActive ? AppTheme.gold : AppTheme.textHint,
-                size: 20),
+            child: Icon(
+              Icons.content_cut_rounded,
+              color: service.isActive ? AppTheme.gold : AppTheme.textHint,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -235,13 +238,17 @@ class _Tile extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                          color: AppTheme.inputBorder,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Text('Inativo',
-                          style: GoogleFonts.jost(
-                              color: AppTheme.textHint,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600)),
+                        color: AppTheme.inputBorder,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Inativo',
+                        style: GoogleFonts.jost(
+                          color: AppTheme.textHint,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                 ]),
                 const SizedBox(height: 3),
@@ -249,17 +256,20 @@ class _Tile extends StatelessWidget {
                   Text(
                     service.formattedPrice,
                     style: GoogleFonts.jost(
-                        color: AppTheme.gold,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600),
+                      color: AppTheme.gold,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   const Icon(Icons.timer_outlined,
                       size: 12, color: AppTheme.textHint),
                   const SizedBox(width: 3),
-                  Text(service.formattedDuration,
-                      style: GoogleFonts.jost(
-                          color: AppTheme.textHint, fontSize: 12)),
+                  Text(
+                    service.formattedDuration,
+                    style: GoogleFonts.jost(
+                        color: AppTheme.textHint, fontSize: 12),
+                  ),
                 ]),
               ],
             ),
@@ -268,10 +278,10 @@ class _Tile extends StatelessWidget {
             color: AppTheme.surfaceElevated,
             icon: const Icon(Icons.more_vert_rounded,
                 color: AppTheme.textSecondary, size: 20),
-            onSelected: (v) {
-              if (v == 'edit') onEdit();
-              if (v == 'toggle') onToggle();
-              if (v == 'delete') onDelete();
+            onSelected: (value) {
+              if (value == 'edit') onEdit();
+              if (value == 'toggle') onToggle();
+              if (value == 'delete') onDelete();
             },
             itemBuilder: (_) => [
               PopupMenuItem(
@@ -288,14 +298,17 @@ class _Tile extends StatelessWidget {
                 value: 'toggle',
                 child: Row(children: [
                   Icon(
-                      service.isActive
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      color: AppTheme.textSecondary,
-                      size: 16),
+                    service.isActive
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppTheme.textSecondary,
+                    size: 16,
+                  ),
                   const SizedBox(width: 10),
-                  Text(service.isActive ? 'Desativar' : 'Ativar',
-                      style: GoogleFonts.jost(color: AppTheme.textPrimary)),
+                  Text(
+                    service.isActive ? 'Desativar' : 'Ativar',
+                    style: GoogleFonts.jost(color: AppTheme.textPrimary),
+                  ),
                 ]),
               ),
               PopupMenuItem(
@@ -314,8 +327,6 @@ class _Tile extends StatelessWidget {
       );
 }
 
-// â”€â”€ FormulÃ¡rio criar/editar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
 class _FormSheet extends StatefulWidget {
   final AppDataProvider data;
   final String shopId;
@@ -332,20 +343,25 @@ class _FormSheet extends StatefulWidget {
 }
 
 class _FormSheetState extends State<_FormSheet> {
-  late final TextEditingController _name, _desc, _price, _duration;
+  late final TextEditingController _name;
+  late final TextEditingController _desc;
+  late final TextEditingController _price;
+  late final TextEditingController _duration;
   bool _active = true;
 
   @override
   void initState() {
     super.initState();
-    final s = widget.existing;
-    _name = TextEditingController(text: s?.name ?? '');
-    _desc = TextEditingController(text: s?.description ?? '');
+    final service = widget.existing;
+    _name = TextEditingController(text: service?.name ?? '');
+    _desc = TextEditingController(text: service?.description ?? '');
     _price = TextEditingController(
-        text: s != null ? s.price.toStringAsFixed(2) : '');
-    _duration =
-        TextEditingController(text: s != null ? '${s.durationMinutes}' : '30');
-    _active = s?.isActive ?? true;
+      text: service != null ? service.price.toStringAsFixed(2) : '',
+    );
+    _duration = TextEditingController(
+      text: service != null ? '${service.durationMinutes}' : '30',
+    );
+    _active = service?.isActive ?? true;
   }
 
   @override
@@ -358,10 +374,11 @@ class _FormSheetState extends State<_FormSheet> {
   }
 
   Future<void> _save() async {
-    final nm = _name.text.trim();
-    if (nm.isEmpty) return;
+    final name = _name.text.trim();
+    if (name.isEmpty) return;
+
     final price = double.tryParse(_price.text.replaceAll(',', '.')) ?? 0.0;
-    final dur = int.tryParse(_duration.text) ?? 30;
+    final duration = int.tryParse(_duration.text) ?? 30;
 
     try {
       if (widget.existing == null) {
@@ -369,10 +386,10 @@ class _FormSheetState extends State<_FormSheet> {
           widget.shopId,
           ServiceModel(
             id: 'pending',
-            name: nm,
+            name: name,
             description: _desc.text.trim(),
             price: price,
-            durationMinutes: dur,
+            durationMinutes: duration,
             iconName: 'scissors',
             isActive: _active,
           ),
@@ -381,10 +398,10 @@ class _FormSheetState extends State<_FormSheet> {
         await widget.data.updateShopService(
           widget.shopId,
           widget.existing!.copyWith(
-            name: nm,
+            name: name,
             description: _desc.text.trim(),
             price: price,
-            durationMinutes: dur,
+            durationMinutes: duration,
             isActive: _active,
           ),
         );
@@ -418,43 +435,55 @@ class _FormSheetState extends State<_FormSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: AppTheme.divider,
-                    borderRadius: BorderRadius.circular(2)),
+                  color: AppTheme.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              isEdit ? 'Editar ServiÃ§o' : 'Novo ServiÃ§o',
+              isEdit ? 'Editar Serviço' : 'Novo Serviço',
               style: GoogleFonts.jost(
-                  color: AppTheme.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700),
+                color: AppTheme.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 20),
-            _tf(_name, 'Nome do serviÃ§o', 'Ex: Corte ClÃ¡ssico'),
+            _tf(_name, 'Nome do serviço', 'Ex: Corte Clássico'),
             const SizedBox(height: 12),
-            _tf(_desc, 'DescriÃ§Ã£o', 'Descreva brevemente', maxLines: 2),
+            _tf(_desc, 'Descrição', 'Descreva brevemente', maxLines: 2),
             const SizedBox(height: 12),
             Row(children: [
               Expanded(
-                  child: _tf(_price, 'PreÃ§o (R\$)', '45,00',
-                      type: TextInputType.number)),
+                child: _tf(
+                  _price,
+                  'Preço (R\$)',
+                  '45,00',
+                  type: TextInputType.number,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
-                  child: _tf(_duration, 'DuraÃ§Ã£o (min)', '30',
-                      type: TextInputType.number)),
+                child: _tf(
+                  _duration,
+                  'Duração (min)',
+                  '30',
+                  type: TextInputType.number,
+                ),
+              ),
             ]),
             const SizedBox(height: 16),
             Row(children: [
               Switch(
                 value: _active,
-                onChanged: (v) => setState(() => _active = v),
+                onChanged: (value) => setState(() => _active = value),
                 activeThumbColor: AppTheme.gold,
                 inactiveTrackColor: AppTheme.inputBorder,
               ),
               const SizedBox(width: 10),
               Text(
-                _active ? 'ServiÃ§o ativo' : 'ServiÃ§o inativo',
+                _active ? 'Serviço ativo' : 'Serviço inativo',
                 style: GoogleFonts.jost(
                     color: AppTheme.textSecondary, fontSize: 13),
               ),
@@ -469,10 +498,11 @@ class _FormSheetState extends State<_FormSheet> {
                   backgroundColor: AppTheme.gold,
                   foregroundColor: AppTheme.background,
                   shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8))),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
                 ),
                 child: Text(
-                  isEdit ? 'SALVAR ALTERAÃ‡Ã•ES' : 'CRIAR SERVIÃ‡O',
+                  isEdit ? 'SALVAR ALTERAÇÕES' : 'CRIAR SERVIÇO',
                   style: GoogleFonts.jost(
                       fontWeight: FontWeight.w700, letterSpacing: 1.5),
                 ),
@@ -485,39 +515,41 @@ class _FormSheetState extends State<_FormSheet> {
   }
 
   Widget _tf(
-    TextEditingController c,
-    String lbl,
+    TextEditingController controller,
+    String label,
     String hint, {
     int maxLines = 1,
     TextInputType type = TextInputType.text,
-  }) =>
-      TextField(
-        controller: c,
-        maxLines: maxLines,
-        keyboardType: type,
-        style: GoogleFonts.jost(color: AppTheme.textPrimary, fontSize: 14),
-        decoration: InputDecoration(
-          labelText: lbl,
-          hintText: hint,
-          labelStyle:
-              GoogleFonts.jost(color: AppTheme.textSecondary, fontSize: 13),
-          hintStyle: GoogleFonts.jost(color: AppTheme.textHint, fontSize: 13),
-          filled: true,
-          fillColor: AppTheme.surfaceElevated,
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.inputBorder)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.inputBorder)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.gold)),
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: type,
+      style: GoogleFonts.jost(color: AppTheme.textPrimary, fontSize: 14),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        labelStyle:
+            GoogleFonts.jost(color: AppTheme.textSecondary, fontSize: 13),
+        hintStyle: GoogleFonts.jost(color: AppTheme.textHint, fontSize: 13),
+        filled: true,
+        fillColor: AppTheme.surfaceElevated,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.inputBorder),
         ),
-      );
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.inputBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.gold),
+        ),
+      ),
+    );
+  }
 }
-
-// â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _EmptyState extends StatelessWidget {
   final VoidCallback onAdd;
@@ -536,14 +568,15 @@ class _EmptyState extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppTheme.gold.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
+                  border:
+                      Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                 ),
                 child: const Icon(Icons.content_cut_rounded,
                     color: AppTheme.gold, size: 36),
               ),
               const SizedBox(height: 20),
               Text(
-                'Nenhum serviÃ§o',
+                'Nenhum serviço',
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium
@@ -551,7 +584,7 @@ class _EmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Crie seus primeiros serviÃ§os\npara que os clientes possam agendar.',
+                'Crie seus primeiros serviços\npara que os clientes possam agendar.',
                 style: GoogleFonts.jost(
                     color: AppTheme.textSecondary, fontSize: 13, height: 1.5),
                 textAlign: TextAlign.center,
@@ -563,14 +596,17 @@ class _EmptyState extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onAdd,
                   icon: const Icon(Icons.add_rounded, size: 18),
-                  label: Text('CRIAR PRIMEIRO SERVIÃ‡O',
-                      style: GoogleFonts.jost(
-                          fontWeight: FontWeight.w700, letterSpacing: 1)),
+                  label: Text(
+                    'CRIAR PRIMEIRO SERVIÇO',
+                    style: GoogleFonts.jost(
+                        fontWeight: FontWeight.w700, letterSpacing: 1),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.gold,
                     foregroundColor: AppTheme.background,
                     shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8))),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
                   ),
                 ),
               ),

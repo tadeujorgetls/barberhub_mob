@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/core/routes/app_routes.dart';
+import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/barber_shop/presentation/providers/shop_management_providers.dart';
-import 'barber_shop_dashboard_screen.dart';
 import 'barber_shop_barbers_screen.dart';
+import 'barber_shop_dashboard_screen.dart';
 import 'barber_shop_products_screen.dart';
 import 'barber_shop_schedule_screen.dart';
-// MELHORIA #11: Serviços adicionado ao nav.
 import 'barber_shop_services_screen.dart';
 import 'barber_shop_settings_screen.dart';
 
 class BarberShopShell extends ConsumerStatefulWidget {
   const BarberShopShell({super.key});
+
   @override
   ConsumerState<BarberShopShell> createState() => _State();
 }
@@ -22,8 +22,6 @@ class BarberShopShell extends ConsumerStatefulWidget {
 class _State extends ConsumerState<BarberShopShell> {
   int _index = 0;
 
-  // MELHORIA #11: BarberShopServicesScreen adicionada.
-  // Membership é acessada via rota push (não como tab) — mantém 6 tabs.
   final _pages = const [
     BarberShopDashboardScreen(),
     BarberShopScheduleScreen(),
@@ -45,11 +43,12 @@ class _State extends ConsumerState<BarberShopShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _index, children: _pages),
-      // Floating action button para acesso rápido ao painel de assinaturas.
       floatingActionButton: _index == 0
           ? _MembershipFab(
-              onTap: () =>
-                  Navigator.pushNamed(context, AppRoutes.membershipManagement),
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.membershipManagement,
+              ),
             )
           : null,
       bottomNavigationBar: _Nav(
@@ -60,7 +59,6 @@ class _State extends ConsumerState<BarberShopShell> {
   }
 }
 
-/// FAB de acesso rápido ao painel de assinaturas — visível no Dashboard.
 class _MembershipFab extends ConsumerWidget {
   final VoidCallback onTap;
   const _MembershipFab({required this.onTap});
@@ -79,7 +77,10 @@ class _MembershipFab extends ConsumerWidget {
       label: Text(
         'Assinaturas',
         style: GoogleFonts.jost(
-            fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 0.5),
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          letterSpacing: 0.5,
+        ),
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -96,7 +97,6 @@ class _Nav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MELHORIA #11: 6 tabs (Dashboard, Agenda, Barbeiros, Serviços, Produtos, Config.)
     const items = [
       (Icons.dashboard_outlined, Icons.dashboard_rounded, 'Dashboard'),
       (Icons.calendar_today_outlined, Icons.calendar_today_rounded, 'Agenda'),
@@ -105,6 +105,7 @@ class _Nav extends StatelessWidget {
       (Icons.inventory_2_outlined, Icons.inventory_2_rounded, 'Produtos'),
       (Icons.settings_outlined, Icons.settings_rounded, 'Config.'),
     ];
+
     return Container(
       decoration: const BoxDecoration(
         color: AppTheme.surface,
@@ -115,33 +116,42 @@ class _Nav extends StatelessWidget {
         child: SizedBox(
           height: 64,
           child: Row(
-              children: List.generate(items.length, (i) {
-            final (icon, activeIcon, label) = items[i];
-            final sel = currentIndex == i;
-            return Expanded(
+            children: List.generate(items.length, (i) {
+              final (icon, activeIcon, label) = items[i];
+              final selected = currentIndex == i;
+              return Expanded(
                 child: GestureDetector(
-              onTap: () => onTap(i),
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(sel ? activeIcon : icon,
-                          key: ValueKey(sel),
-                          color: sel ? AppTheme.gold : AppTheme.textHint,
-                          size: 22),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(label,
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          selected ? activeIcon : icon,
+                          key: ValueKey(selected),
+                          color: selected ? AppTheme.gold : AppTheme.textHint,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        label,
                         style: GoogleFonts.jost(
-                            fontSize: 9,
-                            fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                            color: sel ? AppTheme.gold : AppTheme.textHint,
-                            letterSpacing: 0.2)),
-                  ]),
-            ));
-          })),
+                          fontSize: 9,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w400,
+                          color: selected ? AppTheme.gold : AppTheme.textHint,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );

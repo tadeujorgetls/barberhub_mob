@@ -12,6 +12,12 @@ class SupabaseAppointmentDatasource {
     final client = SupabaseService.client;
     if (client == null) return const [];
 
+    try {
+      await expireStaleAppointments();
+    } catch (_) {
+      // A migracao pode ainda nao ter sido aplicada em ambientes novos.
+    }
+
     final response = await client
         .from('appointments')
         .select()
@@ -49,7 +55,7 @@ class SupabaseAppointmentDatasource {
           'barbershop_id': barbershop.id,
           'date': _dateOnly(date),
           'time_slot': timeSlot,
-          'status': AppointmentStatus.scheduled.name,
+          'status': _statusToDb(AppointmentStatus.scheduled),
         })
         .select()
         .single();
@@ -64,9 +70,23 @@ class SupabaseAppointmentDatasource {
     final client = SupabaseService.client;
     if (client == null) return;
 
-    await client
+    final response = await client
         .from('appointments')
-        .update({'status': status.name}).eq('id', id);
+        .update({'status': _statusToDb(status)})
+        .eq('id', id)
+        .select('id');
+    if (_rows(response).isEmpty) {
+      throw StateError(
+        'Nenhum agendamento foi atualizado. Verifique as permissoes do Supabase.',
+      );
+    }
+  }
+
+  Future<void> expireStaleAppointments() async {
+    final client = SupabaseService.client;
+    if (client == null) return;
+
+    await client.rpc('expire_stale_appointments');
   }
 
   Future<AppointmentModel> rescheduleAppointment({
@@ -130,11 +150,36 @@ class SupabaseAppointmentDatasource {
   }
 
   AppointmentStatus _status(Object? value) {
-    final name = _string(value, fallback: AppointmentStatus.scheduled.name);
-    return AppointmentStatus.values.firstWhere(
-      (item) => item.name == name,
-      orElse: () => AppointmentStatus.scheduled,
-    );
+    final name = _string(value, fallback: AppointmentStatus.scheduled.name)
+        .trim()
+        .toLowerCase();
+    switch (name) {
+      case 'no_show':
+      case 'noshow':
+        return AppointmentStatus.noShow;
+      case 'pending_completion':
+      case 'pendingcompletion':
+        return AppointmentStatus.pendingCompletion;
+      default:
+        return AppointmentStatus.values.firstWhere(
+          (item) => item.name.toLowerCase() == name,
+          orElse: () => AppointmentStatus.scheduled,
+        );
+    }
+  }
+
+  String _statusToDb(AppointmentStatus status) {
+    switch (status) {
+      case AppointmentStatus.noShow:
+        return 'no_show';
+      case AppointmentStatus.pendingCompletion:
+        return AppointmentStatus.scheduled.name;
+      case AppointmentStatus.scheduled:
+      case AppointmentStatus.completed:
+      case AppointmentStatus.cancelled:
+      case AppointmentStatus.expired:
+        return status.name;
+    }
   }
 
   String _dateOnly(DateTime date) {

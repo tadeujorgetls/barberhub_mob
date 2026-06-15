@@ -7,29 +7,64 @@ class AppUtils {
     switch (status) {
       case AppointmentStatus.scheduled:
         return (const Color(0xFF4CAF50), const Color(0xFF4CAF50));
+      case AppointmentStatus.pendingCompletion:
+        return (Colors.orangeAccent, Colors.orangeAccent);
       case AppointmentStatus.completed:
         return (AppTheme.gold, AppTheme.gold);
       case AppointmentStatus.cancelled:
         return (AppTheme.error, AppTheme.error);
+      case AppointmentStatus.noShow:
+        return (const Color(0xFFFF7043), const Color(0xFFFF7043));
+      case AppointmentStatus.expired:
+        return (AppTheme.textHint, AppTheme.textHint);
     }
   }
 
   static String formatDateShort(DateTime d) {
     const weekdays = ['', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     return '${weekdays[d.weekday]}, ${d.day} ${months[d.month]}';
   }
 
   static String formatDateLong(DateTime d) {
     const weekdays = [
-      '', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'
+      '',
+      'segunda',
+      'terça',
+      'quarta',
+      'quinta',
+      'sexta',
+      'sábado',
+      'domingo'
     ];
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     return '${weekdays[d.weekday]}, ${d.day} de ${months[d.month]} de ${d.year}';
   }

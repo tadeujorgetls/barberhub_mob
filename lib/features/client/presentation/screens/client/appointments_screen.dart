@@ -129,8 +129,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                         'Você não tem horários marcados.\nQue tal agendar agora?',
                     emptyAction: 'Ver barbearias',
                     onEmptyAction: () {
-                      Navigator.pushReplacementNamed(
-                          context, AppRoutes.home);
+                      Navigator.pushReplacementNamed(context, AppRoutes.home);
                     },
                     onCancel: (a) => _confirmCancel(context, a, data),
                     onReschedule: (a) => _showReschedule(context, a),
@@ -167,10 +166,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
             style: Theme.of(context).textTheme.titleLarge),
         content: Text(
           'Cancelar "${a.service.name}" com ${a.barber.name} na ${a.barbershop.name}?',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(height: 1.5),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
         ),
         actions: [
           TextButton(
@@ -236,8 +232,8 @@ class _CountBadge extends StatelessWidget {
     return Container(
       width: 18,
       height: 18,
-      decoration: const BoxDecoration(
-          shape: BoxShape.circle, color: AppTheme.goldDark),
+      decoration:
+          const BoxDecoration(shape: BoxShape.circle, color: AppTheme.goldDark),
       child: Center(
         child: Text(
           '$count',
@@ -313,13 +309,19 @@ class _AppointmentCard extends StatelessWidget {
   });
 
   Color get _statusColor {
-    switch (appointment.status) {
+    switch (appointment.effectiveStatus) {
       case AppointmentStatus.scheduled:
         return const Color(0xFF4CAF50);
       case AppointmentStatus.completed:
         return AppTheme.gold;
       case AppointmentStatus.cancelled:
         return AppTheme.error;
+      case AppointmentStatus.pendingCompletion:
+        return Colors.orangeAccent;
+      case AppointmentStatus.noShow:
+        return const Color(0xFFFF7043);
+      case AppointmentStatus.expired:
+        return AppTheme.textHint;
     }
   }
 
@@ -337,14 +339,12 @@ class _AppointmentCard extends StatelessWidget {
         children: [
           // ── Barbershop header ────────────────────────────────────────
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: AppTheme.gold.withValues(alpha: 0.04),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
-              border: const Border(
-                  bottom: BorderSide(color: AppTheme.divider)),
+              border: const Border(bottom: BorderSide(color: AppTheme.divider)),
             ),
             child: Row(
               children: [
@@ -384,8 +384,8 @@ class _AppointmentCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: AppTheme.gold.withValues(alpha: 0.2)),
+                    border:
+                        Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     children: [
@@ -395,19 +395,14 @@ class _AppointmentCard extends StatelessWidget {
                             .textTheme
                             .headlineLarge
                             ?.copyWith(
-                                color: AppTheme.gold,
-                                fontSize: 26,
-                                height: 1),
+                                color: AppTheme.gold, fontSize: 26, height: 1),
                       ),
                       Text(
                         _monthAbbr(a.date.month),
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(
-                                color: AppTheme.gold,
-                                fontSize: 10,
-                                letterSpacing: 1),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: AppTheme.gold,
+                            fontSize: 10,
+                            letterSpacing: 1),
                       ),
                     ],
                   ),
@@ -498,16 +493,15 @@ class _AppointmentCard extends StatelessWidget {
           if (a.canCancel || a.canReschedule) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
                   if (a.canReschedule && onReschedule != null)
                     Expanded(
                       child: TextButton.icon(
                         onPressed: () => onReschedule!(a),
-                        icon: const Icon(Icons.edit_calendar_outlined,
-                            size: 15),
+                        icon:
+                            const Icon(Icons.edit_calendar_outlined, size: 15),
                         label: const Text('Remarcar'),
                         style: TextButton.styleFrom(
                           textStyle: GoogleFonts.jost(
@@ -516,8 +510,7 @@ class _AppointmentCard extends StatelessWidget {
                       ),
                     ),
                   if (a.canCancel && a.canReschedule)
-                    Container(
-                        width: 1, height: 20, color: AppTheme.divider),
+                    Container(width: 1, height: 20, color: AppTheme.divider),
                   if (a.canCancel && onCancel != null)
                     Expanded(
                       child: TextButton.icon(
@@ -543,12 +536,12 @@ class _AppointmentCard extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => onReview!(a),
-                borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(10)),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(10)),
                 splashColor: AppTheme.gold.withValues(alpha: 0.08),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 11),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -557,10 +550,7 @@ class _AppointmentCard extends StatelessWidget {
                       const SizedBox(width: 7),
                       Text(
                         'Avaliar atendimento',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: AppTheme.gold,
                               fontSize: 12,
                               letterSpacing: 0.3,
@@ -576,49 +566,43 @@ class _AppointmentCard extends StatelessWidget {
           if (a.isReviewed) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: List.generate(5, (i) => Icon(
-                      i < a.review!.rating
-                          ? Icons.star_rounded
-                          : Icons.star_outline_rounded,
-                      size: 14,
-                      color: AppTheme.gold,
-                    )),
+                    children: List.generate(
+                        5,
+                        (i) => Icon(
+                              i < a.review!.rating
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              size: 14,
+                              color: AppTheme.gold,
+                            )),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       a.review!.comment ?? a.review!.ratingLabel,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12, color: AppTheme.textSecondary),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 7, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppTheme.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       'Avaliado',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
-                              color: AppTheme.gold,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.gold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -632,8 +616,19 @@ class _AppointmentCard extends StatelessWidget {
 
   String _monthAbbr(int m) {
     const months = [
-      '', 'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN',
-      'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
+      '',
+      'JAN',
+      'FEV',
+      'MAR',
+      'ABR',
+      'MAI',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SET',
+      'OUT',
+      'NOV',
+      'DEZ'
     ];
     return months[m];
   }
