@@ -11,7 +11,7 @@ class ReviewModel {
   final String barberId;
   final String barberName;
   final String serviceName;
-  final int rating;           // 1 a 5
+  final int rating; // 1 a 5
   final String? comment;
   final DateTime createdAt;
 
@@ -33,8 +33,19 @@ class ReviewModel {
   // ── Helpers ────────────────────────────────────────────────────────────────
   String get formattedDate {
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez',
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez',
     ];
     return '${createdAt.day} de ${months[createdAt.month]} de ${createdAt.year}';
   }
@@ -42,22 +53,32 @@ class ReviewModel {
   /// Retorna o emoji correspondente à nota.
   String get ratingEmoji {
     switch (rating) {
-      case 5: return '🤩';
-      case 4: return '😊';
-      case 3: return '😐';
-      case 2: return '😕';
-      default: return '😞';
+      case 5:
+        return '🤩';
+      case 4:
+        return '😊';
+      case 3:
+        return '😐';
+      case 2:
+        return '😕';
+      default:
+        return '😞';
     }
   }
 
   /// Rótulo textual da nota.
   String get ratingLabel {
     switch (rating) {
-      case 5: return 'Excelente';
-      case 4: return 'Bom';
-      case 3: return 'Regular';
-      case 2: return 'Ruim';
-      default: return 'Péssimo';
+      case 5:
+        return 'Excelente';
+      case 4:
+        return 'Bom';
+      case 3:
+        return 'Regular';
+      case 2:
+        return 'Ruim';
+      default:
+        return 'Péssimo';
     }
   }
 }

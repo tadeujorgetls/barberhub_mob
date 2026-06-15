@@ -110,7 +110,18 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                         ],
                       ),
                     ),
-                    const Tab(text: 'Histórico'),
+                    Tab(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Histórico'),
+                          if (past.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            _CountBadge(past.length),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -138,7 +149,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                     appointments: past,
                     emptyTitle: 'Histórico vazio',
                     emptySubtitle:
-                        'Seus agendamentos concluídos\naparecerão aqui.',
+                        'Concluídos, cancelados e ausências aparecerão aqui.',
                     onCancel: null,
                     onReschedule: null,
                     onReview: (a) => _openReview(context, a),

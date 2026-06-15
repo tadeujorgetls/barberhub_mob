@@ -5,6 +5,7 @@ import 'appointment_model.dart';
 import '../mock/mock_data.dart';
 import '../data/supabase_appointment_datasource.dart';
 import '../data/supabase_catalog_datasource.dart';
+import '../data/supabase_review_datasource.dart';
 import '../data/supabase_blocked_dates_datasource.dart';
 import '../features/barber_shop/domain/entities/blocked_date_entity.dart';
 
@@ -12,6 +13,7 @@ class AppDataProvider extends ChangeNotifier {
   final _appointmentDatasource = SupabaseAppointmentDatasource();
   final _blockedDatesDatasource = SupabaseBlockedDatesDatasource();
   final _catalogDatasource = SupabaseCatalogDatasource();
+  final _reviewDatasource = SupabaseReviewDatasource();
   late List<BarbershopModel> _barbershops;
   late List<ServiceModel> _services;
   late List<BarberModel> _barbers;
@@ -47,7 +49,9 @@ class AppDataProvider extends ChangeNotifier {
         _barbers = remoteShops.expand((shop) => shop.barbers).toList();
         _appointments =
             await _appointmentDatasource.loadAppointments(_barbershops);
-        _reviews = MockData.seedReviews(_appointments);
+        _reviews = await _reviewDatasource.loadReviews();
+        _attachReviewsToAppointments();
+        _syncReviewStats();
         _blockedDates = await _blockedDatesDatasource.loadBlockedDates();
 
         if (_selectedBarbershop != null) {
@@ -163,53 +167,85 @@ class AppDataProvider extends ChangeNotifier {
 
     _isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 700));
 
-    final review = ReviewModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      appointmentId: appointment.id,
-      clientId: appointment.clientId,
-      clientName: appointment.clientName,
-      barbershopId: appointment.barbershop.id,
-      barbershopName: appointment.barbershop.name,
-      barberId: appointment.barber.id,
-      barberName: appointment.barber.name,
-      serviceName: appointment.service.name,
-      rating: rating,
-      comment: comment?.trim().isEmpty == true ? null : comment?.trim(),
-      createdAt: DateTime.now(),
-    );
+    try {
+      final review = _reviewDatasource.isConfigured
+          ? await _reviewDatasource.createReview(
+              appointment: appointment,
+              rating: rating,
+              comment: comment,
+            )
+          : ReviewModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              appointmentId: appointment.id,
+              clientId: appointment.clientId,
+              clientName: appointment.clientName,
+              barbershopId: appointment.barbershop.id,
+              barbershopName: appointment.barbershop.name,
+              barberId: appointment.barber.id,
+              barberName: appointment.barber.name,
+              serviceName: appointment.service.name,
+              rating: rating,
+              comment: comment?.trim().isEmpty == true ? null : comment?.trim(),
+              createdAt: DateTime.now(),
+            );
 
-    _reviews.add(review);
+      _reviews
+          .removeWhere((item) => item.appointmentId == review.appointmentId);
+      _reviews.add(review);
+      _attachReviewToAppointment(review);
+      _syncReviewStats();
+      return review;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
-    final apptIdx = _appointments.indexWhere((a) => a.id == appointment.id);
+  void _attachReviewsToAppointments() {
+    for (final appointment in _appointments) {
+      appointment.review = null;
+    }
+    for (final review in _reviews) {
+      _attachReviewToAppointment(review);
+    }
+  }
+
+  void _attachReviewToAppointment(ReviewModel review) {
+    final apptIdx =
+        _appointments.indexWhere((a) => a.id == review.appointmentId);
     if (apptIdx != -1) _appointments[apptIdx].review = review;
+  }
 
-    final shopIdx =
-        _barbershops.indexWhere((s) => s.id == appointment.barbershop.id);
-    if (shopIdx != -1) {
-      final newRating = ratingForShop(appointment.barbershop.id);
-      final newCount = reviewsForShop(appointment.barbershop.id).length;
-      _barbershops[shopIdx] = _barbershops[shopIdx].copyWith(
-        rating: double.parse(newRating.toStringAsFixed(1)),
-        reviewCount: newCount,
+  void _syncReviewStats() {
+    for (var i = 0; i < _barbershops.length; i++) {
+      final shop = _barbershops[i];
+      final reviews = reviewsForShop(shop.id);
+      if (reviews.isEmpty) continue;
+      final rating =
+          reviews.fold<int>(0, (sum, r) => sum + r.rating) / reviews.length;
+      _barbershops[i] = shop.copyWith(
+        rating: double.parse(rating.toStringAsFixed(1)),
+        reviewCount: reviews.length,
       );
     }
 
-    final allBarbers = _barbershops.expand((s) => s.barbers).toList()
-      ..addAll(_barbers);
-    for (final b in allBarbers) {
-      if (b.id == appointment.barber.id) {
-        final newRating = ratingForBarber(b.id);
-        final newCount = reviewsForBarber(b.id).length;
-        b.rating = double.parse(newRating.toStringAsFixed(1));
-        b.reviewCount = newCount;
-      }
+    final uniqueBarbers = <String, BarberModel>{};
+    for (final barber in _barbers) {
+      uniqueBarbers[barber.id] = barber;
+    }
+    for (final barber in _barbershops.expand((shop) => shop.barbers)) {
+      uniqueBarbers[barber.id] = barber;
     }
 
-    _isLoading = false;
-    notifyListeners();
-    return review;
+    for (final barber in uniqueBarbers.values) {
+      final reviews = reviewsForBarber(barber.id);
+      if (reviews.isEmpty) continue;
+      final rating =
+          reviews.fold<int>(0, (sum, r) => sum + r.rating) / reviews.length;
+      barber.rating = double.parse(rating.toStringAsFixed(1));
+      barber.reviewCount = reviews.length;
+    }
   }
 
   List<ProductModel> get products {

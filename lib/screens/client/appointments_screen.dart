@@ -43,6 +43,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
 
     final active = data.activeForClient(clientId);
     final past = data.pastForClient(clientId);
+    final onRefresh = data.refreshCatalog;
 
     return Scaffold(
       body: SafeArea(
@@ -106,7 +107,18 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                         ],
                       ),
                     ),
-                    const Tab(text: 'Historico'),
+                    Tab(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Histórico'),
+                          if (past.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            _CountBadge(past.length),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -120,19 +132,21 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                     appointments: active,
                     emptyTitle: 'Nenhum agendamento',
                     emptySubtitle:
-                        'Voce nao tem horarios marcados.\nQue tal agendar agora?',
+                        'Você não tem horários marcados.\nQue tal agendar agora?',
                     emptyAction: 'Ver barbearias',
                     onEmptyAction: () {
                       Navigator.pushReplacementNamed(context, AppRoutes.home);
                     },
+                    onRefresh: onRefresh,
                     onCancel: (a) => _confirmCancel(context, a, data),
                     onReschedule: (a) => _showReschedule(context, a),
                   ),
                   _AppointmentList(
                     appointments: past,
-                    emptyTitle: 'Historico vazio',
+                    emptyTitle: 'Histórico vazio',
                     emptySubtitle:
-                        'Seus agendamentos concluidos\naparecerao aqui.',
+                        'Concluídos, cancelados e ausências aparecerão aqui.',
+                    onRefresh: onRefresh,
                     onCancel: null,
                     onReschedule: null,
                     onReview: (a) => _openReview(context, a),
@@ -210,7 +224,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
       arguments: a,
     );
     if (result == true && context.mounted) {
-      AppUtils.showSnack(context, 'Avaliacao enviada! Obrigado.',
+      AppUtils.showSnack(context, 'Avaliação enviada! Obrigado.',
           isSuccess: true);
     }
   }
@@ -246,6 +260,7 @@ class _AppointmentList extends StatelessWidget {
   final String emptySubtitle;
   final String? emptyAction;
   final VoidCallback? onEmptyAction;
+  final RefreshCallback onRefresh;
   final void Function(AppointmentModel)? onCancel;
   final void Function(AppointmentModel)? onReschedule;
   final void Function(AppointmentModel)? onReview;
@@ -256,6 +271,7 @@ class _AppointmentList extends StatelessWidget {
     required this.emptySubtitle,
     this.emptyAction,
     this.onEmptyAction,
+    required this.onRefresh,
     required this.onCancel,
     required this.onReschedule,
     this.onReview,
@@ -264,23 +280,43 @@ class _AppointmentList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (appointments.isEmpty) {
-      return EmptyState(
-        icon: Icons.calendar_today_outlined,
-        title: emptyTitle,
-        subtitle: emptySubtitle,
-        actionLabel: emptyAction,
-        onAction: onEmptyAction,
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        color: AppTheme.gold,
+        backgroundColor: AppTheme.surfaceElevated,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.62,
+              child: EmptyState(
+                icon: Icons.calendar_today_outlined,
+                title: emptyTitle,
+                subtitle: emptySubtitle,
+                actionLabel: emptyAction,
+                onAction: onEmptyAction,
+              ),
+            ),
+          ],
+        ),
       );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      itemCount: appointments.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (context, i) => _AppointmentCard(
-        appointment: appointments[i],
-        onCancel: onCancel,
-        onReschedule: onReschedule,
-        onReview: onReview,
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: AppTheme.gold,
+      backgroundColor: AppTheme.surfaceElevated,
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        itemCount: appointments.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 14),
+        itemBuilder: (context, i) => _AppointmentCard(
+          appointment: appointments[i],
+          onCancel: onCancel,
+          onReschedule: onReschedule,
+          onReview: onReview,
+        ),
       ),
     );
   }

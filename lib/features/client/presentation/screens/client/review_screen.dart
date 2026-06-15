@@ -41,18 +41,23 @@ class _ReviewScreenState extends State<ReviewScreen> {
       if (mounted) {
         Navigator.pop(context, true); // true = sucesso
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[ReviewScreen] Falha ao enviar avaliacao: $e');
+      debugPrintStack(stackTrace: stackTrace);
       if (mounted) {
         setState(() => _submitting = false);
-        AppUtils.showSnack(context, 'Erro ao enviar avaliação.', isError: true);
+        AppUtils.showSnack(
+          context,
+          'Nao foi possivel enviar a avaliacao: $e',
+          isError: true,
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final appt =
-        ModalRoute.of(context)!.settings.arguments as AppointmentModel;
+    final appt = ModalRoute.of(context)!.settings.arguments as AppointmentModel;
 
     return Scaffold(
       body: SafeArea(
@@ -104,8 +109,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 ? Text(
                                     'Toque nas estrelas para avaliar',
                                     key: const ValueKey('hint'),
-                                    style: Theme.of(context).textTheme.bodyMedium
-                                        ?.copyWith(color: AppTheme.textHint, fontSize: 14),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                            color: AppTheme.textHint,
+                                            fontSize: 14),
                                   )
                                 : Row(
                                     key: ValueKey(_rating),
@@ -113,12 +122,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(_ratingIcon(_rating),
-                                          color: _ratingColor(_rating), size: 18),
+                                          color: _ratingColor(_rating),
+                                          size: 18),
                                       const SizedBox(width: 8),
                                       Text(
                                         _ratingLabel(_rating),
-                                        style: Theme.of(context).textTheme.bodyMedium
-                                            ?.copyWith(color: _ratingColor(_rating), fontSize: 14),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                                color: _ratingColor(_rating),
+                                                fontSize: 14),
                                       ),
                                     ],
                                   ),
@@ -146,11 +160,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         controller: _commentCtrl,
                         maxLines: 5,
                         maxLength: 300,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(
-                                color: AppTheme.textPrimary, fontSize: 15),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textPrimary, fontSize: 15),
                         decoration: InputDecoration(
                           hintText:
                               'Conte como foi a experiência (opcional)...',
@@ -175,20 +186,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton.icon(
-                        onPressed:
-                            (_submitting || _rating == 0) ? null : () => _submit(appt),
+                        onPressed: (_submitting || _rating == 0)
+                            ? null
+                            : () => _submit(appt),
                         icon: _submitting
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppTheme.background))
+                                    strokeWidth: 2, color: AppTheme.background))
                             : const Icon(Icons.star_rounded, size: 18),
                         label: Text(
-                          _submitting
-                              ? 'ENVIANDO...'
-                              : 'ENVIAR AVALIAÇÃO',
+                          _submitting ? 'ENVIANDO...' : 'ENVIAR AVALIAÇÃO',
                           style: const TextStyle(
                               fontSize: 12, fontWeight: FontWeight.w700),
                         ),
@@ -206,11 +215,16 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   String _ratingLabel(int r) {
     switch (r) {
-      case 5: return 'Excelente!';
-      case 4: return 'Bom';
-      case 3: return 'Regular';
-      case 2: return 'Ruim';
-      default: return 'Péssimo';
+      case 5:
+        return 'Excelente!';
+      case 4:
+        return 'Bom';
+      case 3:
+        return 'Regular';
+      case 2:
+        return 'Ruim';
+      default:
+        return 'Péssimo';
     }
   }
 
@@ -244,7 +258,8 @@ class _AppointmentSummary extends StatelessWidget {
               border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
             ),
             child: Center(
-              child: Icon(a.barbershop.coverIconData, color: AppTheme.gold, size: 26),
+              child: Icon(a.barbershop.coverIconData,
+                  color: AppTheme.gold, size: 26),
             ),
           ),
           const SizedBox(width: 14),
@@ -264,8 +279,10 @@ class _AppointmentSummary extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${a.barbershop.name} · ${a.formattedDate}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: 11, color: AppTheme.textHint),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontSize: 11, color: AppTheme.textHint),
                 ),
               ],
             ),
