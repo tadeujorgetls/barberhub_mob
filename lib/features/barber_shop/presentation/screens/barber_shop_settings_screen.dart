@@ -83,7 +83,6 @@ class _State extends ConsumerState<BarberShopSettingsScreen> {
         child: Form(
           key: _formKey,
           child: CustomScrollView(slivers: [
-            // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             const SliverToBoxAdapter(
                 child: Column(children: [
               BsScreenHeader(eyebrow: 'barbearia', title: 'Configurações'),
@@ -128,7 +127,6 @@ class _State extends ConsumerState<BarberShopSettingsScreen> {
               padding: EdgeInsets.fromLTRB(24, 28, 24, 14),
               child: BsSectionHeader(title: 'Horário de funcionamento'),
             )),
-
             SliverList(
                 delegate: SliverChildBuilderDelegate(
               (_, i) {
@@ -147,8 +145,6 @@ class _State extends ConsumerState<BarberShopSettingsScreen> {
               },
               childCount: 7,
             )),
-
-            // â”€â”€ Salvar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             SliverToBoxAdapter(
                 child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -165,7 +161,6 @@ class _State extends ConsumerState<BarberShopSettingsScreen> {
   }
 }
 
-// â”€â”€ Day Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _DayRow extends StatelessWidget {
   final int weekday;
   final WorkingHoursEntity hours;

@@ -49,7 +49,6 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: Column(
@@ -70,10 +69,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // â”€â”€ Tab bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
@@ -115,9 +111,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
                 ),
               ),
             ),
-
             const SizedBox(height: 4),
-
             Expanded(
               child: TabBarView(
                 controller: _tab,
@@ -222,7 +216,6 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen>
   }
 }
 
-// â”€â”€ Count badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _CountBadge extends StatelessWidget {
   final int count;
   const _CountBadge(this.count);
@@ -247,7 +240,6 @@ class _CountBadge extends StatelessWidget {
   }
 }
 
-// â”€â”€ Appointment list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _AppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
   final String emptyTitle;
@@ -294,7 +286,6 @@ class _AppointmentList extends StatelessWidget {
   }
 }
 
-// â”€â”€ Appointment card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
   final void Function(AppointmentModel)? onCancel;
@@ -337,7 +328,6 @@ class _AppointmentCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // â”€â”€ Barbershop header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
@@ -370,8 +360,6 @@ class _AppointmentCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // â”€â”€ Main content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -488,8 +476,6 @@ class _AppointmentCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           if (a.canCancel || a.canReschedule) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(
@@ -528,8 +514,6 @@ class _AppointmentCard extends StatelessWidget {
               ),
             ),
           ],
-
-          // â”€â”€ BotÃ£o Avaliar / Badge avaliado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           if (a.canReview && onReview != null) ...[
             Container(height: 1, color: AppTheme.divider),
             Material(
@@ -562,7 +546,6 @@ class _AppointmentCard extends StatelessWidget {
               ),
             ),
           ],
-
           if (a.isReviewed) ...[
             Container(height: 1, color: AppTheme.divider),
             Padding(

@@ -82,7 +82,7 @@ class SupabaseCatalogDatasource {
         .select();
 
     if (rows.isEmpty) {
-      throw StateError('Nenhum serviÃ§o foi atualizado no Supabase.');
+      throw StateError('Nenhum serviço foi atualizado no Supabase.');
     }
 
     return _service(Map<String, dynamic>.from(rows.first as Map));
@@ -102,7 +102,7 @@ class SupabaseCatalogDatasource {
         .select('id');
 
     if (rows.isEmpty) {
-      throw StateError('Nenhum serviÃ§o foi desativado no Supabase.');
+      throw StateError('Nenhum serviço foi desativado no Supabase.');
     }
   }
 

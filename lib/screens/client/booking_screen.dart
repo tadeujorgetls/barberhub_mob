@@ -13,10 +13,8 @@ import '../../models/service_model.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // BookingScreen
 // Recebe via arguments: Map{'service': ServiceModel, 'barbershop': BarbershopModel}
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
 
@@ -45,7 +43,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       service = args;
     }
 
-    // Fallback para provider se nÃ£o vier via args
+    // Fallback para provider se não vier via args
     barbershop ??= data.selectedBarbershop ?? data.barbershops.first;
 
     if (service == null) {
@@ -61,10 +59,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     final args = ModalRoute.of(context)!.settings.arguments;
     final (service, barbershop) = _parseArgs(args, data);
 
-    // Barbeiros APENAS da barbearia em questÃ£o
+    // Barbeiros APENAS da barbearia em questão
     final barbers = barbershop.barbers.where((b) => b.isActive).toList();
 
-    // Horarios jÃ¡ ocupados para o barbeiro/data selecionados
+    // Horarios já ocupados para o barbeiro/data selecionados
     final bookedSlots = (_selectedBarber != null && _selectedDate != null)
         ? data.bookedSlotsFor(_selectedBarber!.id, _selectedDate!)
         : <String>{};
@@ -73,7 +71,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
               child: Row(
@@ -101,14 +98,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 ],
               ),
             ),
-
-            // â”€â”€ Step indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: _StepIndicator(currentStep: _step),
             ),
-
-            // â”€â”€ Service + Barbershop summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
               child: _BookingSummaryBar(
@@ -116,9 +109,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 barbershopName: barbershop.name,
               ),
             ),
-
             const SizedBox(height: 4),
-
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
@@ -175,7 +166,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               data.isDateBlockedForShop(barbershop.id, date),
           onDateSelected: (d) => setState(() {
             _selectedDate = d;
-            _selectedTime = null; // reset horÃ¡rio ao trocar data
+            _selectedTime = null; // reset horário ao trocar data
           }),
           onTimeSelected: (t) => setState(() => _selectedTime = t),
           onNext: () => setState(() => _step = 2),
@@ -336,7 +327,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   }
 }
 
-// â”€â”€ Step Indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _StepIndicator extends StatelessWidget {
   final int currentStep;
   const _StepIndicator({required this.currentStep});
@@ -401,7 +391,6 @@ class _StepIndicator extends StatelessWidget {
   }
 }
 
-// â”€â”€ Booking summary bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _BookingSummaryBar extends StatelessWidget {
   final ServiceModel service;
   final String barbershopName;
@@ -471,7 +460,6 @@ class _BookingSummaryBar extends StatelessWidget {
   }
 }
 
-// â”€â”€ Step 0: Barber â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _BarberStep extends StatelessWidget {
   final List<BarberModel> barbers;
   final BarberModel? selected;
@@ -573,7 +561,6 @@ class _BarberStep extends StatelessWidget {
   }
 }
 
-// â”€â”€ Step 1: Data & Hora â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _DateTimeStep extends StatelessWidget {
   final DateTime? selectedDate;
   final String? selectedTime;
@@ -847,7 +834,6 @@ class _DateTimeStep extends StatelessWidget {
   }
 }
 
-// â”€â”€ Step 2: Confirmar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ConfirmStep extends StatelessWidget {
   final ServiceModel service;
   final BarberModel barber;

@@ -100,7 +100,6 @@ class _WebMapViewState extends State<_WebMapView> {
   void initState() {
     super.initState();
     final loc = widget.shop.location!;
-    // viewType único por barbearia para evitar conflito entre instâncias
     _viewType = 'barber-map-${widget.shop.id}';
 
     // Registra o iframe via platform view do Flutter Web
@@ -559,7 +558,8 @@ class _OfflineFallback extends StatelessWidget {
                         ],
                       ),
                       child: Center(
-                        child: Icon(shop.coverIconData, size: 26, color: AppTheme.background),
+                        child: Icon(shop.coverIconData,
+                            size: 26, color: AppTheme.background),
                       ),
                     ),
                     Container(
@@ -638,7 +638,8 @@ class _OfflineFallback extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                        color: AppTheme.gold.withValues(alpha: 0.18), width: 1.5),
+                        color: AppTheme.gold.withValues(alpha: 0.18),
+                        width: 1.5),
                   ),
                 ),
               ),
