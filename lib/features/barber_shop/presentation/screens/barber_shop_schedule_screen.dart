@@ -60,7 +60,20 @@ class _State extends ConsumerState<BarberShopScheduleScreen>
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
-          const BsScreenHeader(eyebrow: 'gestão', title: 'Agenda'),
+          BsScreenHeader(
+            eyebrow: 'gestão',
+            title: 'Agenda',
+            actions: [
+              IconButton(
+                tooltip: 'Atualizar',
+                onPressed: _refreshSchedule,
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  color: AppTheme.gold,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Tab bar
@@ -119,6 +132,15 @@ class _State extends ConsumerState<BarberShopScheduleScreen>
         ]),
       ),
     );
+  }
+
+  Future<void> _refreshSchedule() async {
+    final data = provider.Provider.of<AppDataProvider>(context, listen: false);
+    await data.refreshCatalog();
+    await data.refreshBlockedDates();
+    await ref.read(shopManagementProvider.notifier).load();
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _showBlockModal(BuildContext ctx, WidgetRef ref, String shopId) {
