@@ -1,10 +1,17 @@
 import 'package:barber_hub/features/barber_shop/domain/entities/barber_shop_entity.dart';
-import 'package:barber_hub/features/client/data/models/appointment_model.dart';
+import 'package:barber_hub/models/appointment_model.dart';
 
-sealed class BarberShopState { const BarberShopState(); }
+sealed class BarberShopState {
+  const BarberShopState();
+}
 
-final class BarberShopInitial extends BarberShopState { const BarberShopInitial(); }
-final class BarberShopLoading extends BarberShopState { const BarberShopLoading(); }
+final class BarberShopInitial extends BarberShopState {
+  const BarberShopInitial();
+}
+
+final class BarberShopLoading extends BarberShopState {
+  const BarberShopLoading();
+}
 
 final class BarberShopLoaded extends BarberShopState {
   final BarberShopEntity shop;

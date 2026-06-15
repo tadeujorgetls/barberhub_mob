@@ -3,8 +3,8 @@ import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_ent
 import 'package:barber_hub/features/client/data/models/barber_model.dart';
 import 'package:barber_hub/features/client/data/models/product_model.dart';
 
-/// Estado completo da gestão de barbearia.
-/// Um único notifier carrega todos os dados do painel do proprietário.
+/// Estado completo da gestao de barbearia.
+/// Um unico notifier carrega todos os dados do painel do proprietario.
 class ShopManagementState {
   final bool isLoading;
   final String? error;

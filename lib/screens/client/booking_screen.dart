@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../core/routes/app_routes.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../models/app_data_provider.dart';
+import '../../models/appointment_booking_failure.dart';
 import '../../mock/mock_data.dart';
 import '../../models/barber_model.dart';
 import '../../models/barbershop_model.dart';
 import '../../models/service_model.dart';
-import '../../core/routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
-import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // BookingScreen
@@ -28,6 +29,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   DateTime? _selectedDate;
   String? _selectedTime;
   int _step = 0; // 0=barbeiro, 1=data/hora, 2=confirmar
+  DateTime get _bookingNow => DateTime.now();
 
   /// Parse seguro dos arguments. Garante que barbershop sempre vem
   /// de uma barbearia real (args ou provider).
@@ -168,6 +170,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           selectedDate: _selectedDate,
           selectedTime: _selectedTime,
           bookedSlots: bookedSlots,
+          referenceNow: _bookingNow,
+          isDateBlocked: (date) =>
+              data.isDateBlockedForShop(barbershop.id, date),
           onDateSelected: (d) => setState(() {
             _selectedDate = d;
             _selectedTime = null; // reset horÃ¡rio ao trocar data
@@ -197,11 +202,17 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     AppDataProvider data,
   ) async {
     final authState = ref.read(authNotifierProvider);
-    final authUser = authState is AuthAuthenticated ? authState.user : null;
+    final user = authState is AuthAuthenticated ? authState.user : null;
+
+    if (user == null) {
+      _showBookingError(AppointmentBookingFailure.notAuthenticated);
+      return;
+    }
+
     try {
       await data.bookAppointment(
-        clientId: authUser?.id ?? 'guest',
-        clientName: authUser?.name ?? 'Visitante',
+        clientId: user.id,
+        clientName: user.name,
         service: service,
         barber: _selectedBarber!,
         barbershop: barbershop,
@@ -210,14 +221,51 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       );
       if (!mounted) return;
       _showSuccessDialog(barbershop.name);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppTheme.error,
-          content: Text('Erro: ${e.toString()}'),
-        ),
-      );
+    } catch (error) {
+      final failure = error is AppointmentBookingException
+          ? error.failure
+          : AppointmentBookingFailure.unknown;
+      _showBookingError(failure);
+    }
+  }
+
+  void _showBookingError(AppointmentBookingFailure failure) {
+    if (!mounted) return;
+
+    final needsLogin = failure == AppointmentBookingFailure.notAuthenticated ||
+        failure == AppointmentBookingFailure.unauthorized;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppTheme.error,
+        content: Text(_bookingErrorMessage(failure)),
+        action: needsLogin
+            ? SnackBarAction(
+                label: 'ENTRAR',
+                textColor: AppTheme.gold,
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
+              )
+            : null,
+      ),
+    );
+  }
+
+  String _bookingErrorMessage(AppointmentBookingFailure failure) {
+    switch (failure) {
+      case AppointmentBookingFailure.notAuthenticated:
+        return 'Entre na sua conta para agendar um horario.';
+      case AppointmentBookingFailure.pastDate:
+        return 'Escolha uma data a partir de hoje para agendar.';
+      case AppointmentBookingFailure.blockedDate:
+        return 'Esta data esta bloqueada pela barbearia.';
+      case AppointmentBookingFailure.slotUnavailable:
+        return 'Esse horario acabou de ser reservado. Escolha outro horario.';
+      case AppointmentBookingFailure.unauthorized:
+        return 'Sua sessao expirou. Entre novamente para continuar.';
+      case AppointmentBookingFailure.network:
+        return 'Nao foi possivel agendar agora. Verifique sua internet.';
+      case AppointmentBookingFailure.unknown:
+        return 'Nao foi possivel concluir o agendamento. Tente novamente.';
     }
   }
 
@@ -238,9 +286,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 height: 72,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.gold.withValues(alpha: 0.12),
+                  color: AppTheme.gold.withOpacity(0.12),
                   border: Border.all(
-                      color: AppTheme.gold.withValues(alpha: 0.3), width: 2),
+                      color: AppTheme.gold.withOpacity(0.3), width: 2),
                 ),
                 child: const Icon(Icons.check_rounded,
                     color: AppTheme.gold, size: 36),
@@ -319,7 +367,7 @@ class _StepIndicator extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: active
-                    ? AppTheme.gold.withValues(alpha: 0.15)
+                    ? AppTheme.gold.withOpacity(0.15)
                     : AppTheme.surfaceElevated,
                 border: Border.all(
                   color: active ? AppTheme.gold : AppTheme.inputBorder,
@@ -381,7 +429,7 @@ class _BookingSummaryBar extends StatelessWidget {
                 barbershopName,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontSize: 11,
-                      color: AppTheme.gold.withValues(alpha: 0.85),
+                      color: AppTheme.gold.withOpacity(0.85),
                     ),
               ),
             ],
@@ -468,7 +516,7 @@ class _BarberStep extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isSel
-                        ? AppTheme.gold.withValues(alpha: 0.06)
+                        ? AppTheme.gold.withOpacity(0.06)
                         : AppTheme.surfaceElevated,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -530,6 +578,8 @@ class _DateTimeStep extends StatelessWidget {
   final DateTime? selectedDate;
   final String? selectedTime;
   final Set<String> bookedSlots;
+  final DateTime referenceNow;
+  final bool Function(DateTime) isDateBlocked;
   final ValueChanged<DateTime> onDateSelected;
   final ValueChanged<String> onTimeSelected;
   final VoidCallback onNext;
@@ -539,6 +589,8 @@ class _DateTimeStep extends StatelessWidget {
     required this.selectedDate,
     required this.selectedTime,
     required this.bookedSlots,
+    required this.referenceNow,
+    required this.isDateBlocked,
     required this.onDateSelected,
     required this.onTimeSelected,
     required this.onNext,
@@ -558,7 +610,7 @@ class _DateTimeStep extends StatelessWidget {
     final minute = int.tryParse(parts[1]);
     if (hour == null || minute == null) return false;
 
-    final now = DateTime.now();
+    final now = referenceNow;
     final slotDateTime = DateTime(
       selectedDate!.year,
       selectedDate!.month,
@@ -594,11 +646,28 @@ class _DateTimeStep extends StatelessWidget {
                 // Date picker
                 GestureDetector(
                   onTap: () async {
+                    final today = DateTime(
+                      referenceNow.year,
+                      referenceNow.month,
+                      referenceNow.day,
+                    );
+                    final selectedDay = selectedDate == null
+                        ? null
+                        : DateTime(
+                            selectedDate!.year,
+                            selectedDate!.month,
+                            selectedDate!.day,
+                          );
+                    final initialDate =
+                        selectedDay != null && !selectedDay.isBefore(today)
+                            ? selectedDay
+                            : today;
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: selectedDate ?? DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 60)),
+                      initialDate: initialDate,
+                      firstDate: today,
+                      lastDate: today.add(const Duration(days: 60)),
+                      selectableDayPredicate: (day) => !isDateBlocked(day),
                       builder: (ctx, child) => Theme(
                         data: Theme.of(ctx).copyWith(
                           colorScheme: const ColorScheme.dark(
@@ -698,7 +767,7 @@ class _DateTimeStep extends StatelessWidget {
                             color: isUnavailable
                                 ? AppTheme.surface
                                 : isSel
-                                    ? AppTheme.gold.withValues(alpha: 0.12)
+                                    ? AppTheme.gold.withOpacity(0.12)
                                     : AppTheme.surfaceElevated,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
@@ -857,9 +926,9 @@ class _ConfirmStep extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.gold.withValues(alpha: 0.06),
+                    color: AppTheme.gold.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppTheme.gold.withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [

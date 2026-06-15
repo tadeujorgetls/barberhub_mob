@@ -1,8 +1,9 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
-import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/barber_shop/presentation/providers/shop_management_providers.dart';
 import 'package:barber_hub/features/barber_shop/presentation/widgets/bs_widgets.dart';
 import 'package:barber_hub/features/client/data/models/barber_model.dart';
@@ -21,7 +22,7 @@ class BarberShopBarbersScreen extends ConsumerWidget {
           SliverToBoxAdapter(
               child: Column(children: [
             BsScreenHeader(
-              eyebrow: 'gestão',
+              eyebrow: 'gestao',
               title: 'Barbeiros',
               actions: [
                 Padding(
@@ -88,7 +89,7 @@ class BarberShopBarbersScreen extends ConsumerWidget {
   }
 }
 
-// ── Barber Tile ───────────────────────────────────────────────────────────────
+// Barber Tile
 class _BarberTile extends StatelessWidget {
   final BarberModel barber;
   final VoidCallback onEdit, onToggle;
@@ -169,7 +170,7 @@ class _BarberTile extends StatelessWidget {
       );
 }
 
-// ── Barber Modal ──────────────────────────────────────────────────────────────
+// Barber Modal
 class _BarberModal extends ConsumerStatefulWidget {
   final BarberModel? barber;
   final WidgetRef ref;
@@ -185,6 +186,8 @@ class _BarberModalState extends ConsumerState<_BarberModal> {
   final _specialtyCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   bool _isActive = true;
+  bool _isSubmitting = false;
+  String? _errorMessage;
   bool get _isEditing => widget.barber != null;
 
   @override
@@ -215,36 +218,64 @@ class _BarberModalState extends ConsumerState<_BarberModal> {
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_isSubmitting || !_formKey.currentState!.validate()) return;
     final notifier = ref.read(shopManagementProvider.notifier);
-    final authState = ref.read(authNotifierProvider);
-    final shopId =
-        authState is AuthAuthenticated ? authState.user.linkedId ?? '' : '';
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
 
-    if (_isEditing) {
-      await notifier.updateBarber(widget.barber!.copyWith(
-        name: _nameCtrl.text.trim(),
-        specialty: _specialtyCtrl.text.trim(),
-        phone: _phoneCtrl.text.trim(),
-        avatarInitials: _initials(_nameCtrl.text.trim()),
-        isActive: _isActive,
-      ));
-    } else {
-      await notifier.addBarber(BarberModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameCtrl.text.trim(),
-        specialty: _specialtyCtrl.text.trim(),
-        phone: _phoneCtrl.text.trim(),
-        avatarInitials: _initials(_nameCtrl.text.trim()),
-        isActive: _isActive,
-      ));
+    try {
+      if (_isEditing) {
+        await notifier
+            .updateBarber(widget.barber!.copyWith(
+              name: _nameCtrl.text.trim(),
+              specialty: _specialtyCtrl.text.trim(),
+              phone: _phoneCtrl.text.trim(),
+              avatarInitials: _initials(_nameCtrl.text.trim()),
+              isActive: _isActive,
+            ))
+            .timeout(const Duration(seconds: 13));
+      } else {
+        await notifier
+            .addBarber(BarberModel(
+              id: _uuidV4(),
+              name: _nameCtrl.text.trim(),
+              specialty: _specialtyCtrl.text.trim(),
+              phone: _phoneCtrl.text.trim(),
+              avatarInitials: _initials(_nameCtrl.text.trim()),
+              isActive: _isActive,
+            ))
+            .timeout(const Duration(seconds: 13));
+      }
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      final message = e is TimeoutException
+          ? 'Tempo esgotado ao salvar. Confira as permissoes da tabela barbers no Supabase.'
+          : e.toString();
+      setState(() => _errorMessage = message);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
-    if (mounted) Navigator.pop(context);
+  }
+
+  String _uuidV4() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    String hex(int value) => value.toRadixString(16).padLeft(2, '0');
+    final chars = bytes.map(hex).join();
+    return '${chars.substring(0, 8)}-${chars.substring(8, 12)}-${chars.substring(12, 16)}-${chars.substring(16, 20)}-${chars.substring(20)}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = ref.watch(shopManagementProvider).isSaving;
     return BsModalSheet(
       title: _isEditing ? 'Editar barbeiro' : 'Novo barbeiro',
       child: Form(
@@ -255,15 +286,15 @@ class _BarberModalState extends ConsumerState<_BarberModal> {
               controller: _nameCtrl,
               textInputAction: TextInputAction.next,
               validator: (v) =>
-                  (v?.trim().isEmpty ?? true) ? 'Obrigatório' : null),
+                  (v?.trim().isEmpty ?? true) ? 'Obrigatorio' : null),
           const SizedBox(height: 14),
           BsTextField(
               label: 'Especialidade',
-              hint: 'Ex: Cortes Clássicos & Fade',
+              hint: 'Ex: Cortes Classicos & Fade',
               controller: _specialtyCtrl,
               textInputAction: TextInputAction.next,
               validator: (v) =>
-                  (v?.trim().isEmpty ?? true) ? 'Obrigatório' : null),
+                  (v?.trim().isEmpty ?? true) ? 'Obrigatorio' : null),
           const SizedBox(height: 14),
           BsTextField(
               label: 'Telefone',
@@ -283,10 +314,30 @@ class _BarberModalState extends ConsumerState<_BarberModal> {
                 onChanged: (v) => setState(() => _isActive = v)),
           ]),
           const SizedBox(height: 24),
+          if (_errorMessage != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.error.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.error.withOpacity(0.35)),
+              ),
+              child: Text(
+                _errorMessage!,
+                style: GoogleFonts.jost(
+                  color: AppTheme.error,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           BsSaveButton(
-              label: _isEditing ? 'Salvar alterações' : 'Adicionar barbeiro',
+              label: _isEditing ? 'Salvar alteracoes' : 'Adicionar barbeiro',
               onPressed: _save,
-              isLoading: isSaving),
+              isLoading: _isSubmitting),
           const SizedBox(height: 8),
         ]),
       ),

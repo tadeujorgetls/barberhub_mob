@@ -20,6 +20,7 @@ class BarbershopDetailScreen extends StatefulWidget {
 class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tab;
+  bool _didRequestCatalogRefresh = false;
 
   @override
   void initState() {
@@ -36,17 +37,25 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final shop = ModalRoute.of(context)!.settings.arguments as BarbershopModel;
+    final routeShop =
+        ModalRoute.of(context)!.settings.arguments as BarbershopModel;
+    final data = context.watch<AppDataProvider>();
+    final shop = data.shopFor(routeShop);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AppDataProvider>().selectBarbershop(shop);
+      final provider = context.read<AppDataProvider>();
+      provider.selectBarbershop(shop);
+      if (!_didRequestCatalogRefresh) {
+        _didRequestCatalogRefresh = true;
+        provider.refreshCatalog();
+      }
     });
 
     return Scaffold(
       body: SafeArea(
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            // ── Top bar ─────────────────────────────────────────────────
+            // â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
@@ -78,7 +87,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
               ),
             ),
 
-            // ── Cover ────────────────────────────────────────────────────
+            // â”€â”€ Cover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -86,7 +95,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
               ),
             ),
 
-            // ── Info ──────────────────────────────────────────────────────
+            // â”€â”€ Info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -94,7 +103,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
               ),
             ),
 
-            // ── Stats ─────────────────────────────────────────────────────
+            // â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 18, 24, 0),
@@ -102,7 +111,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
               ),
             ),
 
-            // ── Equipe ────────────────────────────────────────────────────
+            // â”€â”€ Equipe â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
@@ -125,7 +134,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
               ),
             ),
 
-            // ── Tab bar Serviços / Produtos ───────────────────────────────
+            // â”€â”€ Tab bar ServiÃ§os / Produtos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
@@ -134,7 +143,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
             ),
           ],
 
-          // ── Tab body ───────────────────────────────────────────────────
+          // â”€â”€ Tab body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           body: TabBarView(
             controller: _tab,
             children: [
@@ -149,7 +158,7 @@ class _BarbershopDetailScreenState extends State<BarbershopDetailScreen>
   }
 }
 
-// ── Tab bar toggle ─────────────────────────────────────────────────────────────
+// â”€â”€ Tab bar toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ServicesProductsTabBar extends StatelessWidget {
   final TabController controller;
   final BarbershopModel shop;
@@ -187,7 +196,7 @@ class _ServicesProductsTabBar extends StatelessWidget {
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Icon(Icons.content_cut_rounded, size: 13),
               const SizedBox(width: 5),
-              const Text('Serviços'),
+              const Text('ServiÃ§os'),
               const SizedBox(width: 4),
               _TabCount(count: serviceCount, active: controller.index == 0),
             ]),
@@ -247,7 +256,7 @@ class _TabCount extends StatelessWidget {
   }
 }
 
-// ── Tab 0: Serviços ───────────────────────────────────────────────────────────
+// â”€â”€ Tab 0: ServiÃ§os â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ServicesTab extends StatelessWidget {
   final BarbershopModel shop;
   const _ServicesTab({required this.shop});
@@ -259,8 +268,8 @@ class _ServicesTab extends StatelessWidget {
     if (active.isEmpty) {
       return const EmptyState(
         icon: Icons.content_cut_outlined,
-        title: 'Sem serviços',
-        subtitle: 'Esta barbearia ainda não tem serviços cadastrados.',
+        title: 'Sem serviÃ§os',
+        subtitle: 'Esta barbearia ainda nÃ£o tem serviÃ§os cadastrados.',
       );
     }
 
@@ -276,7 +285,7 @@ class _ServicesTab extends StatelessWidget {
   }
 }
 
-// ── Tab 1: Produtos ───────────────────────────────────────────────────────────
+// â”€â”€ Tab 1: Produtos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ProductsTab extends StatefulWidget {
   final BarbershopModel shop;
   const _ProductsTab({required this.shop});
@@ -303,13 +312,13 @@ class _ProductsTabState extends State<_ProductsTab> {
       return const EmptyState(
         icon: Icons.shopping_bag_outlined,
         title: 'Sem produtos',
-        subtitle: 'Esta barbearia ainda não tem produtos cadastrados.',
+        subtitle: 'Esta barbearia ainda nÃ£o tem produtos cadastrados.',
       );
     }
 
     return CustomScrollView(
       slivers: [
-        // ── Destaques ──────────────────────────────────────────────────
+        // â”€â”€ Destaques â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if (featured.isNotEmpty && _selectedCategory == null) ...[
           const SliverToBoxAdapter(
             child: Padding(
@@ -334,7 +343,7 @@ class _ProductsTabState extends State<_ProductsTab> {
           ),
         ],
 
-        // ── Filtro de categorias ────────────────────────────────────────
+        // â”€â”€ Filtro de categorias â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 0, 0),
@@ -346,7 +355,7 @@ class _ProductsTabState extends State<_ProductsTab> {
           ),
         ),
 
-        // ── Lista de produtos ───────────────────────────────────────────
+        // â”€â”€ Lista de produtos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -394,7 +403,7 @@ class _ProductsTabState extends State<_ProductsTab> {
   }
 }
 
-// ── Category filter ───────────────────────────────────────────────────────────
+// â”€â”€ Category filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _CategoryFilter extends StatelessWidget {
   final List<ProductCategory> categories;
   final ProductCategory? selected;
@@ -439,7 +448,8 @@ class _CategoryFilter extends StatelessWidget {
 }
 
 class _FilterChip extends StatelessWidget {
-  final String label; final IconData iconData;
+  final String label;
+  final IconData iconData;
   final bool selected;
   final VoidCallback onTap;
 
@@ -487,7 +497,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-// ── Featured product card (horizontal scroll) ─────────────────────────────────
+// â”€â”€ Featured product card (horizontal scroll) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _FeaturedProductCard extends StatelessWidget {
   final ProductModel product;
   final BarbershopModel shop;
@@ -584,7 +594,7 @@ class _FeaturedProductCard extends StatelessWidget {
   }
 }
 
-// ── Product card (list) ───────────────────────────────────────────────────────
+// â”€â”€ Product card (list) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ProductCard extends StatelessWidget {
   final ProductModel product;
   final BarbershopModel shop;
@@ -601,7 +611,7 @@ class _ProductCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Conteúdo ──────────────────────────────────────────────
+          // â”€â”€ ConteÃºdo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
@@ -648,7 +658,7 @@ class _ProductCard extends StatelessWidget {
 
                       // Marca + categoria
                       Text(
-                        '${product.brand} · ${product.category.label}',
+                        '${product.brand} Â· ${product.category.label}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontSize: 11,
                               color: AppTheme.textHint,
@@ -656,7 +666,7 @@ class _ProductCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
 
-                      // Descrição curta
+                      // DescriÃ§Ã£o curta
                       Text(
                         product.description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -669,7 +679,7 @@ class _ProductCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
 
-                      // Preço
+                      // PreÃ§o
                       Row(
                         children: [
                           Text(
@@ -727,7 +737,7 @@ class _ProductCard extends StatelessWidget {
             ),
           ),
 
-          // ── CTA (dois botões lado a lado) ──────────────────────────
+          // â”€â”€ CTA (dois botÃµes lado a lado) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Container(height: 1, color: AppTheme.divider),
           _ProductCardActions(product: product, shop: shop),
         ],
@@ -736,7 +746,7 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// ── Tab 2: Reviews ────────────────────────────────────────────────────────────
+// â”€â”€ Tab 2: Reviews â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ReviewsTab extends StatelessWidget {
   final BarbershopModel shop;
   const _ReviewsTab({required this.shop});
@@ -751,15 +761,15 @@ class _ReviewsTab extends StatelessWidget {
     if (reviews.isEmpty) {
       return const EmptyState(
         icon: Icons.star_outline_rounded,
-        title: 'Sem avaliações',
+        title: 'Sem avaliaÃ§Ãµes',
         subtitle:
-            'Seja o primeiro a avaliar esta barbearia\napós seu atendimento.',
+            'Seja o primeiro a avaliar esta barbearia\napÃ³s seu atendimento.',
       );
     }
 
     return CustomScrollView(
       slivers: [
-        // ── Rating summary ────────────────────────────────────────────
+        // â”€â”€ Rating summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -774,7 +784,7 @@ class _ReviewsTab extends StatelessWidget {
         const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(24, 24, 24, 14),
-            child: SectionHeader(title: 'Avaliações'),
+            child: SectionHeader(title: 'AvaliaÃ§Ãµes'),
           ),
         ),
 
@@ -795,7 +805,7 @@ class _ReviewsTab extends StatelessWidget {
   }
 }
 
-// ── Rating summary widget ─────────────────────────────────────────────────────
+// â”€â”€ Rating summary widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _RatingSummary extends StatelessWidget {
   final double rating;
   final int count;
@@ -847,7 +857,7 @@ class _RatingSummary extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '$count avaliações',
+                '$count avaliaÃ§Ãµes',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontSize: 11,
                       color: AppTheme.textHint,
@@ -858,7 +868,7 @@ class _RatingSummary extends StatelessWidget {
           const SizedBox(width: 20),
           Container(width: 1, height: 80, color: AppTheme.divider),
           const SizedBox(width: 20),
-          // Barras de distribuição
+          // Barras de distribuiÃ§Ã£o
           Expanded(
             child: Column(
               children: List.generate(5, (i) {
@@ -918,7 +928,7 @@ class _RatingSummary extends StatelessWidget {
   }
 }
 
-// ── Review card ───────────────────────────────────────────────────────────────
+// â”€â”€ Review card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ReviewCard extends StatelessWidget {
   final ReviewModel review;
   const _ReviewCard({required this.review});
@@ -1005,7 +1015,7 @@ class _ReviewCard extends StatelessWidget {
             ],
           ),
 
-          // Serviço
+          // ServiÃ§o
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -1023,7 +1033,7 @@ class _ReviewCard extends StatelessWidget {
             ),
           ),
 
-          // Comentário
+          // ComentÃ¡rio
           if (r.comment != null && r.comment!.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
@@ -1041,7 +1051,7 @@ class _ReviewCard extends StatelessWidget {
   }
 }
 
-// ── Shared sub-widgets (cover, info, stats, barber chip, service card) ─────────
+// â”€â”€ Shared sub-widgets (cover, info, stats, barber chip, service card) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _CoverCard extends StatelessWidget {
   final BarbershopModel shop;
@@ -1066,8 +1076,7 @@ class _CoverCard extends StatelessWidget {
       child: Stack(
         children: [
           Center(
-              child:
-                  Icon(shop.coverIconData, size: 64, color: AppTheme.gold)),
+              child: Icon(shop.coverIconData, size: 64, color: AppTheme.gold)),
           Positioned(
             top: 12,
             right: 12,
@@ -1200,7 +1209,7 @@ class _RatingPill extends StatelessWidget {
           ]),
         ),
         const SizedBox(height: 4),
-        Text('$count avaliações',
+        Text('$count avaliaÃ§Ãµes',
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -1221,7 +1230,7 @@ class _StatsRow extends StatelessWidget {
         _StatTile(
             icon: Icons.content_cut_rounded,
             value: '${shop.services.where((s) => s.isActive).length}',
-            label: 'serviços'),
+            label: 'serviÃ§os'),
         const SizedBox(width: 10),
         _StatTile(
             icon: Icons.people_outline_rounded,
@@ -1236,7 +1245,7 @@ class _StatsRow extends StatelessWidget {
         _StatTile(
             icon: Icons.star_outline_rounded,
             value: shop.formattedRating,
-            label: 'avaliação'),
+            label: 'avaliaÃ§Ã£o'),
       ],
     );
   }
@@ -1351,7 +1360,7 @@ class _BarberChip extends StatelessWidget {
   }
 }
 
-// ── Service booking card ──────────────────────────────────────────────────────
+// â”€â”€ Service booking card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ServiceBookingCard extends StatelessWidget {
   final ServiceModel service;
   final BarbershopModel shop;
@@ -1449,7 +1458,7 @@ class _ServiceBookingCard extends StatelessWidget {
                     const Icon(Icons.calendar_month_outlined,
                         size: 14, color: AppTheme.gold),
                     const SizedBox(width: 7),
-                    Text('Agendar este serviço',
+                    Text('Agendar este serviÃ§o',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: AppTheme.gold,
                               fontSize: 12,
@@ -1466,7 +1475,7 @@ class _ServiceBookingCard extends StatelessWidget {
   }
 }
 
-// ── Product card actions (Ver detalhes + Adicionar ao carrinho) ──────────────
+// â”€â”€ Product card actions (Ver detalhes + Adicionar ao carrinho) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _ProductCardActions extends StatelessWidget {
   final ProductModel product;
   final BarbershopModel shop;
@@ -1481,7 +1490,7 @@ class _ProductCardActions extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
       child: Row(
         children: [
-          // Botão "Ver detalhes"
+          // BotÃ£o "Ver detalhes"
           Expanded(
             child: Material(
               color: Colors.transparent,
@@ -1514,7 +1523,7 @@ class _ProductCardActions extends StatelessWidget {
 
           Container(width: 1, height: 36, color: AppTheme.divider),
 
-          // Botão "Adicionar" / "No carrinho"
+          // BotÃ£o "Adicionar" / "No carrinho"
           Expanded(
             child: Material(
               color: Colors.transparent,
@@ -1566,7 +1575,7 @@ class _ProductCardActions extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         !product.inStock
-                            ? 'Indisponível'
+                            ? 'IndisponÃ­vel'
                             : inCart
                                 ? 'No carrinho'
                                 : 'Adicionar',
@@ -1598,7 +1607,7 @@ class _ProductCardActions extends StatelessWidget {
         title: Text('Carrinho de outra barbearia',
             style: Theme.of(context).textTheme.titleLarge),
         content: Text(
-          'Você tem itens de "${cart.barbershop?.name}" no carrinho.\n\nDeseja descartá-los e começar com "${conflict.shop.name}"?',
+          'VocÃª tem itens de "${cart.barbershop?.name}" no carrinho.\n\nDeseja descartÃ¡-los e comeÃ§ar com "${conflict.shop.name}"?',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
         ),
         actions: [
@@ -1623,7 +1632,7 @@ class _ProductCardActions extends StatelessWidget {
   }
 }
 
-// ── Cart badge button (usado no top bar do detalhe) ──────────────────────────
+// â”€â”€ Cart badge button (usado no top bar do detalhe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _CartBadgeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

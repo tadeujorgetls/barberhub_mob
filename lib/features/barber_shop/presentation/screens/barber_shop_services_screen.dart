@@ -7,12 +7,12 @@ import 'package:barber_hub/features/auth/presentation/providers/auth_providers.d
 import 'package:barber_hub/features/auth/presentation/providers/auth_state.dart';
 import 'package:barber_hub/models/service_model.dart';
 
-// CORREÇÃO: import corrigido — usa models/app_data_provider.dart (registrado
-// no MultiProvider de main.dart), não features/client/presentation/providers/.
-// Os dois são classes Dart distintas; usar a errada causa ProviderNotFoundException.
+// CORREÃ‡ÃƒO: import corrigido â€” usa models/app_data_provider.dart (registrado
+// no MultiProvider de main.dart), nÃ£o features/client/presentation/providers/.
+// Os dois sÃ£o classes Dart distintas; usar a errada causa ProviderNotFoundException.
 import 'package:barber_hub/models/app_data_provider.dart';
 
-/// Tela de Serviços da Barbearia — CRUD completo.
+/// Tela de ServiÃ§os da Barbearia â€” CRUD completo.
 class BarberShopServicesScreen extends ConsumerWidget {
   const BarberShopServicesScreen({super.key});
 
@@ -22,7 +22,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
     final shopId =
         authState is AuthAuthenticated ? authState.user.linkedId : null;
 
-    // Lê o AppDataProvider registrado no MultiProvider (models/app_data_provider.dart)
+    // LÃª o AppDataProvider registrado no MultiProvider (models/app_data_provider.dart)
     final data = context.watch<AppDataProvider>();
     final services =
         shopId != null ? data.servicesForShop(shopId) : <ServiceModel>[];
@@ -32,7 +32,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──────────────────────────────────────────────────────
+            // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
               child: Row(children: [
@@ -41,7 +41,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'SERVIÇOS',
+                        'SERVIÃ‡OS',
                         style: GoogleFonts.jost(
                             color: AppTheme.gold,
                             fontSize: 10,
@@ -49,7 +49,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
                             letterSpacing: 4),
                       ),
                       Text(
-                        'Meus Serviços',
+                        'Meus ServiÃ§os',
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium
@@ -58,7 +58,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                // ── Botão Novo ──
+                // â”€â”€ BotÃ£o Novo â”€â”€
                 GestureDetector(
                   onTap: shopId == null
                       ? null
@@ -86,18 +86,18 @@ class BarberShopServicesScreen extends ConsumerWidget {
               ]),
             ),
 
-            // ── Contador ────────────────────────────────────────────────────
+            // â”€â”€ Contador â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
               child: Text(
-                '${services.length} serviço${services.length != 1 ? "s" : ""} '
+                '${services.length} serviÃ§o${services.length != 1 ? "s" : ""} '
                 'cadastrado${services.length != 1 ? "s" : ""}',
                 style: GoogleFonts.jost(
                     color: AppTheme.textSecondary, fontSize: 13),
               ),
             ),
 
-            // ── Lista ────────────────────────────────────────────────────────
+            // â”€â”€ Lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Expanded(
               child: shopId == null
                   ? const Center(
@@ -127,7 +127,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
     );
   }
 
-  // ── Sheet helpers ──────────────────────────────────────────────────────────
+  // â”€â”€ Sheet helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   void _showSheet(BuildContext ctx, AppDataProvider data, String shopId,
           ServiceModel? existing) =>
@@ -148,7 +148,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
         builder: (_) => AlertDialog(
           backgroundColor: AppTheme.surfaceElevated,
           title: Text(
-            'Excluir serviço?',
+            'Excluir serviÃ§o?',
             style: GoogleFonts.jost(
                 color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
           ),
@@ -163,9 +163,16 @@ class BarberShopServicesScreen extends ConsumerWidget {
                   style: GoogleFonts.jost(color: AppTheme.textSecondary)),
             ),
             TextButton(
-              onPressed: () {
-                data.deleteShopService(shopId, s.id);
-                Navigator.pop(ctx);
+              onPressed: () async {
+                try {
+                  await data.deleteShopService(shopId, s.id);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
               },
               child: Text('Excluir',
                   style: GoogleFonts.jost(color: AppTheme.error)),
@@ -175,7 +182,7 @@ class BarberShopServicesScreen extends ConsumerWidget {
       );
 }
 
-// ── Tile de serviço ────────────────────────────────────────────────────────────
+// â”€â”€ Tile de serviÃ§o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _Tile extends StatelessWidget {
   final ServiceModel service;
@@ -307,7 +314,7 @@ class _Tile extends StatelessWidget {
       );
 }
 
-// ── Formulário criar/editar ────────────────────────────────────────────────────
+// â”€â”€ FormulÃ¡rio criar/editar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _FormSheet extends StatefulWidget {
   final AppDataProvider data;
@@ -350,38 +357,45 @@ class _FormSheetState extends State<_FormSheet> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final nm = _name.text.trim();
     if (nm.isEmpty) return;
     final price = double.tryParse(_price.text.replaceAll(',', '.')) ?? 0.0;
     final dur = int.tryParse(_duration.text) ?? 30;
 
-    if (widget.existing == null) {
-      widget.data.addShopService(
-        widget.shopId,
-        ServiceModel(
-          id: 'svc_${DateTime.now().millisecondsSinceEpoch}',
-          name: nm,
-          description: _desc.text.trim(),
-          price: price,
-          durationMinutes: dur,
-          iconName: 'scissors',
-          isActive: _active,
-        ),
-      );
-    } else {
-      widget.data.updateShopService(
-        widget.shopId,
-        widget.existing!.copyWith(
-          name: nm,
-          description: _desc.text.trim(),
-          price: price,
-          durationMinutes: dur,
-          isActive: _active,
-        ),
+    try {
+      if (widget.existing == null) {
+        await widget.data.addShopService(
+          widget.shopId,
+          ServiceModel(
+            id: 'pending',
+            name: nm,
+            description: _desc.text.trim(),
+            price: price,
+            durationMinutes: dur,
+            iconName: 'scissors',
+            isActive: _active,
+          ),
+        );
+      } else {
+        await widget.data.updateShopService(
+          widget.shopId,
+          widget.existing!.copyWith(
+            name: nm,
+            description: _desc.text.trim(),
+            price: price,
+            durationMinutes: dur,
+            isActive: _active,
+          ),
+        );
+      }
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
       );
     }
-    Navigator.pop(context);
   }
 
   @override
@@ -410,24 +424,24 @@ class _FormSheetState extends State<_FormSheet> {
             ),
             const SizedBox(height: 20),
             Text(
-              isEdit ? 'Editar Serviço' : 'Novo Serviço',
+              isEdit ? 'Editar ServiÃ§o' : 'Novo ServiÃ§o',
               style: GoogleFonts.jost(
                   color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 20),
-            _tf(_name, 'Nome do serviço', 'Ex: Corte Clássico'),
+            _tf(_name, 'Nome do serviÃ§o', 'Ex: Corte ClÃ¡ssico'),
             const SizedBox(height: 12),
-            _tf(_desc, 'Descrição', 'Descreva brevemente', maxLines: 2),
+            _tf(_desc, 'DescriÃ§Ã£o', 'Descreva brevemente', maxLines: 2),
             const SizedBox(height: 12),
             Row(children: [
               Expanded(
-                  child: _tf(_price, 'Preço (R\$)', '45,00',
+                  child: _tf(_price, 'PreÃ§o (R\$)', '45,00',
                       type: TextInputType.number)),
               const SizedBox(width: 12),
               Expanded(
-                  child: _tf(_duration, 'Duração (min)', '30',
+                  child: _tf(_duration, 'DuraÃ§Ã£o (min)', '30',
                       type: TextInputType.number)),
             ]),
             const SizedBox(height: 16),
@@ -440,7 +454,7 @@ class _FormSheetState extends State<_FormSheet> {
               ),
               const SizedBox(width: 10),
               Text(
-                _active ? 'Serviço ativo' : 'Serviço inativo',
+                _active ? 'ServiÃ§o ativo' : 'ServiÃ§o inativo',
                 style: GoogleFonts.jost(
                     color: AppTheme.textSecondary, fontSize: 13),
               ),
@@ -458,7 +472,7 @@ class _FormSheetState extends State<_FormSheet> {
                       borderRadius: BorderRadius.all(Radius.circular(8))),
                 ),
                 child: Text(
-                  isEdit ? 'SALVAR ALTERAÇÕES' : 'CRIAR SERVIÇO',
+                  isEdit ? 'SALVAR ALTERAÃ‡Ã•ES' : 'CRIAR SERVIÃ‡O',
                   style: GoogleFonts.jost(
                       fontWeight: FontWeight.w700, letterSpacing: 1.5),
                 ),
@@ -503,7 +517,7 @@ class _FormSheetState extends State<_FormSheet> {
       );
 }
 
-// ── Empty state ────────────────────────────────────────────────────────────────
+// â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _EmptyState extends StatelessWidget {
   final VoidCallback onAdd;
@@ -529,7 +543,7 @@ class _EmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Nenhum serviço',
+                'Nenhum serviÃ§o',
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium
@@ -537,7 +551,7 @@ class _EmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Crie seus primeiros serviços\npara que os clientes possam agendar.',
+                'Crie seus primeiros serviÃ§os\npara que os clientes possam agendar.',
                 style: GoogleFonts.jost(
                     color: AppTheme.textSecondary, fontSize: 13, height: 1.5),
                 textAlign: TextAlign.center,
@@ -549,7 +563,7 @@ class _EmptyState extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onAdd,
                   icon: const Icon(Icons.add_rounded, size: 18),
-                  label: Text('CRIAR PRIMEIRO SERVIÇO',
+                  label: Text('CRIAR PRIMEIRO SERVIÃ‡O',
                       style: GoogleFonts.jost(
                           fontWeight: FontWeight.w700, letterSpacing: 1)),
                   style: ElevatedButton.styleFrom(

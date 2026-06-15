@@ -24,11 +24,39 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
   late BarberModel _selectedBarber;
   DateTime? _selectedDate;
   String? _selectedTime;
-
   @override
   void initState() {
     super.initState();
     _selectedBarber = widget.appointment.barber;
+  }
+
+  DateTime get _bookingNow => DateTime.now();
+
+  DateTime get _today => DateTime(
+        _bookingNow.year,
+        _bookingNow.month,
+        _bookingNow.day,
+      );
+
+  bool _isPastSlot(String slot) {
+    if (_selectedDate == null) return false;
+
+    final parts = slot.split(':');
+    if (parts.length != 2) return false;
+
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return false;
+
+    final slotDateTime = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+      hour,
+      minute,
+    );
+
+    return !slotDateTime.isAfter(_bookingNow);
   }
 
   @override
@@ -79,9 +107,7 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Remarcar',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium),
+                            style: Theme.of(context).textTheme.headlineMedium),
                         const SizedBox(height: 2),
                         Text(
                           widget.appointment.service.name,
@@ -111,10 +137,10 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: AppTheme.gold.withValues(alpha: 0.08),
+                        color: AppTheme.gold.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: AppTheme.gold.withValues(alpha: 0.2)),
+                        border:
+                            Border.all(color: AppTheme.gold.withOpacity(0.2)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -127,8 +153,7 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
-                                ?.copyWith(
-                                    color: AppTheme.gold, fontSize: 11),
+                                ?.copyWith(color: AppTheme.gold, fontSize: 11),
                           ),
                         ],
                       ),
@@ -166,7 +191,7 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: sel
-                                    ? AppTheme.gold.withValues(alpha: 0.06)
+                                    ? AppTheme.gold.withOpacity(0.06)
                                     : AppTheme.surfaceElevated,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
@@ -218,14 +243,27 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                       const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () async {
+                          final selectedDay = _selectedDate == null
+                              ? null
+                              : DateTime(
+                                  _selectedDate!.year,
+                                  _selectedDate!.month,
+                                  _selectedDate!.day,
+                                );
+                          final initialDate = selectedDay != null &&
+                                  !selectedDay.isBefore(_today)
+                              ? selectedDay
+                              : _today;
                           final picked = await showDatePicker(
                             context: context,
-                            initialDate:
-                                DateTime.now().add(const Duration(days: 1)),
-                            firstDate:
-                                DateTime.now().add(const Duration(days: 1)),
-                            lastDate:
-                                DateTime.now().add(const Duration(days: 60)),
+                            initialDate: initialDate,
+                            firstDate: _today,
+                            lastDate: _today.add(const Duration(days: 60)),
+                            selectableDayPredicate: (day) =>
+                                !data.isDateBlockedForShop(
+                              widget.appointment.barbershop.id,
+                              day,
+                            ),
                             builder: (ctx, child) => Theme(
                               data: Theme.of(ctx).copyWith(
                                 colorScheme: const ColorScheme.dark(
@@ -300,24 +338,25 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                           children: MockData.timeSlots.map((slot) {
                             final isSel = _selectedTime == slot;
                             final isBooked = bookedSlots.contains(slot);
+                            final isPast = _isPastSlot(slot);
+                            final isUnavailable = isBooked || isPast;
                             return GestureDetector(
-                              onTap: isBooked
+                              onTap: isUnavailable
                                   ? null
-                                  : () =>
-                                      setState(() => _selectedTime = slot),
+                                  : () => setState(() => _selectedTime = slot),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 9),
                                 decoration: BoxDecoration(
-                                  color: isBooked
+                                  color: isUnavailable
                                       ? AppTheme.surface
                                       : isSel
-                                          ? AppTheme.gold.withValues(alpha: 0.12)
+                                          ? AppTheme.gold.withOpacity(0.12)
                                           : AppTheme.surfaceElevated,
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: isBooked
+                                    color: isUnavailable
                                         ? AppTheme.divider
                                         : isSel
                                             ? AppTheme.gold
@@ -332,12 +371,12 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
                                     fontWeight: isSel
                                         ? FontWeight.w600
                                         : FontWeight.w400,
-                                    color: isBooked
+                                    color: isUnavailable
                                         ? AppTheme.textHint
                                         : isSel
                                             ? AppTheme.gold
                                             : AppTheme.textSecondary,
-                                    decoration: isBooked
+                                    decoration: isUnavailable
                                         ? TextDecoration.lineThrough
                                         : null,
                                   ),
@@ -356,17 +395,13 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
               // CTA
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                    24,
-                    12,
-                    24,
-                    12 + MediaQuery.of(context).viewPadding.bottom),
+                    24, 12, 24, 12 + MediaQuery.of(context).viewPadding.bottom),
                 child: PrimaryButton(
                   label: 'Confirmar remarcação',
                   isLoading: data.isLoading,
-                  onPressed:
-                      (_selectedDate != null && _selectedTime != null)
-                          ? _confirm
-                          : null,
+                  onPressed: (_selectedDate != null && _selectedTime != null)
+                      ? _confirm
+                      : null,
                 ),
               ),
             ],
@@ -414,8 +449,19 @@ class _RescheduleSheetState extends State<RescheduleSheet> {
 
   String _fmtDate(DateTime d) {
     const months = [
-      '', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+      '',
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez'
     ];
     return '${d.day} de ${months[d.month]} de ${d.year}';
   }

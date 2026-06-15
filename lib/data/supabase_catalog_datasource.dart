@@ -1,10 +1,121 @@
-﻿import 'package:barber_hub/core/services/supabase_service.dart';
+import 'dart:math';
+import 'package:barber_hub/core/services/supabase_service.dart';
 import 'package:barber_hub/models/barber_model.dart';
 import 'package:barber_hub/models/barbershop_model.dart';
 import 'package:barber_hub/models/service_model.dart';
 
 class SupabaseCatalogDatasource {
   bool get isConfigured => SupabaseService.client != null;
+
+  Future<void> updateBarbershopInfo({
+    required String id,
+    required String name,
+    required String address,
+    required String phone,
+  }) async {
+    final client = SupabaseService.client;
+    if (client == null) return;
+
+    final updatedRows = await client
+        .from('barbershops')
+        .update({
+          'name': name,
+          'address': address,
+          'phone': phone,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', id)
+        .select('id');
+
+    if (updatedRows.isEmpty) {
+      throw StateError(
+        'Nenhuma barbearia foi atualizada. Verifique o linked_id do perfil e a policy da tabela barbershops.',
+      );
+    }
+  }
+
+  Future<ServiceModel> createService({
+    required String barbershopId,
+    required ServiceModel service,
+  }) async {
+    final client = SupabaseService.client;
+    if (client == null) return service;
+
+    final row = await client
+        .from('services')
+        .insert({
+          'id': _uuidV4(),
+          'barbershop_id': barbershopId,
+          'name': service.name,
+          'description': service.description,
+          'price': service.price,
+          'duration_minutes': service.durationMinutes,
+          'icon_name': service.iconName,
+          'is_active': service.isActive,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .select()
+        .single();
+
+    return _service(Map<String, dynamic>.from(row as Map));
+  }
+
+  Future<ServiceModel> updateService({
+    required String serviceId,
+    required ServiceModel service,
+  }) async {
+    final client = SupabaseService.client;
+    if (client == null) return service;
+
+    final rows = await client
+        .from('services')
+        .update({
+          'name': service.name,
+          'description': service.description,
+          'price': service.price,
+          'duration_minutes': service.durationMinutes,
+          'icon_name': service.iconName,
+          'is_active': service.isActive,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', serviceId)
+        .select();
+
+    if (rows.isEmpty) {
+      throw StateError('Nenhum serviÃ§o foi atualizado no Supabase.');
+    }
+
+    return _service(Map<String, dynamic>.from(rows.first as Map));
+  }
+
+  Future<void> deactivateService(String serviceId) async {
+    final client = SupabaseService.client;
+    if (client == null) return;
+
+    final rows = await client
+        .from('services')
+        .update({
+          'is_active': false,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', serviceId)
+        .select('id');
+
+    if (rows.isEmpty) {
+      throw StateError('Nenhum serviÃ§o foi desativado no Supabase.');
+    }
+  }
+
+  String _uuidV4() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    String hex(int value) => value.toRadixString(16).padLeft(2, '0');
+    final chars = bytes.map(hex).join();
+    return '${chars.substring(0, 8)}-${chars.substring(8, 12)}-${chars.substring(12, 16)}-${chars.substring(16, 20)}-${chars.substring(20)}';
+  }
 
   Future<List<BarbershopModel>> loadBarbershops() async {
     final client = SupabaseService.client;
@@ -124,7 +235,7 @@ class SupabaseCatalogDatasource {
       brand: _string(row['brand']),
       isAvailable: _bool(row['is_available'], fallback: true),
       isFeatured: _bool(row['is_featured']),
-      stockQty: _int(row['stock_qty'], fallback: 99),
+      stockQty: _int(row['stock'] ?? row['stock_qty'], fallback: 99),
     );
   }
 

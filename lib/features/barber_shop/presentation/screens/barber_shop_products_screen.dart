@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +31,7 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
           SliverToBoxAdapter(
               child: Column(children: [
             BsScreenHeader(
-              eyebrow: 'gestão',
+              eyebrow: 'gestao',
               title: 'Produtos',
               actions: [
                 Padding(
@@ -143,7 +144,7 @@ class _State extends ConsumerState<BarberShopProductsScreen> {
   }
 }
 
-// ── Filter Chip ───────────────────────────────────────────────────────────────
+// Filter Chip
 class _FilterChip extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -180,7 +181,7 @@ class _FilterChip extends StatelessWidget {
       );
 }
 
-// ── Product Tile ──────────────────────────────────────────────────────────────
+// Product Tile
 class _ProductTile extends StatelessWidget {
   final ProductModel product;
   final VoidCallback onEdit, onDelete;
@@ -261,7 +262,7 @@ class _ProductTile extends StatelessWidget {
       );
 }
 
-// ── Product Modal ─────────────────────────────────────────────────────────────
+// Product Modal
 class _ProductModal extends ConsumerStatefulWidget {
   final ProductModel? product;
   final WidgetRef ref;
@@ -279,6 +280,8 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
   final _stockCtrl = TextEditingController();
   final _brandCtrl = TextEditingController();
   ProductCategory _category = ProductCategory.pomade;
+  bool _isSubmitting = false;
+  String? _errorMessage;
   bool get _isEditing => widget.product != null;
 
   @override
@@ -311,6 +314,11 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
     final notifier = ref.read(shopManagementProvider.notifier);
     final authState = ref.read(authNotifierProvider);
     final shopId =
@@ -319,38 +327,61 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
     final price = double.tryParse(_priceCtrl.text.replaceAll(',', '.')) ?? 0;
     final stock = int.tryParse(_stockCtrl.text) ?? 0;
 
-    if (_isEditing) {
-      await notifier.updateProduct(ProductModel(
-        id: widget.product!.id,
-        barbershopId: shopId,
-        name: _nameCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        price: price,
-        category: _category,
-        imageEmoji: _category.iconKey,
-        brand: _brandCtrl.text.trim(),
-        stockQty: stock,
-        isFeatured: widget.product!.isFeatured,
-      ));
-    } else {
-      await notifier.addProduct(ProductModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        barbershopId: shopId,
-        name: _nameCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        price: price,
-        category: _category,
-        imageEmoji: _category.iconKey,
-        brand: _brandCtrl.text.trim(),
-        stockQty: stock,
-      ));
+    try {
+      if (_isEditing) {
+        await notifier.updateProduct(ProductModel(
+          id: widget.product!.id,
+          barbershopId: shopId,
+          name: _nameCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          price: price,
+          category: _category,
+          imageEmoji: _category.iconKey,
+          brand: _brandCtrl.text.trim(),
+          stockQty: stock,
+          isFeatured: widget.product!.isFeatured,
+        ));
+      } else {
+        await notifier.addProduct(ProductModel(
+          id: _uuidV4(),
+          barbershopId: shopId,
+          name: _nameCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          price: price,
+          category: _category,
+          imageEmoji: _category.iconKey,
+          brand: _brandCtrl.text.trim(),
+          stockQty: stock,
+        ));
+      }
+
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString();
+        _isSubmitting = false;
+      });
     }
-    if (mounted) Navigator.pop(context);
+  }
+
+  String _uuidV4() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    String hex(int value) => value.toRadixString(16).padLeft(2, '0');
+    final buffer = StringBuffer();
+    for (var i = 0; i < bytes.length; i++) {
+      if (i == 4 || i == 6 || i == 8 || i == 10) buffer.write('-');
+      buffer.write(hex(bytes[i]));
+    }
+    return buffer.toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = ref.watch(shopManagementProvider).isSaving;
     return BsModalSheet(
       title: _isEditing ? 'Editar produto' : 'Novo produto',
       child: Form(
@@ -361,26 +392,26 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
               controller: _nameCtrl,
               textInputAction: TextInputAction.next,
               validator: (v) =>
-                  (v?.trim().isEmpty ?? true) ? 'Obrigatório' : null),
+                  (v?.trim().isEmpty ?? true) ? 'Obrigatorio' : null),
           const SizedBox(height: 14),
           BsTextField(
-              label: 'Descrição',
+              label: 'Descricao',
               controller: _descCtrl,
               maxLines: 2,
               validator: (v) =>
-                  (v?.trim().isEmpty ?? true) ? 'Obrigatório' : null),
+                  (v?.trim().isEmpty ?? true) ? 'Obrigatorio' : null),
           const SizedBox(height: 14),
           Row(children: [
             Expanded(
                 child: BsTextField(
-              label: 'Preço (R\$)',
+              label: 'Preco (R\$)',
               controller: _priceCtrl,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.next,
               validator: (v) {
                 final n = double.tryParse(v?.replaceAll(',', '.') ?? '');
-                return (n == null || n <= 0) ? 'Inválido' : null;
+                return (n == null || n <= 0) ? 'Invalido' : null;
               },
             )),
             const SizedBox(width: 12),
@@ -390,7 +421,7 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
               controller: _stockCtrl,
               keyboardType: TextInputType.number,
               validator: (v) =>
-                  int.tryParse(v ?? '') == null ? 'Inválido' : null,
+                  int.tryParse(v ?? '') == null ? 'Invalido' : null,
             )),
           ]),
           const SizedBox(height: 14),
@@ -440,10 +471,30 @@ class _ProductModalState extends ConsumerState<_ProductModal> {
             onChanged: (c) => setState(() => _category = c!),
           ),
           const SizedBox(height: 24),
+          if (_errorMessage != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.error.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.error.withOpacity(0.35)),
+              ),
+              child: Text(
+                _errorMessage!,
+                style: GoogleFonts.jost(
+                  color: AppTheme.error,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           BsSaveButton(
-              label: _isEditing ? 'Salvar alterações' : 'Adicionar produto',
+              label: _isEditing ? 'Salvar alteracoes' : 'Adicionar produto',
               onPressed: _save,
-              isLoading: isSaving),
+              isLoading: _isSubmitting),
           const SizedBox(height: 8),
         ]),
       ),

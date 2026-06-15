@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
 import 'package:barber_hub/core/utils/app_utils.dart';
@@ -7,8 +8,8 @@ import 'package:barber_hub/features/auth/presentation/providers/auth_providers.d
 import 'package:barber_hub/features/barber_shop/domain/entities/blocked_date_entity.dart';
 import 'package:barber_hub/features/barber_shop/presentation/providers/shop_management_providers.dart';
 import 'package:barber_hub/features/barber_shop/presentation/widgets/bs_widgets.dart';
-import 'package:barber_hub/features/client/data/models/appointment_model.dart';
-import 'package:barber_hub/shared/mock/mock_data.dart';
+import 'package:barber_hub/models/app_data_provider.dart';
+import 'package:barber_hub/models/appointment_model.dart';
 
 class BarberShopScheduleScreen extends ConsumerStatefulWidget {
   const BarberShopScheduleScreen({super.key});
@@ -41,10 +42,11 @@ class _State extends ConsumerState<BarberShopScheduleScreen>
     final mgmtState = ref.watch(shopManagementProvider);
     final blockedDates = mgmtState.blockedDates;
 
-    // Filtra agendamentos da barbearia deste dia
-    final allAppts = MockData.seedAppointments(MockData.barbershops())
-        .where((a) => a.barbershop.id == shopId)
-        .toList();
+    // Filtra agendamentos reais da barbearia neste dia.
+    final data = provider.Provider.of<AppDataProvider>(context);
+    final allAppts = shopId.isEmpty
+        ? <AppointmentModel>[]
+        : data.appointmentsForShop(shopId);
     final dayAppts = allAppts
         .where((a) =>
             a.date.year == _selectedDay.year &&
@@ -478,6 +480,8 @@ class _BlockModalState extends ConsumerState<_BlockModal> {
             reason: _reasonCtrl.text.trim(),
           ),
         );
+    await provider.Provider.of<AppDataProvider>(context, listen: false)
+        .refreshBlockedDates();
     if (mounted) Navigator.pop(context);
   }
 
