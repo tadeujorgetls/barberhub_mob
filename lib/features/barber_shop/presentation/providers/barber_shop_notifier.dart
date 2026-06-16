@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_hub/data/supabase_appointment_datasource.dart';
 import 'package:barber_hub/data/supabase_catalog_datasource.dart';
+import 'package:barber_hub/data/supabase_review_datasource.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
 import 'package:barber_hub/features/barber_shop/domain/entities/barber_shop_entity.dart';
 import 'package:barber_hub/models/appointment_model.dart';
@@ -11,6 +12,7 @@ class BarberShopNotifier extends StateNotifier<BarberShopState> {
   final Ref _ref;
   final _catalogDatasource = SupabaseCatalogDatasource();
   final _appointmentDatasource = SupabaseAppointmentDatasource();
+  final _reviewDatasource = SupabaseReviewDatasource();
 
   BarberShopNotifier(this._ref) : super(const BarberShopInitial());
 
@@ -21,13 +23,13 @@ class BarberShopNotifier extends StateNotifier<BarberShopState> {
     try {
       final authState = _ref.read(authNotifierProvider);
       if (authState is! AuthAuthenticated) {
-        state = const BarberShopError('Usuário não autenticado.');
+        state = const BarberShopError('Usuario nao autenticado.');
         return;
       }
 
       final shopId = authState.user.linkedId;
       if (shopId == null) {
-        state = const BarberShopError('Barbearia não vinculada ao perfil.');
+        state = const BarberShopError('Barbearia nao vinculada ao perfil.');
         return;
       }
 
@@ -36,19 +38,9 @@ class BarberShopNotifier extends StateNotifier<BarberShopState> {
           : MockData.barbershops();
       final shopData = _shopById(shops, shopId);
       if (shopData == null) {
-        state = const BarberShopError('Barbearia não encontrada.');
+        state = const BarberShopError('Barbearia nao encontrada.');
         return;
       }
-
-      final shop = BarberShopEntity(
-        id: shopData.id,
-        name: shopData.name,
-        address: shopData.address,
-        rating: shopData.rating,
-        reviewCount: shopData.reviewCount,
-        phone: shopData.phone ?? '',
-        coverEmoji: shopData.coverEmoji,
-      );
 
       final sourceAppointments = _appointmentDatasource.isConfigured
           ? await _appointmentDatasource.loadAppointments(shops)
@@ -56,6 +48,26 @@ class BarberShopNotifier extends StateNotifier<BarberShopState> {
       final allAppts = sourceAppointments
           .where((a) => a.barbershop.id == shopData.id)
           .toList();
+
+      final reviews = await _loadReviewsForShop(shopId, shopData.id, allAppts);
+      final reviewCount = reviews.length;
+      final rating = reviews.isEmpty
+          ? 0.0
+          : double.parse(
+              (reviews.fold<int>(0, (sum, item) => sum + item.rating) /
+                      reviews.length)
+                  .toStringAsFixed(1),
+            );
+
+      final shop = BarberShopEntity(
+        id: shopData.id,
+        name: shopData.name,
+        address: shopData.address,
+        rating: rating,
+        reviewCount: reviewCount,
+        phone: shopData.phone ?? '',
+        coverEmoji: shopData.coverEmoji,
+      );
 
       final today = DateTime.now();
       final todayAppts = allAppts
@@ -76,7 +88,8 @@ class BarberShopNotifier extends StateNotifier<BarberShopState> {
       final totalRevenue = completed.fold(0.0, (s, a) => s + a.service.price);
       final monthRevenue = completed
           .where(
-              (a) => a.date.month == today.month && a.date.year == today.year)
+            (a) => a.date.month == today.month && a.date.year == today.year,
+          )
           .fold(0.0, (s, a) => s + a.service.price);
 
       state = BarberShopLoaded(
@@ -88,14 +101,42 @@ class BarberShopNotifier extends StateNotifier<BarberShopState> {
           completedAppointments: completed.length,
           totalRevenue: totalRevenue,
           monthRevenue: monthRevenue,
-          averageRating: shopData.rating,
+          averageRating: rating,
         ),
         todayAppointments: todayAppts,
         upcomingAppointments: upcoming,
+        recentReviews: reviews.take(3).toList(),
       );
     } catch (e) {
       state = BarberShopError('Erro ao carregar dashboard: $e');
     }
+  }
+
+  Future<List<ReviewModel>> _loadReviewsForShop(
+    String linkedShopId,
+    String resolvedShopId,
+    List<AppointmentModel> appointments,
+  ) async {
+    final acceptedIds = <String>{
+      linkedShopId,
+      resolvedShopId,
+      _legacyShopId(linkedShopId),
+      _legacyShopId(resolvedShopId),
+    };
+
+    if (_reviewDatasource.isConfigured) {
+      final reviews = await _reviewDatasource.loadReviews();
+      return reviews
+          .where((item) => acceptedIds.contains(item.barbershopId))
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
+    final seeded = MockData.seedReviews(appointments);
+    return seeded
+        .where((item) => acceptedIds.contains(item.barbershopId))
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   BarbershopModel? _shopById(List<BarbershopModel> shops, String shopId) {

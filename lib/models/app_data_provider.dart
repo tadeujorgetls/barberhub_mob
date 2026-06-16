@@ -110,9 +110,11 @@ class AppDataProvider extends ChangeNotifier {
 
   List<ReviewModel> get allReviews => List.unmodifiable(_reviews);
 
-  List<ReviewModel> reviewsForShop(String shopId) =>
-      _reviews.where((r) => r.barbershopId == shopId).toList()
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  List<ReviewModel> reviewsForShop(String shopId) {
+    final acceptedIds = _acceptedShopIds(shopId);
+    return _reviews.where((r) => acceptedIds.contains(r.barbershopId)).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
 
   List<ReviewModel> reviewsForBarber(String barberId) =>
       _reviews.where((r) => r.barberId == barberId).toList()
@@ -220,14 +222,7 @@ class AppDataProvider extends ChangeNotifier {
   void _syncReviewStats() {
     for (var i = 0; i < _barbershops.length; i++) {
       final shop = _barbershops[i];
-      final reviews = reviewsForShop(shop.id);
-      if (reviews.isEmpty) continue;
-      final rating =
-          reviews.fold<int>(0, (sum, r) => sum + r.rating) / reviews.length;
-      _barbershops[i] = shop.copyWith(
-        rating: double.parse(rating.toStringAsFixed(1)),
-        reviewCount: reviews.length,
-      );
+      _barbershops[i] = shop.copyWith(rating: 0, reviewCount: 0);
     }
 
     final uniqueBarbers = <String, BarberModel>{};
@@ -236,6 +231,23 @@ class AppDataProvider extends ChangeNotifier {
     }
     for (final barber in _barbershops.expand((shop) => shop.barbers)) {
       uniqueBarbers[barber.id] = barber;
+    }
+
+    for (final barber in uniqueBarbers.values) {
+      barber.rating = 0;
+      barber.reviewCount = 0;
+    }
+
+    for (var i = 0; i < _barbershops.length; i++) {
+      final shop = _barbershops[i];
+      final reviews = reviewsForShop(shop.id);
+      if (reviews.isEmpty) continue;
+      final rating =
+          reviews.fold<int>(0, (sum, r) => sum + r.rating) / reviews.length;
+      _barbershops[i] = shop.copyWith(
+        rating: double.parse(rating.toStringAsFixed(1)),
+        reviewCount: reviews.length,
+      );
     }
 
     for (final barber in uniqueBarbers.values) {
@@ -291,8 +303,12 @@ class AppDataProvider extends ChangeNotifier {
   List<BarberModel> barbersFor(BarbershopModel shop) =>
       shop.barbers.where((b) => b.isActive).toList();
 
-  List<AppointmentModel> appointmentsForShop(String shopId) =>
-      _appointments.where((a) => a.barbershop.id == shopId).toList();
+  List<AppointmentModel> appointmentsForShop(String shopId) {
+    final acceptedIds = _acceptedShopIds(shopId);
+    return _appointments
+        .where((a) => acceptedIds.contains(a.barbershop.id))
+        .toList();
+  }
 
   List<AppointmentModel> appointmentsForClient(String clientId) =>
       _appointments.where((a) => a.clientId == clientId).toList();
@@ -629,6 +645,12 @@ class AppDataProvider extends ChangeNotifier {
     final legacyId = _legacyShopId(shopId);
     return _barbershops.where((s) => s.id == legacyId).firstOrNull;
   }
+
+  Set<String> _acceptedShopIds(String shopId) => {
+        shopId,
+        _remoteShopId(shopId),
+        _legacyShopId(shopId),
+      };
 
   String _remoteShopId(String shopId) {
     switch (shopId) {

@@ -162,7 +162,7 @@ class SupabaseCatalogDatasource {
         id: id,
         name: _string(row['name'], fallback: 'Barbearia'),
         address: _string(row['address'], fallback: 'Endereco nao informado'),
-        rating: _double(row['rating'], fallback: 5),
+        rating: _double(row['rating']),
         reviewCount: _int(row['review_count']),
         imageUrl: _string(row['image_url']),
         coverEmoji: _string(row['cover_emoji'], fallback: 'scissors'),
@@ -204,7 +204,7 @@ class SupabaseCatalogDatasource {
       id: _string(row['id']),
       name: name,
       specialty: _string(row['specialty']),
-      rating: _double(row['rating'], fallback: 5),
+      rating: _double(row['rating']),
       reviewCount: _int(row['review_count']),
       avatarInitials: _string(
         row['avatar_initials'],

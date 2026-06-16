@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_hub/core/theme/app_theme.dart';
-import 'package:barber_hub/core/utils/app_icons.dart';
 import 'package:barber_hub/core/routes/app_routes.dart';
 import 'package:barber_hub/shared/widgets/app_widgets.dart';
 import 'package:barber_hub/features/auth/presentation/providers/auth_providers.dart';
@@ -138,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       const SizedBox(height: 16),
                       AppTextField(
                         label: 'Senha',
-                        hint: '••••••••',
+                        hint: 'Digite sua senha',
                         controller: _passCtrl,
                         focusNode: _passFocus,
                         isPassword: true,
@@ -172,7 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           onPressed: _handleLogin,
                           isLoading: isLoading),
                       const SizedBox(height: 40),
-                      const DividerWithText(text: 'NAO TEM UMA CONTA'),
+                      const DividerWithText(text: 'AINDA NAO TEM UMA CONTA'),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -196,8 +195,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       fontSize: 13)),
                         ),
                       ),
-                      const SizedBox(height: 36),
-                      _DemoHint(),
                     ],
                   ),
                 ),
@@ -219,63 +216,5 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             Colors.transparent
           ]),
         ),
-      );
-}
-
-class _DemoHint extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
-        borderRadius: BorderRadius.circular(4),
-        color: AppTheme.gold.withValues(alpha: 0.04),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Icon(Icons.info_outline, color: AppTheme.gold, size: 14),
-          const SizedBox(width: 8),
-          Text('DEMO',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppTheme.gold, fontSize: 10, letterSpacing: 2)),
-        ]),
-        const SizedBox(height: 10),
-        _row(context, LucideIcons.user, 'Cliente', 'carlos@barberhub.com'),
-        _row(context, LucideIcons.scissors, 'Barbearia',
-            'classica@barberhub.com'),
-        _row(context, LucideIcons.scissors, 'Barbeiro', 'rafael@barberhub.com'),
-        _row(context, LucideIcons.settings, 'Admin', 'admin@barberhub.com'),
-        const SizedBox(height: 4),
-        Text('Senha: 123456 (todos)',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontSize: 11, color: AppTheme.textHint)),
-      ]),
-    );
-  }
-
-  Widget _row(
-          BuildContext context, IconData icon, String label, String email) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Row(children: [
-          Icon(icon, size: 13, color: AppTheme.gold),
-          const SizedBox(width: 6),
-          Text(label,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
-          const SizedBox(width: 6),
-          Expanded(
-              child: Text(email,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(fontSize: 11, color: AppTheme.textHint),
-                  overflow: TextOverflow.ellipsis)),
-        ]),
       );
 }

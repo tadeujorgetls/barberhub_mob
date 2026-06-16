@@ -1,4 +1,4 @@
-import 'package:barber_hub/features/barber_shop/domain/entities/barber_shop_entity.dart';
+﻿import 'package:barber_hub/features/barber_shop/domain/entities/barber_shop_entity.dart';
 import 'package:barber_hub/models/appointment_model.dart';
 
 sealed class BarberShopState {
@@ -18,11 +18,14 @@ final class BarberShopLoaded extends BarberShopState {
   final BarberShopStats stats;
   final List<AppointmentModel> todayAppointments;
   final List<AppointmentModel> upcomingAppointments;
+  final List<ReviewModel> recentReviews;
+
   const BarberShopLoaded({
     required this.shop,
     required this.stats,
     required this.todayAppointments,
     required this.upcomingAppointments,
+    required this.recentReviews,
   });
 }
 
